@@ -1,68 +1,42 @@
-# TODO - v0.2.5 - Visual Art Improvements
+# TODO - v0.2.9 Combat Balance and Telegraphs
 
-## 1. Sistema de Renderização Visual
-- [ ] Criar src/art.js com helpers visuais
-- [ ] drawIsoShadow
-- [ ] drawAura
-- [ ] drawRuneCircle
-- [ ] drawFloatingLabel
-- [ ] drawDetailedPortal
-- [ ] drawParticle
+## Escopo
+- Telegraphs visuais para ataques perigosos
+- Balanceamento de danos de inimigos básicos
+- Telegraph do Guardião de Tumba
+- Documentation updates
+- Tests
 
-## 2. Melhorar Necromante
-- [ ] Capuz escuro mais detalhado
-- [ ] Manto rasgado
-- [ ] Olhos brilhantes
-- [ ] Aura de alma nas mãos
-- [ ] Sombra no chão
-- [ ] Partículas espirituais
+## Tarefas
 
-## 3. Melhorar Servos
-- [ ] Esqueleto Guerreiro - ossos claros, espada, escudo
-- [ ] Esqueleto Veterano - armadura, elmo, aura
-- [ ] Servo Feral - quatro patas, postura agressiva
-- [ ] Soldado Reerguido - armadura danificada
+### 1. Balanceamento de Inimigos Básicos (config.js)
+- [ ] rat: damage 7 -> 5 (reduzir mortes injustas)
+- [ ] wolf: damage 12 -> 10
+- [ ] soldier: damage 15 -> 12
+- [ ] warhound: damage 14 -> 11
+- [ ] cultist: damage 10 -> 8
 
-## 4. Melhorar Inimigos
-- [ ] Rato de Cripta
-- [ ] Lobo Cadavérico
-- [ ] Soldado Humano Caído
-- [ ] Caçador Humano
-- [ ] Cão de Guerra
-- [ ] Cultista Fraco
-- [ ] Imp Abissal
-- [ ] Guardião de Tumba (chefe)
+### 2. Telegraph do Guardião de Tumba (ai.js)
+- [ ] Adicionar telegraphTimer antes do AOE (2 segundos de aviso)
+- [ ] Efeito visual de telegraph (area color changing to warning)
+- [ ] Reduzir damage AOE: 24 -> 18 (mais justo)
+- [ ] Reduzir melee damage: 28 -> 22
 
-## 5. Melhorar Mapas
-- [ ] Cripta Inicial - piso, altar, sarcófagos, velas
-- [ ] Cemitério Neutro - túmulos, árvores mortas
-- [ ] Estrada dos Enforcados - forcas, placas
-- [ ] Área Secreta - mural, escama
+### 3. Telegraph para Inimigos (entities.js)
+- [ ] Adicionar telegraphColor/telegraphTimer em Enemy
+- [ ] Desenhar indication visual quando telegraphing
+- [ ] Imp: telegraph antes de projectile
 
-## 6. Melhorar Portais
-- [ ] Círculo mágico
-- [ ] Partículas subindo
-- [ ] Anel pulsante
-- [ ] Estados: liberado/bloqueado/futuro
+### 4. Documentação (README.md, PROJECT_STATUS.md)
+- [ ] Atualizar para v0.2.9
+- [ ] Documentar mudanças de balance
 
-## 7. Efeitos de Habilidades
-- [ ] Ataque - projétil com rastro
-- [ ] Dreno - feixe espiritual
-- [ ] Lança Óssea - brilho
-- [ ] Marca - símbolo roxo
-- [ ] Explosão - círculo de aviso
-- [ ] Captura - corrente
+### 5. Testes (REGRESSION_v0.2.9.md)
+- [ ] Criar docs/tests/REGRESSION_v0.2.9.md
 
-## 8. HUD e Menus
-- [ ] Estilo dark fantasy consistente
-- [ ] Cores: verde espectral, vermelho, dourado
-- [ ] Menus mais detalhados
+### 6. Versão (package.json, config.js)
+- [ ] Atualizar versão para 0.2.9
 
-## 9. Performance
-- [ ] VISUAL_QUALITY config
-- [ ] Limitar partículas
-- [ ]medium como padrão
-
-## 10. PROJECT_STATUS
-- [ ] Criar PROJECT_STATUS.md
-- [ ] Atualizar README.md
+## Bugs Conhecidos (pre-calibrados)
+- O balanceamento é baseado em mobile touch controls
+- Telegraphs usam cores padrão (poderiam usar sprites customizados no futuro)

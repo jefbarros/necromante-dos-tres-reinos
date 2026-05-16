@@ -1,6 +1,26 @@
 # Necromante dos Tres Reinos
 
-Prototipo jogavel v0.2.8 em HTML5, JavaScript e Canvas. O jogo continua mobile-first e preparado para uso hibrido em Web, Android via Capacitor e Windows via Tauri, com save local, conta mock, save em nuvem mock e sincronizacao futura entre dispositivos.
+Prototipo jogavel v0.2.9 em HTML5, JavaScript e Canvas. O jogo continua mobile-first e preparado para uso hibrido em Web, Android via Capacitor e Windows via Tauri, com save local, conta mock, save em nuvem mock e sincronizacao futura entre dispositivos.
+
+## v0.2.9 - Balanceamento de Combate e Telegraphs
+
+A v0.2.9 melhora o balanceamento de combate para dispositivos moveis e adiciona telegraphs visuais para ataques perigosos, reduzindo mortes injustas no inicio do jogo.
+
+Mudancas principais:
+
+- Dano de inimigos basicos reduzido: rat (7->5), wolf (12->10), soldier (15->12), warhound (14->11), cultist (10->8).
+- Guardiao de Tumba melee: damage reduzido de 28 para 22.
+- Guardiao de Tumba AOE: damage reduzido de 24 para 18.
+- Telegraph visual de 2 segundos antes do AOE do Guardiao (efeito amarelo "cuidado!").
+- Save/export continua sem persistir estado runtime de UI.
+- Objetivo inicial continue no HUD.
+
+Teste manual minimo da v0.2.9:
+
+1. Clique em `Novo Jogo` e confirme gameplay com objetivo no HUD.
+2. Derrote inimigos basicos e confirme dano reduzido.
+3. Derrote o Guardiao de Tumba e confirme telegraph antes do AOE.
+4. Salve e exporte JSON; confirme presenca de `objectiveProgress` e ausencia de `screen`, `activeModal`, `selectedMenu`, `inputLock`.
 
 ## v0.2.8 - Objetivos Iniciais
 
@@ -395,22 +415,24 @@ Arquivos ignorados esperados:
 
 ## Bugs Conhecidos
 
-- Firebase real segue apenas preparado; a v0.2.8 continua usando mockCloud quando nao houver configuracao local.
+- Firebase real segue apenas preparado; a v0.2.9 continua usando mockCloud quando nao houver configuracao local.
 - O teste Android/Windows nativo ainda depende de ambiente Capacitor/Tauri dedicado.
 - Alguns textos permanecem em ASCII no codigo para manter compatibilidade com arquivos existentes.
 - O fluxo MockCloud depende de login mock e dados existentes em `localStorage`.
 
 ## Proxima Etapa Recomendada
 
-v0.2.9 deve focar em balanceamento de combate, mais telegraphs para inimigos especiais, preparacao real de build Android/Windows e uma tela dedicada de configuracoes fora da tela Conta.
+v0.2.10 deve continuar refinando combat balance, adicionando mais variacao de inimigos, construcao de chefes de area e uma tela dedicada de configuracoes fora da tela Conta.
 
 ## Comandos Git Recomendados
 
 ```bash
 git status -sb
 git add .
-git commit -m "v0.2.8 - objetivos iniciais e regressao de gameplay"
+git commit -m "v0.2.9 - balanceamento de combate e telegraphs"
 git push
+git tag v0.2.9
+git push origin v0.2.9
 ```
 
 Inclua outros arquivos apenas se fizerem parte da mudanca intencional.

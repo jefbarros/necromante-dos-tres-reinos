@@ -70,15 +70,20 @@
     }
   }
 
-  function updateBoss(enemy, dt, game) {
+function updateBoss(enemy, dt, game) {
     if (!enemy.engaged && enemy.distanceTo(game.player) < 7.5) {
       enemy.engaged = true;
       game.message("O Guardiao de Tumba desperta.");
     }
     if (!enemy.engaged) return;
 
+    // Initialize telegraph timer if not present
+    if (!enemy.telegraphTimer) enemy.telegraphTimer = 0;
+    if (!enemy.telegraphActive) enemy.telegraphActive = false;
+
     enemy.summonTimer -= dt;
     enemy.aoeTimer -= dt;
+    if (enemy.telegraphTimer > 0) enemy.telegraphTimer -= dt;
 
     var target = closestTo(enemy, [game.player].concat(game.servants), function (item) {
       return !item.destroyed;
@@ -87,15 +92,29 @@
     if (enemy.distanceTo(target) > 1.25) {
       enemy.move(dir.x, dir.y, enemy.speed, dt, game.map);
     } else {
+      // Reduced melee damage from 28 to 22 (config adjusted)
       attackIfClose(enemy, target, dt, game, 1.45, enemy.damage);
     }
 
     var nearbyServants = game.servants.filter(function (s) {
       return !s.destroyed && !s.dead && enemy.distanceTo(s) < 2.6;
     });
-    if (enemy.aoeTimer <= 0 && (nearbyServants.length >= 2 || enemy.distanceTo(game.player) < 2.1)) {
+    
+    // Telegraph system - warn before AOE
+    if (enemy.aoeTimer <= 0 && !enemy.telegraphActive) {
+      enemy.telegraphActive = true;
+      enemy.telegraphTimer = 2.0; // 2 second warning
+      // Show warning effect
+      game.effects.push(new window.AreaEffect(enemy.x, enemy.y, 2.65, "#f0c84d"));
+      game.floatText("cuidado!", enemy.x, enemy.y, "#ffd84d");
+    }
+    
+    // Execute AOE after telegraph
+    if (enemy.telegraphActive && enemy.telegraphTimer <= 0) {
+      enemy.telegraphActive = false;
       enemy.aoeTimer = 5.7;
-      game.areaDamage(enemy, enemy.x, enemy.y, 2.65, 24, "servantsAndPlayer");
+      // Reduced AOE damage from 24 to 18
+      game.areaDamage(enemy, enemy.x, enemy.y, 2.65, 18, "servantsAndPlayer");
       game.effects.push(new window.AreaEffect(enemy.x, enemy.y, 2.65, "#f0799d"));
       game.message("Guardiao: impacto sepulcral.");
     }

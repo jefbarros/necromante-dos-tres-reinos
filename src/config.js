@@ -1,8 +1,8 @@
 (function () {
   "use strict";
 
-window.GameConfig = {
-    version: "0.2.8",
+  window.GameConfig = {
+    version: "0.2.9",
     title: "Necromante dos Tres Reinos",
     visualQuality: "medium",
     world: {
@@ -45,7 +45,7 @@ window.GameConfig = {
         name: "Rato de Cripta",
         hp: 32,
         speed: 3.9,
-        damage: 7,
+        damage: 5,
         exp: 8,
         fragments: 1,
         radius: 0.34,
@@ -56,7 +56,7 @@ window.GameConfig = {
         name: "Lobo Cadaverico Selvagem",
         hp: 58,
         speed: 3.65,
-        damage: 12,
+        damage: 10,
         exp: 15,
         fragments: 2,
         radius: 0.42,
@@ -67,7 +67,7 @@ window.GameConfig = {
         name: "Soldado Humano Caido",
         hp: 88,
         speed: 2.65,
-        damage: 15,
+        damage: 12,
         exp: 22,
         fragments: 3,
         radius: 0.46,
@@ -100,7 +100,7 @@ window.GameConfig = {
         name: "Cao de Guerra Cadaverico",
         hp: 70,
         speed: 4.1,
-        damage: 14,
+        damage: 11,
         exp: 19,
         fragments: 2,
         radius: 0.4,
@@ -111,7 +111,7 @@ window.GameConfig = {
         name: "Cultista Fraco",
         hp: 54,
         speed: 2.75,
-        damage: 10,
+        damage: 8,
         exp: 18,
         fragments: 2,
         radius: 0.38,
@@ -133,7 +133,7 @@ window.GameConfig = {
         name: "Guardiao de Tumba",
         hp: 620,
         speed: 2.05,
-        damage: 28,
+        damage: 22,
         exp: 130,
         fragments: 24,
         radius: 0.9,
