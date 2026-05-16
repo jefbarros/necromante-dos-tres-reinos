@@ -8,11 +8,11 @@
   }
 
 function keyToAction(key) {
-    if (key === " " || key === "j") return "attack";
-    if (key === "1") return "skill1";
-    if (key === "2") return "skill2";
-    if (key === "3") return "skill3";
-    if (key === "4") return "skill4";
+    if (key === " " || key === "1") return "attack";
+    if (key === "2") return "skill1";
+    if (key === "3") return "skill2";
+    if (key === "4") return "skill3";
+    if (key === "5") return "skill4";
     if (key === "c") return "capture";
     if (key === "q") return "command";
     if (key === "m") return "manage";
@@ -26,6 +26,7 @@ function keyToAction(key) {
     if (key === "tab") return "command";
     if (key === "f") return "fusion";
     if (key === "l") return "account";
+    if (key === "r") return "autoAttack";
     if (key === "f10") return "recoverUI";
     return "";
   }
@@ -76,6 +77,7 @@ function keyToAction(key) {
         key === "enter" ||
         key === "tab" ||
         key === "f" ||
+        key === "r" ||
         key === "f10"
       ) {
         event.preventDefault();

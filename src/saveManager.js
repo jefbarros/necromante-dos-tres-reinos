@@ -6,8 +6,8 @@
   // Handles save, load, delete, export, import, sync
   // Uses versioned save format with migration support
 
-  var SCHEMA_VERSION = "0.3.0";
-  var GAME_VERSION = "0.3.0";
+  var SCHEMA_VERSION = "0.3.2";
+  var GAME_VERSION = "0.3.2";
   var RUNTIME_UI_FIELDS = [
     "screen",
     "currentScreen",
@@ -79,6 +79,59 @@
     }
     progress.currentStep = "initialLoopComplete";
     return progress;
+  }
+
+  function defaultInventory() {
+    return {
+      equipment: {
+        crackedStaff: 1,
+        boneGrimoire: 1,
+        cryptRing: 1,
+        rustyBlade: 0,
+        boneAmulet: 0,
+        shadowRing: 0
+      },
+      consumables: {
+        healthPotion: 1,
+        manaPotion: 1
+      },
+      materials: {
+        soulFragment: 0,
+        oldBone: 0,
+        darkCore: 0,
+        demonAsh: 0,
+        crackedDragonScale: 0
+      }
+    };
+  }
+
+  function normalizeInventory(inventory, fragments) {
+    var base = defaultInventory();
+    var source = inventory || {};
+    if (source.equipment || source.consumables || source.materials) {
+      ["equipment", "consumables", "materials"].forEach(function (section) {
+        base[section] = Object.assign(base[section], source[section] || {});
+      });
+    } else {
+      var legacyMap = {
+        "Fragmento de Alma": ["materials", "soulFragment"],
+        "Osso Antigo": ["materials", "oldBone"],
+        "Nucleo Sombrio": ["materials", "darkCore"],
+        "Cinza Demoniaca": ["materials", "demonAsh"],
+        "Escama Draconica Rachada": ["materials", "crackedDragonScale"],
+        "Pocao de Vida": ["consumables", "healthPotion"],
+        "Pocao de Mana": ["consumables", "manaPotion"],
+        "Amuleto de Ossos": ["equipment", "boneAmulet"],
+        "Lamina Enferrujada": ["equipment", "rustyBlade"],
+        "Anel Sombrio": ["equipment", "shadowRing"]
+      };
+      Object.keys(source).forEach(function (name) {
+        var target = legacyMap[name];
+        if (target) base[target[0]][target[1]] = Math.max(base[target[0]][target[1]] || 0, source[name] || 0);
+      });
+    }
+    if (typeof fragments === "number") base.materials.soulFragment = fragments;
+    return base;
   }
 
   var SaveManager = {
@@ -196,7 +249,8 @@
 
         // Flags
         tutorialCaptureDone: game.tutorialCaptureDone,
-        dragonSignalSeen: game.dragonSignalSeen
+        dragonSignalSeen: game.dragonSignalSeen,
+        autoAttackEnabled: game.autoAttackEnabled
       };
     },
 
@@ -258,6 +312,7 @@
 
       data = this.sanitizeRuntimeUIFields(data);
       data.objectiveProgress = migrateObjectiveProgress(data);
+      data.inventory = normalizeInventory(data.inventory, data.player && data.player.fragments);
       data = this.normalizeServantRoster(data);
       var validation = this.validateSaveData(data);
       if (!validation.valid) {
@@ -314,7 +369,7 @@
         reserveServants: cleanOldSave.reserveServants || [],
         bossDefeated: cleanOldSave.bossDefeated || false,
         secretUnlocked: cleanOldSave.secretUnlocked || false,
-        inventory: cleanOldSave.inventory || {},
+        inventory: normalizeInventory(cleanOldSave.inventory || {}, cleanOldSave.player && cleanOldSave.player.fragments),
         equipment: cleanOldSave.equipment || {},
         equipmentOwned: cleanOldSave.equipmentOwned || {},
         unlockedSkills: cleanOldSave.unlockedSkills || {},
@@ -324,7 +379,8 @@
         unlockedRegions: cleanOldSave.unlockedRegions || { cripta_inicial: true, cemiterio_neutro: true, estrada_dos_enforcados: true },
         objectiveProgress: migrateObjectiveProgress(cleanOldSave),
         tutorialCaptureDone: cleanOldSave.tutorialCaptureDone || false,
-        dragonSignalSeen: cleanOldSave.dragonSignalSeen || false
+        dragonSignalSeen: cleanOldSave.dragonSignalSeen || false,
+        autoAttackEnabled: cleanOldSave.autoAttackEnabled || false
       };
 
       // Handle legacy mapState formats
@@ -385,6 +441,7 @@
 
         data = this.sanitizeRuntimeUIFields(data);
         data.objectiveProgress = migrateObjectiveProgress(data);
+        data.inventory = normalizeInventory(data.inventory, data.player && data.player.fragments);
         data = this.normalizeServantRoster(data);
         var validation = this.validateSaveData(data);
         if (!validation.valid) {
@@ -445,6 +502,7 @@
       if (data.schemaVersion !== SCHEMA_VERSION) data = this.migrateSave(data);
       data = this.sanitizeRuntimeUIFields(data);
       data.objectiveProgress = migrateObjectiveProgress(data);
+      data.inventory = normalizeInventory(data.inventory, data.player && data.player.fragments);
       data = this.normalizeServantRoster(data);
       var validation = this.validateSaveData(data);
       if (!validation.valid) {

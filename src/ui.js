@@ -62,6 +62,8 @@ ctx.fillStyle = "#ecf4dc";
       ctx.fillStyle = game.skillPoints > 0 ? "#ffe58a" : "#b9cbc0";
       ctx.fillText("Pontos: " + game.skillPoints, 330, 101);
     }
+    ctx.fillStyle = game.autoAttackEnabled ? "#9ff3d8" : "#b9cbc0";
+    ctx.fillText("Auto-ataque: " + (game.autoAttackEnabled ? "ON" : "OFF"), compact ? 190 : 232, compact ? 101 : 122);
 
     // Draw sync/platform status indicator
     this.drawSyncStatus(ctx, 12, compact ? 108 : 130, width);
@@ -256,11 +258,12 @@ ctx.fillStyle = "#ecf4dc";
   GameUI.prototype.drawSkillStrip = function (ctx, canvas) {
     var player = this.game.player;
     var labels = [
-      skillLabel("attack", player.cooldowns.attack, "J", "Ataque"),
-      skillLabel("skill1", player.cooldowns.skill1, "1", "Dreno"),
-      skillLabel("skill2", player.cooldowns.skill2, "2", "Lanca"),
-      skillLabel("skill3", player.cooldowns.skill3, "3", "Marca"),
-      skillLabel("skill4", player.cooldowns.skill4, "4", "Explosao"),
+      skillLabel("attack", player.cooldowns.attack, "1", "Ataque"),
+      skillLabel("skill1", player.cooldowns.skill1, "2", "Dreno"),
+      skillLabel("skill2", player.cooldowns.skill2, "3", "Lanca"),
+      skillLabel("skill3", player.cooldowns.skill3, "4", "Marca"),
+      skillLabel("skill4", player.cooldowns.skill4, "5", "Explosao"),
+      "R Auto " + (this.game.autoAttackEnabled ? "ON" : "OFF"),
       "C Capturar",
       "Q Ordem"
     ];
@@ -316,7 +319,7 @@ if (game.screen === "skills") this.drawSkillTreeScreen(ctx, x, y, panelW, panelH
     ctx.fillText("Necromante dos Tres Reinos", x + 24, y + 42);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-ctx.fillText("v0.2.8 - ESC fecha, F10 recupera UI, CMD/Q alterna, CAP/C ou ATK/J confirma.", x + 24, y + 68);
+ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar/Carregar; 1 ataca, R alterna auto-ataque.", x + 24, y + 68);
     options.forEach(function (option, index) {
       var selected = index === game.selectedMenu;
       ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
@@ -340,9 +343,9 @@ ctx.fillText("v0.2.8 - ESC fecha, F10 recupera UI, CMD/Q alterna, CAP/C ou ATK/J
     ctx.font = "800 14px system-ui, sans-serif";
     ctx.fillStyle = "#dbe9e1";
     var lines = [
-      "PC: WASD/setas move, J/espaco ataca, 1-4 habilidades, C captura, Q comando.",
+      "PC: WASD/setas move, 1/espaco ataca, 2-5 habilidades, R auto-ataque, C captura, Q comando.",
       "E interage com portal ou objeto proximo, priorizando o alvo mais perto.",
-      "Menus: Esc/Menu fecha tela atual, M alterna Equipe, I Inventario, K Habilidades, P Salvar, Enter/Mapa volta ao jogo.",
+      "Menus: Esc/Menu abre/fecha Menu, M Equipe, I Inventario, K Talentos, Salvar/Carregar e Conta ficam no Menu.",
       "F10 recupera a UI se algum menu prender o input.",
       "Mobile: joystick esquerdo, botoes de acao a direita e menus no topo.",
       "Nesta tela, CAP/ATK volta ao menu principal."
@@ -367,32 +370,43 @@ ctx.fillText("v0.2.8 - ESC fecha, F10 recupera UI, CMD/Q alterna, CAP/C ou ATK/J
     ctx.fillText("Gerenciamento de Servos", x + 22, y + 34);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-    ctx.fillText("CAP/ATK ativa reserva, CMD alterna, ESC/M/Mapa/Enter volta, 3 remove ativo, 4/F funde.", x + 22, y + 58);
+    ctx.fillText("CMD troca coluna, 2 substitui, 3 move ativo para reserva, 5 filtro, CAP confirma.", x + 22, y + 58);
 
     ctx.font = "900 16px system-ui, sans-serif";
-    ctx.fillStyle = "#e7f0df";
-    ctx.fillText("Equipe ativa (" + game.servants.length + "/" + game.player.soulControl + ")", x + 24, y + 94);
+    ctx.fillStyle = game.teamColumn === "active" ? "#9ff3d8" : "#e7f0df";
+    var activeLimit = Math.min(3, game.player.soulControl);
+    ctx.fillText("Equipe ativa (" + game.servants.length + "/" + activeLimit + ")", x + 24, y + 94);
+    ctx.fillStyle = game.teamColumn === "reserve" ? "#9ff3d8" : "#e7f0df";
     ctx.fillText("Reserva (" + game.reserveServants.length + ")", x + w * 0.52, y + 94);
+    ctx.fillStyle = "#c9d7ce";
+    ctx.font = "700 12px system-ui, sans-serif";
+    ctx.fillText("Filtro: " + game.getReserveFilterLabel(), x + w * 0.52, y + 112);
 
     ctx.font = "700 13px system-ui, sans-serif";
-    for (var i = 0; i < 3; i += 1) {
+    for (var i = 0; i < activeLimit; i += 1) {
       var servant = game.servants[i];
       var rowY = y + 122 + i * 48;
-      ctx.fillStyle = "rgba(255,255,255,0.055)";
+      var selectedActive = game.teamColumn === "active" && i === game.selectedActive;
+      ctx.fillStyle = selectedActive ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.055)";
       ctx.fillRect(x + 24, rowY - 22, w * 0.43, 36);
+      ctx.strokeStyle = selectedActive ? "#9ff3d8" : "rgba(255,255,255,0.12)";
+      ctx.strokeRect(x + 24, rowY - 22, w * 0.43, 36);
       ctx.fillStyle = servant ? servant.color : "#6f7a76";
       ctx.fillRect(x + 34, rowY - 14, 16, 16);
       ctx.fillStyle = "#edf5ea";
       ctx.fillText(servant ? this.servantSummary(servant) : "Espaco vazio", x + 58, rowY);
     }
 
-    var maxRows = Math.min(5, Math.max(1, game.reserveServants.length));
+    var reserve = game.filteredReserveServants();
+    var maxRows = Math.min(5, Math.max(1, reserve.length));
     for (var r = 0; r < maxRows; r += 1) {
-      var res = game.reserveServants[r];
+      var res = reserve[r];
       var ry = y + 122 + r * 48;
-      var selected = r === game.selectedReserve;
+      var selected = game.teamColumn === "reserve" && r === game.selectedReserve;
       ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.18)" : "rgba(255,255,255,0.055)";
       ctx.fillRect(x + w * 0.52, ry - 22, w * 0.42, 36);
+      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.12)";
+      ctx.strokeRect(x + w * 0.52, ry - 22, w * 0.42, 36);
       if (res) {
         ctx.fillStyle = res.color;
         ctx.fillRect(x + w * 0.52 + 10, ry - 14, 16, 16);
@@ -404,26 +418,26 @@ ctx.fillText("v0.2.8 - ESC fecha, F10 recupera UI, CMD/Q alterna, CAP/C ou ATK/J
       }
     }
 
-    var selected = game.reserveServants[game.selectedReserve] || game.servants[0];
+    var selected = game.teamColumn === "active" ? game.servants[game.selectedActive] : reserve[game.selectedReserve];
     if (selected) {
       ctx.fillStyle = "rgba(255,255,255,0.055)";
-      ctx.fillRect(x + 24, y + h - 148, w - 48, 44);
+      ctx.fillRect(x + 24, y + h - 154, w - 48, 58);
       ctx.fillStyle = "#dbe9e1";
       ctx.font = "800 12px system-ui, sans-serif";
-      this.wrapText(ctx, this.servantDetails(selected), x + 36, y + h - 126, w - 72, 16);
+      this.wrapText(ctx, this.servantDetails(selected), x + 36, y + h - 132, w - 72, 16);
     }
 
     this.drawReputation(ctx, x + 24, y + h - 82, w - 48);
   };
 
   GameUI.prototype.servantSummary = function (servant) {
-    return servant.name + " | " + servant.kind + " Nv " + servant.level + " HP " + Math.ceil(servant.hp) + "/" + servant.maxHp;
+    return servant.name + " | Nv " + servant.level + " HP " + Math.ceil(servant.hp) + "/" + servant.maxHp + " Pwr " + this.game.getServantPower(servant);
   };
 
   GameUI.prototype.servantDetails = function (servant) {
     var behavior = servant.kind === "veteran" ? "protetor" : servant.kind === "feral" ? "agressivo" : servant.kind === "ember" ? "instavel" : "obediente";
     var canEvolve = servant.kind === "skeleton" ? " evolui: sim" : " evolui: nao";
-    return "Tipo " + servant.kind + " | dano " + servant.damage + " | defesa " + servant.defense + " | personalidade " + behavior + " | estado " + servant.state + " |" + canEvolve;
+    return "Tipo " + servant.kind + " | Nivel " + servant.level + " | Vida " + Math.ceil(servant.hp) + "/" + servant.maxHp + " | Dano " + servant.damage + " | Defesa " + servant.defense + " | Poder " + this.game.getServantPower(servant) + " | Comportamento " + this.game.getServantRole(servant) + "/" + behavior + " | Estado " + servant.state + " |" + canEvolve;
   };
 
   GameUI.prototype.drawInventoryScreen = function (ctx, x, y, w, h) {
@@ -431,37 +445,39 @@ ctx.fillText("v0.2.8 - ESC fecha, F10 recupera UI, CMD/Q alterna, CAP/C ou ATK/J
     ctx.fillText("Inventario e Reputacao", x + 22, y + 34);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-    ctx.fillText("CMD alterna equipamento, CAP/ATK equipa, ESC/M/Mapa/Enter volta ao jogo.", x + 22, y + 58);
-    var items = Object.keys(game.inventory);
-    items.forEach(function (name, index) {
+    ctx.fillText("CMD troca aba, CAP usa/equipa/desequipa, materiais mostram quantidade.", x + 22, y + 58);
+    var tabs = ["equipment", "consumables", "materials"];
+    tabs.forEach(function (tab, index) {
+      var tx = x + 28 + index * 150;
+      var active = tab === game.inventoryTab;
+      ctx.fillStyle = active ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.055)";
+      ctx.fillRect(tx, y + 76, 136, 28);
+      ctx.strokeStyle = active ? "#9ff3d8" : "rgba(255,255,255,0.12)";
+      ctx.strokeRect(tx, y + 76, 136, 28);
+      ctx.fillStyle = active ? "#9ff3d8" : "#dbe9e1";
+      ctx.font = "900 12px system-ui, sans-serif";
+      ctx.fillText(window.GameConfig.inventoryTabs[tab], tx + 10, y + 95);
+    });
+    var entries = game.getInventoryEntries(game.inventoryTab);
+    entries.forEach(function (entry, index) {
       var col = index % 2;
       var row = Math.floor(index / 2);
       var ix = x + 28 + col * (w * 0.45);
-      var iy = y + 102 + row * 48;
-      ctx.fillStyle = "rgba(255,255,255,0.06)";
-      ctx.fillRect(ix, iy - 22, w * 0.38, 34);
+      var iy = y + 138 + row * 48;
+      var selected = index === game.selectedInventory;
+      var equipped = entry.section === "equipment" && window.GameConfig.equipment[entry.key] && game.equipment[window.GameConfig.equipment[entry.key].slot] === entry.key;
+      ctx.fillStyle = equipped ? "rgba(105, 178, 130, 0.22)" : selected ? "rgba(117, 212, 183, 0.16)" : "rgba(255,255,255,0.06)";
+      ctx.fillRect(ix, iy - 22, w * 0.38, 38);
+      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.12)";
+      ctx.strokeRect(ix, iy - 22, w * 0.38, 38);
       ctx.fillStyle = "#f1ead1";
-      ctx.font = "800 14px system-ui, sans-serif";
-      ctx.fillText(name + ": " + game.inventory[name], ix + 12, iy);
-    });
-    var equipmentKeys = Object.keys(window.GameConfig.equipment);
-    equipmentKeys.forEach(function (key, index) {
-      var item = window.GameConfig.equipment[key];
-      var ex = x + 28 + index * ((w - 70) / 3);
-      var ey = y + 245;
-      var selected = index === game.selectedEquipment;
-      var equipped = game.equipment[item.slot] === key;
-      ctx.fillStyle = equipped ? "rgba(105, 178, 130, 0.22)" : selected ? "rgba(117, 212, 183, 0.16)" : "rgba(255,255,255,0.055)";
-      ctx.fillRect(ex, ey - 24, (w - 96) / 3, 68);
-      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.13)";
-      ctx.strokeRect(ex, ey - 24, (w - 96) / 3, 68);
-      ctx.fillStyle = "#f1ead1";
-      ctx.font = "900 13px system-ui, sans-serif";
-      ctx.fillText(item.name, ex + 10, ey);
+      ctx.font = "800 13px system-ui, sans-serif";
+      ctx.fillText(entry.name + (entry.section === "equipment" ? "" : ": " + entry.amount), ix + 12, iy);
       ctx.fillStyle = "#c9d7ce";
       ctx.font = "700 11px system-ui, sans-serif";
-      ctx.fillText(item.text, ex + 10, ey + 20);
-      ctx.fillText(equipped ? "Equipado" : "Disponivel", ex + 10, ey + 38);
+      if (entry.section === "equipment") ctx.fillText(equipped ? "Equipado" : "Equipar", ix + 12, iy + 14);
+      if (entry.section === "consumables") ctx.fillText(window.GameConfig.consumables[entry.key].text, ix + 12, iy + 14);
+      if (entry.section === "materials") ctx.fillText("Material armazenado", ix + 12, iy + 14);
     });
     this.drawReputation(ctx, x + 24, y + h - 110, w - 48);
     ctx.fillStyle = "#dbe9e1";
@@ -474,28 +490,31 @@ ctx.fillText("v0.2.8 - ESC fecha, F10 recupera UI, CMD/Q alterna, CAP/C ou ATK/J
     ctx.fillText("Arvore Inicial do Necromante", x + 22, y + 34);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-    ctx.fillText("CMD alterna caminho, CAP/ATK desbloqueia, ESC/M/Mapa/Enter volta. Pontos: " + game.skillPoints, x + 22, y + 58);
+    ctx.fillText("CMD seleciona talento, CAP desbloqueia. Pontos: " + game.skillPoints, x + 22, y + 58);
 
     window.GameConfig.skillTree.forEach(function (node, index) {
-      var nx = x + 24 + index * ((w - 48) / 4);
-      var ny = y + 140;
+      var col = index % 4;
+      var row = Math.floor(index / 4);
+      var nx = x + 24 + col * ((w - 54) / 4);
+      var ny = y + 118 + row * 112;
       var selected = index === game.selectedSkill;
       var unlocked = game.unlockedSkills[node.id];
+      var locked = !unlocked && game.getTalentRequirementText(node).indexOf("Requer:") === 0;
       ctx.fillStyle = unlocked ? "rgba(105, 178, 130, 0.24)" : selected ? "rgba(117, 212, 183, 0.18)" : "rgba(255,255,255,0.06)";
-      ctx.fillRect(nx, ny - 54, (w - 78) / 4, 168);
+      ctx.fillRect(nx, ny - 34, (w - 86) / 4, 96);
       ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.15)";
-      ctx.strokeRect(nx, ny - 54, (w - 78) / 4, 168);
+      ctx.strokeRect(nx, ny - 34, (w - 86) / 4, 96);
       ctx.fillStyle = unlocked ? "#a7f2bf" : "#f0ead8";
-      ctx.font = "900 13px system-ui, sans-serif";
-      ctx.fillText(node.path, nx + 10, ny - 28);
+      ctx.font = "900 11px system-ui, sans-serif";
+      ctx.fillText(node.path, nx + 8, ny - 14);
       ctx.font = "800 12px system-ui, sans-serif";
-      ctx.fillText(node.name, nx + 10, ny - 8);
-      ctx.font = "800 13px system-ui, sans-serif";
-      ctx.fillStyle = "#f3d478";
-      ctx.fillText((unlocked ? "Desbloqueado" : "Custo " + node.cost + " ponto"), nx + 10, ny + 16);
+      ctx.fillText(node.name, nx + 8, ny + 4);
+      ctx.font = "800 11px system-ui, sans-serif";
+      ctx.fillStyle = unlocked ? "#a7f2bf" : locked ? "#f1b2bf" : "#f3d478";
+      ctx.fillText(unlocked ? "Desbloqueado" : game.getTalentRequirementText(node), nx + 8, ny + 22);
       ctx.font = "700 12px system-ui, sans-serif";
       ctx.fillStyle = "#c9d7ce";
-      this.wrapText(ctx, node.text, nx + 10, ny + 44, (w - 122) / 4, 17);
+      this.wrapText(ctx, node.text, nx + 8, ny + 42, (w - 130) / 4, 15);
     }.bind(this));
 
     this.drawReputation(ctx, x + 24, y + h - 82, w - 48);

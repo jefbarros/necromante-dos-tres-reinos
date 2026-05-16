@@ -91,6 +91,7 @@
       this.hp = this.maxHp;
       this.mana = this.maxMana;
       this.necroDomain += 0.2;
+      this.baseNecroDomain = (typeof this.baseNecroDomain === "number" ? this.baseNecroDomain : this.necroDomain - 0.2) + 0.2;
       game.skillPoints += 1;
       game.message("Nivel " + this.level + ": a linhagem proibida desperta.");
     }

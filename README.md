@@ -1,6 +1,20 @@
 # Necromante dos Tres Reinos
 
-Prototipo jogavel v0.3.1 em HTML5, JavaScript e Canvas. O jogo evolui para uma estrutura de Mundo Aberto por Regioes, com lore e identidade propria baseada nos Tres Reinos: Humanos, Demonios e Dragoes.
+Prototipo jogavel v0.3.2 em HTML5, JavaScript e Canvas. O jogo evolui para uma estrutura de Mundo Aberto por Regioes, com lore e identidade propria baseada nos Tres Reinos: Humanos, Demonios e Dragoes.
+
+## v0.3.2 - Revisao de Sistemas Centrais e UX
+
+A v0.3.2 reprioriza a base jogavel antes de expansoes maiores. Neblina de Guerra, mapas maiores, Android/Capacitor, Windows/Tauri, 3D real e faccoes avancadas ficam fora desta versao.
+
+Mudancas principais:
+- Equipe com selecao separada entre coluna ativa e reserva, filtros por papel/poder, remocao, movimentacao e substituicao de servos.
+- Inventario separado em equipamentos, consumiveis e materiais, com equipar, desequipar e usar pocoes.
+- Talentos expandidos em quatro caminhos: Invocador, Ceifador, Senhor das Almas e Estrategista Sombrio.
+- Menu principal concentra Conta e Salvar/Carregar.
+- Almas de monstros mortos sao coletadas automaticamente como recurso.
+- Drops simples entram direto no inventario.
+- Ataque basico passa para tecla/botao `1`; habilidades seguem `2` a `5`.
+- Auto-ataque ON/OFF escolhe alvo proximo e usa apenas o ataque basico.
 
 ## v0.3.1 - Padronizacao de Mapa e Regioes
 
@@ -156,18 +170,19 @@ npm run build:web
 PC:
 
 - WASD ou setas: mover.
-- J ou Espaco: ataque basico.
-- 1: Dreno de Alma.
-- 2: Lanca Ossea.
-- 3: Marca da Submissao.
-- 4: Explosao Cadaverica.
+- 1 ou Espaco: ataque basico.
+- 2: Dreno de Alma.
+- 3: Lanca Ossea.
+- 4: Marca da Submissao.
+- 5: Explosao Cadaverica.
+- R: alternar auto-ataque.
 - C: Capturar Alma ou confirmar em menus.
 - Q: alternar comando dos servos ou opcao selecionada.
 - M: abre gerenciamento de servos no jogo; fecha a tela atual quando algum menu/modal esta aberto.
 - I: inventario/equipamentos/reputacao.
 - K: arvore de habilidades.
 - L: Conta.
-- P: salvar.
+- P: salvar rapido; Salvar/Carregar tambem fica dentro do Menu.
 - Esc: fecha a tela/modal atual; no gameplay abre o menu principal.
 - E: entrar em portal ou interagir com objeto proximo.
 - Enter/Mapa: confirmar no menu principal; fechar a tela atual e voltar ao gameplay quando um menu esta aberto.
@@ -179,7 +194,7 @@ Mobile:
 
 - Joystick virtual a esquerda.
 - Botoes de ataque, habilidades, captura e comando a direita.
-- Botoes superiores: Menu, Conta, Equipe, Inventario, Talentos, Salvar e Mapa.
+- Botoes superiores: Menu, Equipe, Inventario, Talentos e Mapa.
 - Botao contextual Entrar aparece perto de portais.
 - Botao contextual Interagir aparece perto de objetos.
 
