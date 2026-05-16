@@ -643,6 +643,9 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
 
   GameUI.prototype.drawWorldMap = function (ctx, x, y, w, h) {
     var game = this.game;
+    var compact = w < 600;
+    var listW = compact ? w - 48 : Math.floor(w * 0.45);
+    
     ctx.fillStyle = "#f3f7ef";
     ctx.font = "900 24px system-ui, sans-serif";
     ctx.fillText("Mapa do Mundo", x + 24, y + 42);
@@ -652,30 +655,72 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
 
     window.WorldRegions.forEach(function (reg, index) {
       var selected = index === game.selectedMenu;
-      var unlocked = game.unlockedRegions[reg.id] || (reg.requires && game.isBossDefeatedForMap("cemiterio_neutro"));
+      var unlocked = game.unlockedRegions[reg.id] || (reg.requires === "tombGuardianDefeated" && game.isBossDefeatedForMap("cemiterio_neutro"));
       var rx = x + 24;
       var ry = y + 92 + index * 52;
       
       ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
-      ctx.fillRect(rx, ry, w - 48, 44);
+      ctx.fillRect(rx, ry, listW, 44);
       ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.12)";
-      ctx.strokeRect(rx, ry, w - 48, 44);
+      ctx.strokeRect(rx, ry, listW, 44);
 
       ctx.fillStyle = reg.status === "future" ? "#8d9990" : unlocked ? "#edf5ea" : "#e36d6d";
       ctx.font = "900 15px system-ui, sans-serif";
-      var statusLabel = reg.status === "future" ? "[FUTURO]" : unlocked ? "[DESBLOQUEADO]" : "[BLOQUEADO]";
-      ctx.fillText(reg.name + " " + statusLabel, rx + 16, ry + 18);
+      var statusLabel = this.getRegionStatusLabel(reg, unlocked);
+      ctx.fillText(reg.name, rx + 12, ry + 18);
       
       ctx.font = "700 12px system-ui, sans-serif";
-      ctx.fillStyle = "#b9cbc0";
-      var desc = reg.desc + " (Nvl Sugerido: " + reg.level + ")";
-      ctx.fillText(desc, rx + 16, ry + 36);
+      ctx.fillStyle = selected ? "#9ff3d8" : "#b9cbc0";
+      ctx.fillText(statusLabel + " | Nvl " + reg.level + " | " + reg.type.toUpperCase(), rx + 12, ry + 36);
       
       if (selected) {
         ctx.fillStyle = "#9ff3d8";
         ctx.fillRect(rx + 2, ry + 2, 4, 40);
+        if (!compact) {
+          this.drawSelectedRegionDetails(ctx, x + listW + 48, y + 92, w - listW - 72, reg, unlocked);
+        }
       }
-    });
+    }.bind(this));
+  };
+
+  GameUI.prototype.getRegionStatusLabel = function (region, unlocked) {
+    if (region.status === "future") return "[FUTURO]";
+    return unlocked ? "[DESBLOQUEADO]" : "[BLOQUEADO]";
+  };
+
+  GameUI.prototype.getRegionRequirementText = function (region) {
+    if (region.requires === "tombGuardianDefeated") return "Derrotar Guardiao de Tumba";
+    if (region.requires === "futureContent") return "Expansao Futura";
+    return region.requires || "Nivel insuficiente";
+  };
+
+  GameUI.prototype.drawSelectedRegionDetails = function (ctx, x, y, w, region, unlocked) {
+    ctx.fillStyle = "#edf5ea";
+    ctx.font = "900 18px system-ui, sans-serif";
+    ctx.fillText(region.name, x, y + 10);
+    
+    ctx.font = "700 13px system-ui, sans-serif";
+    ctx.fillStyle = "#b9cbc0";
+    this.wrapText(ctx, region.desc, x, y + 36, w, 18);
+
+    if (!unlocked && region.status !== "future") {
+      ctx.fillStyle = "#e36d6d";
+      ctx.font = "900 14px system-ui, sans-serif";
+      ctx.fillText("Requisito: " + this.getRegionRequirementText(region), x, y + 80);
+    }
+
+    ctx.fillStyle = "#e7f0df";
+    ctx.font = "900 14px system-ui, sans-serif";
+    ctx.fillText("Pontos de Interesse:", x, y + 115);
+
+    (region.pointsOfInterest || []).forEach(function (poi, i) {
+      ctx.fillStyle = "#edf5ea";
+      ctx.font = "800 13px system-ui, sans-serif";
+      ctx.fillText("• " + poi.name, x + 8, y + 140 + i * 42);
+      ctx.fillStyle = "#b9cbc0";
+      ctx.font = "700 11px system-ui, sans-serif";
+      this.wrapText(ctx, poi.desc, x + 18, y + 156 + i * 42, w - 20, 14);
+    }.bind(this));
   };
 
   GameUI.prototype.drawLoadSaveScreen = function (ctx, x, y, w, h) {

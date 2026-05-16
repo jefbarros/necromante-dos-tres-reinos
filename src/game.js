@@ -1202,9 +1202,16 @@ if (this.screen !== "map") {
       this.message("Regiao disponivel em expansoes futuras.");
       return;
     }
-    var unlocked = this.unlockedRegions[region.id] || (region.requires && this.isBossDefeatedForMap("cemiterio_neutro"));
+
+    var unlocked = this.unlockedRegions[region.id];
+    
+    // Regra especifica para Fronteira baseada no Guardiao
+    if (region.requires === "tombGuardianDefeated" && this.isBossDefeatedForMap("cemiterio_neutro")) {
+      unlocked = true;
+    }
+
     if (!unlocked) {
-      this.message("Regiao bloqueada. Requisito: " + (region.requires || "Nivel insuficiente") + ".");
+      this.message("Regiao bloqueada. Requisito: " + this.ui.getRegionRequirementText(region) + ".");
       return;
     }
     this.changeMap(region.id, "default");

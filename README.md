@@ -1,8 +1,17 @@
 # Necromante dos Tres Reinos
 
-Prototipo jogavel v0.3.0 em HTML5, JavaScript e Canvas. O jogo evolui para uma estrutura de Mundo Aberto por Regioes, com lore e identidade propria baseada nos Tres Reinos: Humanos, Demonios e Dragoes.
+Prototipo jogavel v0.3.1 em HTML5, JavaScript e Canvas. O jogo evolui para uma estrutura de Mundo Aberto por Regioes, com lore e identidade propria baseada nos Tres Reinos: Humanos, Demonios e Dragoes.
 
-## v0.3.0 - Mundo Aberto por Regioes
+## v0.3.1 - Padronizacao de Mapa e Regioes
+
+A v0.3.1 foca na organizacao de dados do mundo e comunicacao visual das regioes.
+
+Mudancas principais:
+- Padronizacao do schema de metadados para todas as regioes.
+- Adicao de Pontos de Interesse (POIs) narrativos para cada regiao no mapa-mundi.
+- Interface de Mapa do Mundo agora mostra detalhes, requisitos e POIs da regiao selecionada.
+- Requisitos de bloqueio agora sao exibidos de forma legivel ao jogador.
+- Versionamento e status do projeto atualizados.
 
 A v0.3.0 introduz o sistema de navegacao por regioes, permitindo que o necromante viaje entre areas desbloqueadas e visualize o progresso do mundo.
 
