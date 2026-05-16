@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#08080c">
+    <title>Necromante dos Tres Reinos</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="game-shell" aria-label="Necromante dos Tres Reinos">
+      <canvas id="gameCanvas"></canvas>
+
+      <div id="rotateHint">Vire o aparelho para jogar na horizontal.</div>
+
+      <section id="mobileControls" aria-label="Controles de toque">
+        <div class="top-menu" aria-label="Menus">
+          <button class="menu-button" data-action="menu" aria-label="Menu principal">Menu</button>
+          <button class="menu-button" data-action="manage" aria-label="Gerenciar servos">Equipe</button>
+          <button class="menu-button" data-action="inventory" aria-label="Inventario">Inventario</button>
+          <button class="menu-button" data-action="skills" aria-label="Arvore de habilidades">Talentos</button>
+          <button class="menu-button" data-action="save" aria-label="Salvar jogo">Salvar</button>
+          <button class="menu-button start" data-action="start" aria-label="Entrar ou voltar ao mapa">Mapa</button>
+        </div>
+
+        <button id="portalButton" class="portal-button" data-action="enterPortal" aria-label="Entrar no portal">Entrar</button>
+
+        <div id="joystick" class="joystick" aria-label="Joystick virtual">
+          <div id="joystickKnob" class="joystick-knob"></div>
+        </div>
+
+        <div class="action-grid">
+          <button class="control-button primary" data-action="attack" aria-label="Ataque">ATK</button>
+          <button class="control-button" data-action="skill1" aria-label="Dreno de Alma">1</button>
+          <button class="control-button" data-action="skill2" aria-label="Lanca Ossea">2</button>
+          <button class="control-button" data-action="skill3" aria-label="Marca da Submissao">3</button>
+          <button class="control-button" data-action="skill4" aria-label="Explosao Cadaverica">4</button>
+          <button class="control-button capture" data-action="capture" aria-label="Capturar Alma">CAP</button>
+          <button class="control-button command" data-action="command" aria-label="Comando dos Servos">CMD</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="src/config.js"></script>
+    <script src="src/input.js"></script>
+    <script src="src/map.js"></script>
+    <script src="src/entities.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="src/game.js"></script>
+    <script src="src/main.js"></script>
+  </body>
+</html>
