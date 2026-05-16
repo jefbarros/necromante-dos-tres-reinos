@@ -1,48 +1,32 @@
-# TODO - v0.2.3 - COMPLETO
+# TODO - v0.2.4 - HOTFIX Equipe, Save e Regeneração
 
-## 1. Sistema de Save Separado
-- [x] Criar src/saveManager.js - Camada única de save
-- [x] Criar src/localSave.js - Save local com localStorage
-- [x] Criar src/cloudSave.js - Save em nuvem (mock)
-- [x] Criar src/auth.js - Serviço de autenticação
-- [x] Criar src/platform.js - Detecção de plataforma
-- [x] Criar src/syncManager.js - Sincronização
+## 1. Corrigir limite de equipe ativa
+- [ ] Adicionar MAX_ACTIVE_SERVANTS = 3 const
+- [ ] Criar normalizeServantRoster() em game.js
+- [ ] Chamar após loadGame()
+- [ ] Chamar após migrar save
 
-## 2. Modelo de Save Versionado
-- [x] Definir schemaVersion
-- [x] Criar migrateSave(oldSave) para compatibilidade
+## 2. Corrigir troca de equipe
+- [ ] toggleSelectedReserve deve respeitar o limite de 3
+- [ ] Enviar excedentes para reserva
+- [ ] Mostrar mensagem clara
 
-## 3. Firebase Config
-- [x] Criar src/firebaseConfig.example.js
-- [x] Adicionar firebaseConfig.local.js ao .gitignore
+## 3. Corrigir captura com limite
+- [ ] captureSoul deve verificar limite antes de adicionar
 
-## 4. Telas UI
-- [x] Tela de Conta
-- [ ] Tela de Conflito de Save (simplificado via console)
-- [x] Indicador de Sync na HUD
+## 4. Menu Carregar Save
+- [ ] Adicionar opção no menu inicial
+- [ ] Criar tela de load
+- [ ] Usar SaveManager.loadGame()
 
-## 5. Autosave
-- [x] Implementar debounce
-- [x] Eventos que marcam savedirty
+## 5. Regeneração
+- [ ] Vida do necromante regenera fora de combate
+- [ ] Mana regenera
+- [ ] Servos regeneram na Cripta Inicial
 
-## 6. package.json
-- [x] Criar package.json com scripts
+## 6. PROJECT_STATUS.md
+- [ ] Criar arquivo com histórico completo
+- [ ] Atualizar README.md
 
-## 7. README
-- [x] Atualizar com nova arquitetura híbrida
-- [x] Instruções Capacitor/Android
-- [x] Instruções Tauri/Windows
-
-## 8. Integração com game.js
-- [x] Migrar saveGame/loadGame/deleteSave para SaveManager
-
-## Verificações Realizadas
-- [x] node --check src/platform.js ✓
-- [x] node --check src/localSave.js ✓
-- [x] node --check src/cloudSave.js ✓
-- [x] node --check src/auth.js ✓
-- [x] node --check src/syncManager.js ✓
-- [x] node --check src/saveManager.js ✓
-- [x] node --check src/config.js ✓
-- [x] node --check src/game.js ✓
-- [x] node --check src/ui.js ✓
+## 7. Versão
+- [ ] Atualizar config.js para 0.2.4

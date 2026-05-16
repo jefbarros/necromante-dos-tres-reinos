@@ -286,8 +286,9 @@ if (game.screen === "mainMenu") this.drawMainMenu(ctx, x, y, panelW, panelH);
     if (game.screen === "credits") this.drawCredits(ctx, x, y, panelW, panelH);
     if (game.screen === "team") this.drawTeamScreen(ctx, x, y, panelW, panelH);
     if (game.screen === "inventory") this.drawInventoryScreen(ctx, x, y, panelW, panelH);
-    if (game.screen === "skills") this.drawSkillTreeScreen(ctx, x, y, panelW, panelH);
+if (game.screen === "skills") this.drawSkillTreeScreen(ctx, x, y, panelW, panelH);
     if (game.screen === "account") this.drawAccountScreen(ctx, x, y, panelW, panelH);
+    if (game.screen === "loadSave") this.drawLoadSaveScreen(ctx, x, y, panelW, panelH);
   };
 
   GameUI.prototype.drawMainMenu = function (ctx, x, y, w, h) {
@@ -298,7 +299,7 @@ if (game.screen === "mainMenu") this.drawMainMenu(ctx, x, y, panelW, panelH);
     ctx.fillText("Necromante dos Tres Reinos", x + 24, y + 42);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-ctx.fillText("v0.2.3 - CMD/Q alterna, CAP/C ou ATK/J confirma. X apaga save.", x + 24, y + 68);
+ctx.fillText("v0.2.3 - CMD/Q alterna, L Conta, CAP/C ou ATK/J confirma. X apaga save.", x + 24, y + 68);
     options.forEach(function (option, index) {
       var selected = index === game.selectedMenu;
       ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";

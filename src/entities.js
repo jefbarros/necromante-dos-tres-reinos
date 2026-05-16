@@ -96,9 +96,34 @@
     }
   };
 
-  Player.prototype.update = function (dt, game) {
+Player.prototype.update = function (dt, game) {
     this.updateBase(dt);
     this.mana = Math.min(this.maxMana, this.mana + cfg.player.regenManaPerSecond * dt);
+    
+    // Regenerate HP when out of combat and in safe zone
+    var regenRate = 0;
+    if (game) {
+      var inSafeZone = game.currentMapId === "cripta_inicial";
+      var noEnemiesNearby = true;
+      
+      // Check for nearby enemies
+      if (game.enemies) {
+        for (var i = 0; i < game.enemies.length; i++) {
+var e = game.enemies[i];
+          if (e && !e.dead && Math.hypot(e.x - this.x, e.y - this.y) < 8) {
+            noEnemiesNearby = false;
+            break;
+          }
+        }
+      }
+      
+      // If in safe zone and no enemies, regenerate
+      if (inSafeZone && noEnemiesNearby && this.hp < this.maxHp) {
+        regenRate = this.maxHp * 0.03; // 3% per second
+        this.hp = Math.min(this.maxHp, this.hp + regenRate * dt);
+      }
+    }
+    
     Object.keys(this.cooldowns).forEach(function (key) {
       this.cooldowns[key] = Math.max(0, this.cooldowns[key] - dt);
     }.bind(this));

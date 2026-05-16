@@ -1,7 +1,13 @@
 (function () {
   "use strict";
 
-  var cfg = window.GameConfig;
+var cfg = window.GameConfig;
+
+  // Constant for max active servants
+  var MAX_ACTIVE_SERVANTS = 3;
+  var HP_REGEN_BASE = 0.01; // 1% per second
+  var MANA_REGEN_BASE = 0.02; // 2% per second
+  var SAFE_ZONE_REGEN = 3; // 3x regen in safe zones
 
   function norm(x, y) {
     var len = Math.hypot(x, y);
@@ -86,16 +92,38 @@ window.NecromancerGame = function NecromancerGame(canvas, input) {
     this.boss = null;
     this.trainingTick = 0;
     this.spawnTick = 0;
-    this.respawnTimers = { common: 0, elite: 0 };
+this.respawnTimers = { common: 0, elite: 0 };
     this.ui = new window.GameUI(this);
     this.camera = { x: 0, y: 0 };
     this.lastTime = 0;
+    // Track damage and combat for regen
+    this.lastDamageTime = 0;
+    this.inCombat = false;
     this.resize();
     this.setupWorld();
     this.setupStarterReserve();
     this.applyAllBonuses();
     this.allServants().forEach(this.applySkillBonusesToServant.bind(this));
     this.lastSaveStatus = this.hasSave() ? "Save encontrado" : "Sem save local";
+  };
+
+  // Normalize servant roster - ensure max 3 active
+  NecromancerGame.prototype.normalizeServantRoster = function () {
+    var active = this.servants.filter(function (s) { return s && !s.destroyed; });
+    var reserve = this.reserveServants.filter(function (s) { return s && !s.destroyed; });
+    
+    if (active.length > MAX_ACTIVE_SERVANTS) {
+      var excess = active.splice(MAX_ACTIVE_SERVANTS);
+      excess.forEach(function (s) {
+        s.dead = false;
+        s.destroyed = false;
+        reserve.push(s);
+      });
+      this.message("Equipe corrigida: servos excedentes enviados para a reserva.", true);
+    }
+    
+    this.servants = active;
+    this.reserveServants = reserve;
   };
 
   NecromancerGame.prototype.defaultInventory = function () {
@@ -449,8 +477,10 @@ NecromancerGame.prototype.loadGame = function () {
     this.reputation = Object.assign(this.defaultReputation(), data.reputation || {});
     this.tutorialCaptureDone = Boolean(data.tutorialCaptureDone);
     this.dragonSignalSeen = Boolean(data.dragonSignalSeen);
-    this.servants = (data.servants || []).map(this.deserializeServant.bind(this));
+this.servants = (data.servants || []).map(this.deserializeServant.bind(this));
     this.reserveServants = (data.reserveServants || []).map(this.deserializeServant.bind(this));
+    // Normalize team after loading
+    this.normalizeServantRoster();
     this.projectiles = [];
     this.souls = [];
     this.effects = [];
@@ -556,7 +586,8 @@ NecromancerGame.prototype.deleteSave = function () {
     if (this.input.consume("menu")) this.openScreen("mainMenu");
     if (this.input.consume("save")) this.saveGame();
     if (this.input.consume("deleteSave")) this.deleteSave();
-    if (this.input.consume("manage")) this.openScreen("team");
+if (this.input.consume("manage")) this.openScreen("team");
+    if (this.input.consume("account")) this.openScreen("account");
     if (this.input.consume("inventory")) this.openScreen("inventory");
     if (this.input.consume("skills")) this.openScreen("skills");
     if (this.input.consume("start")) {
@@ -857,7 +888,7 @@ NecromancerGame.prototype.nextMenuSelection = function () {
 NecromancerGame.prototype.getMainMenuOptions = function () {
     var options = ["Novo Jogo"];
     if (this.hasSave()) options.push("Continuar");
-    options.push("Conta", "Controles", "Creditos", "Apagar Save");
+    options.push("Carregar Save", "Conta", "Controles", "Creditos", "Apagar Save");
     return options;
   };
 
@@ -865,25 +896,34 @@ NecromancerGame.prototype.confirmMainMenu = function () {
     var option = this.getMainMenuOptions()[this.selectedMenu] || "Novo Jogo";
     if (option === "Novo Jogo") this.newGame();
     else if (option === "Continuar") this.loadGame();
+    else if (option === "Carregar Save") this.openScreen("loadSave");
     else if (option === "Conta") this.openScreen("account");
     else if (option === "Controles") this.screen = "controls";
     else if (option === "Creditos") this.screen = "credits";
     else if (option === "Apagar Save") this.deleteSave();
   };
 
-  NecromancerGame.prototype.toggleSelectedReserve = function () {
+NecromancerGame.prototype.toggleSelectedReserve = function () {
     if (this.reserveServants.length === 0) {
       this.message("Reserva vazia.");
       return;
     }
+    var activeCount = this.servants.filter(function (s) { return !s.destroyed; }).length;
+    
+    // If at max, move one active to reserve first
+    if (activeCount >= MAX_ACTIVE_SERVANTS) {
+      var toMove = this.servants.pop();
+      if (toMove) {
+        toMove.dead = false;
+        toMove.destroyed = false;
+        this.reserveServants.push(toMove);
+      }
+    }
+    
+    // Now add selected from reserve
     var servant = this.reserveServants[this.selectedReserve];
     if (!servant) return;
-    if (this.servants.filter(function (s) { return !s.destroyed; }).length >= this.player.soulControl) {
-      var returned = this.servants.pop();
-      returned.dead = false;
-      returned.destroyed = false;
-      this.reserveServants.push(returned);
-    }
+    
     this.reserveServants.splice(this.selectedReserve, 1);
     servant.dead = false;
     servant.destroyed = false;
@@ -893,6 +933,7 @@ NecromancerGame.prototype.confirmMainMenu = function () {
     this.servants.push(servant);
     this.selectedReserve = Math.min(this.selectedReserve, Math.max(0, this.reserveServants.length - 1));
     this.message(servant.name + " entrou na equipe ativa.");
+    this.saveGame(true);
   };
 
   NecromancerGame.prototype.sendActiveToReserve = function () {
@@ -1201,10 +1242,11 @@ NecromancerGame.prototype.confirmMainMenu = function () {
       return;
     }
 
-    var kind = this.servantKindForSoul(soul);
+var kind = this.servantKindForSoul(soul);
     var servant = new window.Servant(kind, this.player.x - 0.8 + Math.random() * 1.6, this.player.y + 0.8);
     this.applySkillBonusesToServant(servant);
-    if (this.servants.filter(function (s) { return !s.destroyed; }).length < this.player.soulControl) {
+    var activeCount = this.servants.filter(function (s) { return !s.destroyed; }).length;
+    if (activeCount < MAX_ACTIVE_SERVANTS) {
       this.servants.push(servant);
       this.message((this.tutorialCaptureDone ? "Servo capturado: " : "Primeira captura garantida: ") + servant.name + ".", true);
     } else {

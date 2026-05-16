@@ -7,7 +7,7 @@
     return { x: x / len, y: y / len };
   }
 
-  function keyToAction(key) {
+function keyToAction(key) {
     if (key === " " || key === "j") return "attack";
     if (key === "1") return "skill1";
     if (key === "2") return "skill2";
@@ -25,6 +25,7 @@
     if (key === "enter") return "start";
     if (key === "tab") return "command";
     if (key === "f") return "fusion";
+    if (key === "l") return "account";
     return "";
   }
 
