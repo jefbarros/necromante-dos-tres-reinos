@@ -6,8 +6,8 @@
   // Handles save, load, delete, export, import, sync
   // Uses versioned save format with migration support
 
-  var SCHEMA_VERSION = "0.2.8";
-  var GAME_VERSION = "0.2.8";
+  var SCHEMA_VERSION = "0.3.0";
+  var GAME_VERSION = "0.3.0";
   var RUNTIME_UI_FIELDS = [
     "screen",
     "currentScreen",
@@ -191,6 +191,7 @@
 
         // Map state
         mapState: game.mapState,
+        unlockedRegions: game.unlockedRegions,
         objectiveProgress: game.objectiveProgress || defaultObjectiveProgress(),
 
         // Flags
@@ -320,6 +321,7 @@
         skillPoints: cleanOldSave.skillPoints || 0,
         reputation: cleanOldSave.reputation || {},
         mapState: cleanOldSave.mapState || {},
+        unlockedRegions: cleanOldSave.unlockedRegions || { cripta_inicial: true, cemiterio_neutro: true, estrada_dos_enforcados: true },
         objectiveProgress: migrateObjectiveProgress(cleanOldSave),
         tutorialCaptureDone: cleanOldSave.tutorialCaptureDone || false,
         dragonSignalSeen: cleanOldSave.dragonSignalSeen || false

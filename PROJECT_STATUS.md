@@ -2,11 +2,11 @@
 
 ## Versao Atual
 
-v0.2.9.1
+v0.3.0
 
 ## Estado Geral
 
-O projeto esta em uma branch baseada na v0.2.9 para correcao de IA de boss:
+O projeto inicia a fundacao de mundo aberto, estruturando o gameplay por regioes desbloqueaveis.
 
 - HTML5/JavaScript/Canvas;
 - SaveManager;
@@ -22,11 +22,11 @@ A v0.2.9.1 refina a logica do Guardiao de Tumba, garantindo que o ataque AOE so 
 
 ## Sistemas Alterados
 
-- `src/config.js`: versao atualizada para `0.2.9.1`.
-- `package.json`: versao atualizada para `0.2.9.1`.
-- `src/ai.js`: Logica de proximidade adicionada ao telegraph/AOE do Guardiao (2+ servos ou jogador perto).
-- `src/ai.js`: Feedback visual de pulso azul espectral quando o AOE do Guardiao esta pronto mas sem alvos.
-- `src/ai.js`: Feedback sonoro, cor condicional e frequencia aumentada (se player < 20% HP) adicionados ao pulso de prontidao do Boss.
+- `src/config.js` & `package.json`: v0.3.0.
+- `src/map.js`: Definicao de `WorldRegions`.
+- `src/game.js`: Sistema de viagem e desbloqueio de regioes.
+- `src/ui.js`: Tela de Mapa do Mundo funcional.
+- `src/saveManager.js`: Novo schema v0.3.0 com suporte a regioes.
 - `README.md`: documentacao atualizada para v0.2.9.
 - `PROJECT_STATUS.md`: status atualizado para v0.2.9.
 - `docs/tests/REGRESSION_v0.2.9.md`: roteiro de regressao do balanceamento e telegraphs.

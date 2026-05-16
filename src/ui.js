@@ -305,6 +305,7 @@ if (game.screen === "mainMenu") this.drawMainMenu(ctx, x, y, panelW, panelH);
 if (game.screen === "skills") this.drawSkillTreeScreen(ctx, x, y, panelW, panelH);
     if (game.screen === "account") this.drawAccountScreen(ctx, x, y, panelW, panelH);
     if (game.screen === "loadSave") this.drawLoadSaveScreen(ctx, x, y, panelW, panelH);
+    if (game.screen === "worldMap") this.drawWorldMap(ctx, x, y, panelW, panelH);
   };
 
   GameUI.prototype.drawMainMenu = function (ctx, x, y, w, h) {
@@ -638,6 +639,43 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillStyle = "#b9cbc0";
     ctx.font = "700 12px system-ui, sans-serif";
     this.wrapText(ctx, "Atalhos: 1 entrar/sair, 2 sincronizar, 3 qualidade, P exportar, I importar, X apagar local.", x + 24, y + h - 44, w - 48, 16);
+  };
+
+  GameUI.prototype.drawWorldMap = function (ctx, x, y, w, h) {
+    var game = this.game;
+    ctx.fillStyle = "#f3f7ef";
+    ctx.font = "900 24px system-ui, sans-serif";
+    ctx.fillText("Mapa do Mundo", x + 24, y + 42);
+    ctx.font = "700 13px system-ui, sans-serif";
+    ctx.fillStyle = "#b9cbc0";
+    ctx.fillText("CMD alterna regiao, CAP/ATK viaja, ESC/Voltar retorna.", x + 24, y + 68);
+
+    window.WorldRegions.forEach(function (reg, index) {
+      var selected = index === game.selectedMenu;
+      var unlocked = game.unlockedRegions[reg.id] || (reg.requires && game.isBossDefeatedForMap("cemiterio_neutro"));
+      var rx = x + 24;
+      var ry = y + 92 + index * 52;
+      
+      ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
+      ctx.fillRect(rx, ry, w - 48, 44);
+      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.12)";
+      ctx.strokeRect(rx, ry, w - 48, 44);
+
+      ctx.fillStyle = reg.status === "future" ? "#8d9990" : unlocked ? "#edf5ea" : "#e36d6d";
+      ctx.font = "900 15px system-ui, sans-serif";
+      var statusLabel = reg.status === "future" ? "[FUTURO]" : unlocked ? "[DESBLOQUEADO]" : "[BLOQUEADO]";
+      ctx.fillText(reg.name + " " + statusLabel, rx + 16, ry + 18);
+      
+      ctx.font = "700 12px system-ui, sans-serif";
+      ctx.fillStyle = "#b9cbc0";
+      var desc = reg.desc + " (Nvl Sugerido: " + reg.level + ")";
+      ctx.fillText(desc, rx + 16, ry + 36);
+      
+      if (selected) {
+        ctx.fillStyle = "#9ff3d8";
+        ctx.fillRect(rx + 2, ry + 2, 4, 40);
+      }
+    });
   };
 
   GameUI.prototype.drawLoadSaveScreen = function (ctx, x, y, w, h) {

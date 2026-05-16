@@ -373,6 +373,48 @@
     }
   };
 
+  window.WorldRegions = [
+    {
+      id: "cripta_inicial",
+      name: "Dominio da Cripta Inicial",
+      desc: "Onde o folego da morte se recusa a partir. Uma zona de seguranca para necromantes despertos.",
+      type: "safe",
+      level: 1,
+      status: "unlocked"
+    },
+    {
+      id: "cemiterio_neutro",
+      name: "Cemiterio Neutro",
+      desc: "Um campo de ossos esquecidos sob a vigia de um Guardiao antigo.",
+      type: "field",
+      level: 1,
+      status: "unlocked"
+    },
+    {
+      id: "estrada_dos_enforcados",
+      name: "Estrada dos Enforcados",
+      desc: "Caminho perigoso onde a justiça humana deixou cicatrizes profundas na terra.",
+      type: "danger",
+      level: 5,
+      status: "unlocked"
+    },
+    {
+      id: "fronteira_tres_reinos",
+      name: "Fronteira dos Tres Reinos",
+      desc: "A divisao entre os dominios de Humanos, Demonios e o rastro dos Dragoes.",
+      type: "boss",
+      level: 10,
+      requires: "tombGuardianDefeated"
+    },
+    {
+      id: "vale_cinzas",
+      name: "Vale das Cinzas Draconicas",
+      desc: "Territorio sagrado e calcinado. Conteudo para futuras expansões.",
+      type: "future",
+      status: "future"
+    }
+  ];
+
   window.GameMap = function GameMap() {
     this.tileW = cfg.world.tileW;
     this.tileH = cfg.world.tileH;

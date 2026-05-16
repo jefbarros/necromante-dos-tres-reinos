@@ -142,6 +142,11 @@ window.NecromancerGame = function NecromancerGame(canvas, input) {
     this.tutorialCaptureDone = false;
     this.objectiveProgress = this.createDefaultObjectiveProgress();
     this.bossDefeated = false;
+    this.unlockedRegions = {
+      cripta_inicial: true,
+      cemiterio_neutro: true,
+      estrada_dos_enforcados: true
+    };
     this.boss = null;
     this.trainingTick = 0;
     this.spawnTick = 0;
@@ -804,6 +809,7 @@ NecromancerGame.prototype.saveGame = function (silent) {
       skillPoints: this.skillPoints,
       reputation: this.reputation,
       mapState: this.mapState,
+      unlockedRegions: this.unlockedRegions,
       objectiveProgress: this.objectiveProgress,
       tutorialCaptureDone: this.tutorialCaptureDone,
       dragonSignalSeen: this.dragonSignalSeen
@@ -884,6 +890,12 @@ NecromancerGame.prototype.loadGame = function () {
     this.reputation = Object.assign(this.defaultReputation(), data.reputation || {});
     this.tutorialCaptureDone = Boolean(data.tutorialCaptureDone);
     this.dragonSignalSeen = Boolean(data.dragonSignalSeen);
+    this.unlockedRegions = Object.assign({
+      cripta_inicial: true,
+      cemiterio_neutro: true,
+      estrada_dos_enforcados: true
+    }, data.unlockedRegions || {});
+
 this.servants = (data.servants || []).map(this.deserializeServant.bind(this));
     this.reserveServants = (data.reserveServants || []).map(this.deserializeServant.bind(this));
     // Normalize team after loading
@@ -1037,6 +1049,15 @@ NecromancerGame.prototype.deleteSave = function () {
       if (this.input.consume("inventory")) this.openSaveImport();
       return;
     }
+    if (this.screen === "worldMap") {
+      if (this.input.consume("menu") || this.input.consume("start") || this.input.consume("returnToGame") || this.input.consume("manage")) {
+        this.closeAllMenusAndReturnToGame();
+        return;
+      }
+      if (this.input.consume("command")) this.selectedMenu = (this.selectedMenu + 1) % window.WorldRegions.length;
+      if (this.input.consume("capture") || this.input.consume("attack")) this.confirmRegionTravel();
+      return;
+    }
     if (this.input.consume("menu")) {
       if (this.screen === "map") this.openScreen("mainMenu");
       else this.closeAllMenusAndReturnToGame();
@@ -1074,7 +1095,7 @@ if (this.input.consume("manage")) {
         if (this.enteredMap) this.closeAllMenusAndReturnToGame();
         else this.openScreen("mainMenu");
       } else if (this.screen === "map") {
-        this.enterMap();
+        this.openScreen("worldMap");
       } else {
         this.closeAllMenusAndReturnToGame();
       }
@@ -1120,6 +1141,7 @@ if (this.screen !== "map") {
     if (screen === "skills") this.message("Habilidades: CMD alterna, CAP compra com pontos.");
     if (screen === "loadSave") this.message("Carregar Save: CMD alterna, CAP confirma, I importa, P exporta.");
     if (screen === "account") this.message("Conta: CMD alterna, CAP confirma, 3 muda qualidade visual.");
+    if (screen === "worldMap") this.message("Mapa do Mundo: CMD alterna regiao, CAP viaja.");
   };
 
   NecromancerGame.prototype.toggleMockLogin = function () {
@@ -1173,6 +1195,22 @@ if (this.screen !== "map") {
     else this.closeAllMenusAndReturnToGame();
   };
 
+  NecromancerGame.prototype.confirmRegionTravel = function () {
+    var region = window.WorldRegions[this.selectedMenu];
+    if (!region) return;
+    if (region.status === "future") {
+      this.message("Regiao disponivel em expansoes futuras.");
+      return;
+    }
+    var unlocked = this.unlockedRegions[region.id] || (region.requires && this.isBossDefeatedForMap("cemiterio_neutro"));
+    if (!unlocked) {
+      this.message("Regiao bloqueada. Requisito: " + (region.requires || "Nivel insuficiente") + ".");
+      return;
+    }
+    this.changeMap(region.id, "default");
+    this.closeAllMenusAndReturnToGame();
+  };
+
   NecromancerGame.prototype.loadCloudSave = function () {
     if (!window.AuthService || !window.AuthService.isLoggedIn() || !window.CloudSaveService) {
       this.message("Entre na conta mock antes de carregar nuvem.");
@@ -1208,6 +1246,10 @@ if (this.screen !== "map") {
   };
 
   NecromancerGame.prototype.getWorldFlags = function () {
+    // Unlock Frontier if boss defeated
+    if (this.isBossDefeatedForMap("cemiterio_neutro")) {
+      this.unlockedRegions.fronteira_tres_reinos = true;
+    }
     return {
       tombGuardianDefeated: this.isBossDefeatedForMap("cemiterio_neutro"),
       secretUnlocked: this.getMapState("cemiterio_neutro").secretUnlocked || this.map.secretUnlocked,

@@ -1,6 +1,19 @@
 # Necromante dos Tres Reinos
 
-Prototipo jogavel v0.2.9 em HTML5, JavaScript e Canvas. O jogo continua mobile-first e preparado para uso hibrido em Web, Android via Capacitor e Windows via Tauri, com save local, conta mock, save em nuvem mock e sincronizacao futura entre dispositivos.
+Prototipo jogavel v0.3.0 em HTML5, JavaScript e Canvas. O jogo evolui para uma estrutura de Mundo Aberto por Regioes, com lore e identidade propria baseada nos Tres Reinos: Humanos, Demonios e Dragoes.
+
+## v0.3.0 - Mundo Aberto por Regioes
+
+A v0.3.0 introduz o sistema de navegacao por regioes, permitindo que o necromante viaje entre areas desbloqueadas e visualize o progresso do mundo.
+
+Mudancas principais:
+- Novo sistema de Regioes com metadados (nivel, tipo, status).
+- Interface de Mapa do Mundo acessivel por tecla Mapa/Enter.
+- Viagem rapida entre regioes desbloqueadas.
+- Regiao "Fronteira dos Tres Reinos" desbloqueada apos derrotar o Guardiao.
+- Persistencia do progresso de exploracao no save.
+- README e PROJECT_STATUS atualizados para a nova fase.
+- Migracao segura de saves v0.2.x.
 
 ## v0.2.9.1 - Refinamento de IA de Chefe
 
