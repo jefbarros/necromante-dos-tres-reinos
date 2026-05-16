@@ -65,6 +65,7 @@ ctx.fillStyle = "#ecf4dc";
 
     // Draw sync/platform status indicator
     this.drawSyncStatus(ctx, 12, compact ? 108 : 130, width);
+    this.drawObjectiveStatus(ctx, 12, compact ? 136 : 158, compact ? Math.min(292, width - 24) : Math.min(430, width - 24), compact);
 
     var zone = game.map.current.name;
     this.drawPanel(ctx, Math.max(12, width - (compact ? 214 : 312)), 12, compact ? 202 : 300, 58);
@@ -314,7 +315,7 @@ if (game.screen === "skills") this.drawSkillTreeScreen(ctx, x, y, panelW, panelH
     ctx.fillText("Necromante dos Tres Reinos", x + 24, y + 42);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-ctx.fillText("v0.2.7 - ESC fecha, F10 recupera UI, CMD/Q alterna, CAP/C ou ATK/J confirma.", x + 24, y + 68);
+ctx.fillText("v0.2.8 - ESC fecha, F10 recupera UI, CMD/Q alterna, CAP/C ou ATK/J confirma.", x + 24, y + 68);
     options.forEach(function (option, index) {
       var selected = index === game.selectedMenu;
       ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
@@ -562,6 +563,25 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(statusText, x + 190, y + 10);
     ctx.fillStyle = syncColor;
     ctx.fillText(syncText, x + 190, y + 24);
+  };
+
+  GameUI.prototype.drawObjectiveStatus = function (ctx, x, y, w, compact) {
+    var game = this.game;
+    if (!game.getCurrentObjectiveText) return;
+    var objective = game.getCurrentObjectiveText();
+    var h = compact ? 58 : 66;
+    this.drawPanel(ctx, x, y, w, h);
+    ctx.fillStyle = objective.complete ? "#9ff3d8" : "#fff1ac";
+    ctx.font = compact ? "900 11px system-ui, sans-serif" : "900 12px system-ui, sans-serif";
+    ctx.fillText("Objetivo", x + 12, y + 19);
+    ctx.fillStyle = "#ecf4dc";
+    ctx.font = compact ? "800 12px system-ui, sans-serif" : "800 14px system-ui, sans-serif";
+    this.wrapText(ctx, objective.title, x + 12, y + (compact ? 36 : 39), w - 24, compact ? 14 : 16);
+    if (!compact) {
+      ctx.fillStyle = "#b9cbc0";
+      ctx.font = "700 11px system-ui, sans-serif";
+      this.wrapText(ctx, objective.hint, x + 12, y + 57, w - 24, 13);
+    }
   };
 
   // Account screen

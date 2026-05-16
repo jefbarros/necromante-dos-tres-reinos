@@ -8,6 +8,50 @@ var cfg = window.GameConfig;
   var HP_REGEN_BASE = 0.01; // 1% per second
   var MANA_REGEN_BASE = 0.02; // 2% per second
   var SAFE_ZONE_REGEN = 3; // 3x regen in safe zones
+  var INITIAL_OBJECTIVE_VERSION = "0.2.8";
+  var INITIAL_OBJECTIVE_STEPS = [
+    {
+      id: "awakenCrypt",
+      title: "Despertar na Cripta Inicial",
+      hint: "Reconheca a cripta antes de atravessar o limiar."
+    },
+    {
+      id: "touchFuneralThrone",
+      title: "Tocar o Trono Funerario",
+      hint: "Interaja com o trono ou altar que responde a sua coroa fria."
+    },
+    {
+      id: "reachNeutralCemetery",
+      title: "Ir ao Cemiterio Neutro",
+      hint: "Use o portal da cripta para encontrar almas fracas."
+    },
+    {
+      id: "defeatBasicEnemies",
+      title: "Derrotar inimigos basicos",
+      hint: "Abata criaturas menores no cemiterio.",
+      target: 2
+    },
+    {
+      id: "captureFirstSoul",
+      title: "Capturar a primeira alma",
+      hint: "Aproxime-se de uma alma e use Capturar."
+    },
+    {
+      id: "defeatTombGuardian",
+      title: "Derrotar o Guardiao de Tumba",
+      hint: "Enfrente o guardiao na arena tumular."
+    },
+    {
+      id: "unlockSecretArea",
+      title: "Desbloquear a Area Secreta",
+      hint: "A queda do guardiao rompe o selo antigo."
+    },
+    {
+      id: "initialLoopComplete",
+      title: "Ciclo inicial estabilizado",
+      hint: "A Area Secreta esta aberta para exploracao."
+    }
+  ];
 
   function norm(x, y) {
     var len = Math.hypot(x, y);
@@ -96,6 +140,7 @@ window.NecromancerGame = function NecromancerGame(canvas, input) {
     this.markedTarget = null;
     this.groupingDangerTimer = 0;
     this.tutorialCaptureDone = false;
+    this.objectiveProgress = this.createDefaultObjectiveProgress();
     this.bossDefeated = false;
     this.boss = null;
     this.trainingTick = 0;
@@ -401,6 +446,103 @@ this.respawnTimers = { common: 0, elite: 0 };
     };
   };
 
+  NecromancerGame.prototype.createDefaultObjectiveProgress = function () {
+    return {
+      version: INITIAL_OBJECTIVE_VERSION,
+      completed: {},
+      basicEnemiesDefeated: 0,
+      currentStep: "awakenCrypt",
+      completedInitialLoop: false
+    };
+  };
+
+  NecromancerGame.prototype.normalizeObjectiveProgress = function (savedProgress) {
+    var progress = this.createDefaultObjectiveProgress();
+    if (savedProgress && typeof savedProgress === "object") {
+      progress.version = savedProgress.version || INITIAL_OBJECTIVE_VERSION;
+      progress.completed = Object.assign({}, savedProgress.completed || {});
+      progress.basicEnemiesDefeated = Math.max(0, savedProgress.basicEnemiesDefeated || 0);
+      progress.completedInitialLoop = Boolean(savedProgress.completedInitialLoop);
+    }
+    return this.reconcileObjectiveProgress(progress);
+  };
+
+  NecromancerGame.prototype.reconcileObjectiveProgress = function (progress) {
+    progress = progress || this.createDefaultObjectiveProgress();
+    progress.completed = progress.completed || {};
+    if (this.getMapState("cripta_inicial").visited || this.currentMapId === "cripta_inicial") {
+      progress.completed.awakenCrypt = true;
+    }
+    if (this.getMapState("cripta_inicial").events.trono_funerario || this.getMapState("cripta_inicial").events.altar_renascimento) {
+      progress.completed.touchFuneralThrone = true;
+    }
+    if (this.getMapState("cemiterio_neutro").visited || this.currentMapId === "cemiterio_neutro") {
+      progress.completed.reachNeutralCemetery = true;
+    }
+    if (progress.basicEnemiesDefeated >= 2) progress.completed.defeatBasicEnemies = true;
+    if (this.tutorialCaptureDone || this.servants.length > 0 || this.reserveServants.length > 3) {
+      progress.completed.captureFirstSoul = true;
+    }
+    if (this.isBossDefeatedForMap("cemiterio_neutro")) progress.completed.defeatTombGuardian = true;
+    if (this.getMapState("cemiterio_neutro").secretUnlocked || this.map.secretUnlocked) {
+      progress.completed.unlockSecretArea = true;
+    }
+    if (progress.completed.unlockSecretArea) {
+      progress.completed.initialLoopComplete = true;
+      progress.completedInitialLoop = true;
+    }
+    progress.currentStep = this.getCurrentObjectiveStep(progress).id;
+    progress.version = INITIAL_OBJECTIVE_VERSION;
+    return progress;
+  };
+
+  NecromancerGame.prototype.getCurrentObjectiveStep = function (progress) {
+    var current = progress || this.objectiveProgress || this.createDefaultObjectiveProgress();
+    var completed = current.completed || {};
+    for (var i = 0; i < INITIAL_OBJECTIVE_STEPS.length; i += 1) {
+      if (!completed[INITIAL_OBJECTIVE_STEPS[i].id]) return INITIAL_OBJECTIVE_STEPS[i];
+    }
+    return INITIAL_OBJECTIVE_STEPS[INITIAL_OBJECTIVE_STEPS.length - 1];
+  };
+
+  NecromancerGame.prototype.getCurrentObjectiveText = function () {
+    this.objectiveProgress = this.reconcileObjectiveProgress(this.objectiveProgress);
+    var step = this.getCurrentObjectiveStep(this.objectiveProgress);
+    var suffix = "";
+    if (step.id === "defeatBasicEnemies") {
+      suffix = " (" + Math.min(this.objectiveProgress.basicEnemiesDefeated, step.target) + "/" + step.target + ")";
+    }
+    return {
+      title: step.title + suffix,
+      hint: step.hint,
+      complete: step.id === "initialLoopComplete"
+    };
+  };
+
+  NecromancerGame.prototype.completeObjectiveStep = function (stepId) {
+    this.objectiveProgress = this.objectiveProgress || this.createDefaultObjectiveProgress();
+    this.objectiveProgress.completed = this.objectiveProgress.completed || {};
+    if (this.objectiveProgress.completed[stepId]) return false;
+    this.objectiveProgress.completed[stepId] = true;
+    if (stepId === "unlockSecretArea") {
+      this.objectiveProgress.completed.initialLoopComplete = true;
+      this.objectiveProgress.completedInitialLoop = true;
+    }
+    this.objectiveProgress.currentStep = this.getCurrentObjectiveStep(this.objectiveProgress).id;
+    return true;
+  };
+
+  NecromancerGame.prototype.incrementBasicObjectiveKill = function (enemy) {
+    if (!enemy || enemy.type === "boss" || this.currentMapId !== "cemiterio_neutro") return;
+    this.objectiveProgress = this.reconcileObjectiveProgress(this.objectiveProgress);
+    if (this.objectiveProgress.completed.defeatBasicEnemies) return;
+    this.objectiveProgress.basicEnemiesDefeated += 1;
+    if (this.objectiveProgress.basicEnemiesDefeated >= 2 && this.completeObjectiveStep("defeatBasicEnemies")) {
+      this.message("Objetivo concluido: inimigos basicos abatidos.", true);
+      this.saveGame(true);
+    }
+  };
+
   NecromancerGame.prototype.createDefaultMapState = function () {
     return {
       cripta_inicial: {
@@ -482,6 +624,12 @@ this.respawnTimers = { common: 0, elite: 0 };
     var state = this.getMapState(id);
     if (state.visited) return false;
     state.visited = true;
+    if (id === "cripta_inicial" && this.completeObjectiveStep("awakenCrypt")) {
+      this.message("Objetivo concluido: despertar na Cripta Inicial.", true);
+    }
+    if (id === "cemiterio_neutro" && this.completeObjectiveStep("reachNeutralCemetery")) {
+      this.message("Objetivo concluido: Cemiterio Neutro alcancado.", true);
+    }
     var mapData = window.WorldMaps[id] || this.map.current;
     if (mapData && mapData.firstVisitMessage) this.message(mapData.firstVisitMessage, true);
     return true;
@@ -548,6 +696,7 @@ this.respawnTimers = { common: 0, elite: 0 };
     this.commandEfficiency = 1;
     this.bossDefeated = false;
     this.mapState = this.createDefaultMapState();
+    this.objectiveProgress = this.createDefaultObjectiveProgress();
     this.dragonSignalSeen = false;
     this.portalCooldown = 1;
     this.blockedPortalCooldown = 0;
@@ -655,6 +804,7 @@ NecromancerGame.prototype.saveGame = function (silent) {
       skillPoints: this.skillPoints,
       reputation: this.reputation,
       mapState: this.mapState,
+      objectiveProgress: this.objectiveProgress,
       tutorialCaptureDone: this.tutorialCaptureDone,
       dragonSignalSeen: this.dragonSignalSeen
     };
@@ -746,6 +896,7 @@ this.servants = (data.servants || []).map(this.deserializeServant.bind(this));
     this.setupWorld();
     if (this.bossDefeated && this.boss) this.boss.dead = true;
     this.applyAllBonuses();
+    this.objectiveProgress = this.normalizeObjectiveProgress(data.objectiveProgress);
     this.lastSaveStatus = "Save carregado";
     this.areaTitle = this.map.current.name;
     this.areaTitleTimer = 3;
@@ -1206,6 +1357,9 @@ if (this.screen !== "map") {
         state.secretUnlocked = true;
         state.portalsUnlocked.cemiterio_para_secreta = true;
         this.map.secretUnlocked = true;
+        if (this.completeObjectiveStep("unlockSecretArea")) {
+          this.message("Objetivo concluido: Area Secreta desbloqueada.", true);
+        }
         this.message(point.unlockedMessage || point.message, true);
         this.effects.push(new window.AreaEffect(point.x, point.y, 1.2, "#7df0cd"));
         this.saveGame(true);
@@ -1237,6 +1391,9 @@ if (this.screen !== "map") {
     }
 
     if (point.once) state.events[eventKey] = true;
+    if ((point.id === "trono_funerario" || point.id === "altar_renascimento") && this.completeObjectiveStep("touchFuneralThrone")) {
+      this.message("Objetivo concluido: o poder da cripta respondeu.", true);
+    }
     this.floatText(point.label, point.x, point.y, "#fff1ac");
     this.message(point.message, true);
     this.portalCooldown = 0.35;
@@ -1656,6 +1813,9 @@ var kind = this.servantKindForSoul(soul);
       this.message("Limite ativo cheio. " + servant.name + " foi enviado a reserva.");
     }
     this.tutorialCaptureDone = true;
+    if (this.completeObjectiveStep("captureFirstSoul")) {
+      this.message("Objetivo concluido: primeira alma capturada.", true);
+    }
     this.player.fragments += soul.fragments + 1;
     this.inventory["Fragmento de Alma"] = this.player.fragments;
     if (soul.sourceType === "soldier" || soul.sourceType === "hunter") this.adjustReputation("Humanos", -3);
@@ -1737,6 +1897,7 @@ var kind = this.servantKindForSoul(soul);
         this.player.gainExp(enemy.exp, this);
         this.player.fragments += enemy.fragments;
         this.applyEnemyRewards(enemy);
+        this.incrementBasicObjectiveKill(enemy);
         this.souls.push(new window.Soul(enemy));
         this.floatText("alma", enemy.x, enemy.y, "#8ff2df");
         if (enemy === this.boss) this.defeatBoss();
@@ -1771,6 +1932,10 @@ var kind = this.servantKindForSoul(soul);
     cemetery.bossDefeated = true;
     cemetery.secretUnlocked = true;
     cemetery.portalsUnlocked.cemiterio_para_secreta = true;
+    if (this.completeObjectiveStep("defeatTombGuardian")) {
+      this.message("Objetivo concluido: Guardiao de Tumba derrotado.", true);
+    }
+    this.completeObjectiveStep("unlockSecretArea");
     this.message("Guardiao derrotado. Area Secreta desbloqueada.", true);
     this.adjustReputation("Mortos-vivos", 10);
     var evolved = false;

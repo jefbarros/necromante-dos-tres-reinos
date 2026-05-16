@@ -6,8 +6,8 @@
   // Handles save, load, delete, export, import, sync
   // Uses versioned save format with migration support
 
-  var SCHEMA_VERSION = "0.2.7";
-  var GAME_VERSION = "0.2.7";
+  var SCHEMA_VERSION = "0.2.8";
+  var GAME_VERSION = "0.2.8";
   var RUNTIME_UI_FIELDS = [
     "screen",
     "currentScreen",
@@ -29,6 +29,57 @@
 
   // Legacy save key from v0.2.2
   var LEGACY_SAVE_KEY = "necromanteTresReinosSaveV02";
+
+  function defaultObjectiveProgress() {
+    return {
+      version: GAME_VERSION,
+      completed: {},
+      basicEnemiesDefeated: 0,
+      currentStep: "awakenCrypt",
+      completedInitialLoop: false
+    };
+  }
+
+  function migrateObjectiveProgress(save) {
+    var progress = defaultObjectiveProgress();
+    if (save && save.objectiveProgress && typeof save.objectiveProgress === "object") {
+      progress.completed = Object.assign({}, save.objectiveProgress.completed || {});
+      progress.basicEnemiesDefeated = Math.max(0, save.objectiveProgress.basicEnemiesDefeated || 0);
+      progress.currentStep = save.objectiveProgress.currentStep || progress.currentStep;
+      progress.completedInitialLoop = Boolean(save.objectiveProgress.completedInitialLoop);
+    }
+    var mapState = save && save.mapState || {};
+    if ((mapState.cripta_inicial && mapState.cripta_inicial.visited) || (save && save.currentMapId === "cripta_inicial")) {
+      progress.completed.awakenCrypt = true;
+    }
+    if (mapState.cripta_inicial && mapState.cripta_inicial.events && (mapState.cripta_inicial.events.trono_funerario || mapState.cripta_inicial.events.altar_renascimento)) {
+      progress.completed.touchFuneralThrone = true;
+    }
+    if ((mapState.cemiterio_neutro && mapState.cemiterio_neutro.visited) || (save && save.currentMapId === "cemiterio_neutro")) {
+      progress.completed.reachNeutralCemetery = true;
+    }
+    if (progress.basicEnemiesDefeated >= 2) progress.completed.defeatBasicEnemies = true;
+    if (save && (save.tutorialCaptureDone || (Array.isArray(save.servants) && save.servants.length > 0))) {
+      progress.completed.captureFirstSoul = true;
+    }
+    if (save && (save.bossDefeated || (mapState.cemiterio_neutro && mapState.cemiterio_neutro.bossDefeated))) {
+      progress.completed.defeatTombGuardian = true;
+    }
+    if (save && (save.secretUnlocked || (mapState.cemiterio_neutro && mapState.cemiterio_neutro.secretUnlocked))) {
+      progress.completed.unlockSecretArea = true;
+      progress.completed.initialLoopComplete = true;
+      progress.completedInitialLoop = true;
+    }
+    var order = ["awakenCrypt", "touchFuneralThrone", "reachNeutralCemetery", "defeatBasicEnemies", "captureFirstSoul", "defeatTombGuardian", "unlockSecretArea", "initialLoopComplete"];
+    for (var i = 0; i < order.length; i += 1) {
+      if (!progress.completed[order[i]]) {
+        progress.currentStep = order[i];
+        return progress;
+      }
+    }
+    progress.currentStep = "initialLoopComplete";
+    return progress;
+  }
 
   var SaveManager = {
     // Current save data in memory
@@ -76,7 +127,7 @@
       return {
         schemaVersion: SCHEMA_VERSION,
         gameVersion: GAME_VERSION,
-        userId: window.AuthService ? window.AuthService.getCurrentUser().userId : null,
+        userId: window.AuthService && window.AuthService.getCurrentUser() ? window.AuthService.getCurrentUser().userId : null,
         slotId: "default",
         deviceId: window.PlatformService ? window.PlatformService.getDeviceId() : null,
         platform: window.PlatformService ? window.PlatformService.getPlatform() : "web",
@@ -140,6 +191,7 @@
 
         // Map state
         mapState: game.mapState,
+        objectiveProgress: game.objectiveProgress || defaultObjectiveProgress(),
 
         // Flags
         tutorialCaptureDone: game.tutorialCaptureDone,
@@ -204,6 +256,7 @@
       }
 
       data = this.sanitizeRuntimeUIFields(data);
+      data.objectiveProgress = migrateObjectiveProgress(data);
       data = this.normalizeServantRoster(data);
       var validation = this.validateSaveData(data);
       if (!validation.valid) {
@@ -267,6 +320,7 @@
         skillPoints: cleanOldSave.skillPoints || 0,
         reputation: cleanOldSave.reputation || {},
         mapState: cleanOldSave.mapState || {},
+        objectiveProgress: migrateObjectiveProgress(cleanOldSave),
         tutorialCaptureDone: cleanOldSave.tutorialCaptureDone || false,
         dragonSignalSeen: cleanOldSave.dragonSignalSeen || false
       };
@@ -328,6 +382,7 @@
         }
 
         data = this.sanitizeRuntimeUIFields(data);
+        data.objectiveProgress = migrateObjectiveProgress(data);
         data = this.normalizeServantRoster(data);
         var validation = this.validateSaveData(data);
         if (!validation.valid) {
@@ -387,6 +442,7 @@
       if (!data) return false;
       if (data.schemaVersion !== SCHEMA_VERSION) data = this.migrateSave(data);
       data = this.sanitizeRuntimeUIFields(data);
+      data.objectiveProgress = migrateObjectiveProgress(data);
       data = this.normalizeServantRoster(data);
       var validation = this.validateSaveData(data);
       if (!validation.valid) {

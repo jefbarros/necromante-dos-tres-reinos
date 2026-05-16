@@ -1,6 +1,28 @@
 # Necromante dos Tres Reinos
 
-Prototipo jogavel v0.2.7 em HTML5, JavaScript e Canvas. O jogo continua mobile-first e preparado para uso hibrido em Web, Android via Capacitor e Windows via Tauri, com save local, conta mock, save em nuvem mock e sincronizacao futura entre dispositivos.
+Prototipo jogavel v0.2.8 em HTML5, JavaScript e Canvas. O jogo continua mobile-first e preparado para uso hibrido em Web, Android via Capacitor e Windows via Tauri, com save local, conta mock, save em nuvem mock e sincronizacao futura entre dispositivos.
+
+## v0.2.8 - Objetivos Iniciais
+
+A v0.2.8 adiciona um sistema simples de objetivo atual no HUD para estabilizar o primeiro ciclo jogavel sem abrir menus automaticamente. O objetivo guia o jogador por despertar na Cripta Inicial, interagir com o Trono Funerario ou altar equivalente, ir ao Cemiterio Neutro, derrotar inimigos basicos, capturar a primeira alma, derrotar o Guardiao de Tumba e desbloquear a Area Secreta.
+
+Mudancas principais:
+
+- HUD mostra o objetivo atual e uma dica curta.
+- Save persiste apenas `objectiveProgress` para o tutorial inicial.
+- Saves antigos migram com progresso de objetivo seguro, inferido de mapa, boss, captura e area secreta quando possivel.
+- Save/export continua sem persistir `screen`, `activeModal`, `selectedMenu`, `inputLock` ou outro estado runtime de UI.
+- Novo Jogo, Continuar, Carregar Local e Carregar MockCloud continuam entrando direto no gameplay.
+- A direcao dark fantasy/necromancia permanece propria, sem copiar nomes, personagens, cenas, simbolos, arte ou lore de referencia externa.
+
+Teste manual minimo da v0.2.8:
+
+1. Clique em `Novo Jogo` e confirme que a Cripta Inicial abre em gameplay com objetivo no HUD.
+2. Interaja com o Trono Funerario ou Altar de Renascimento e confirme o avanco do objetivo.
+3. Entre no Cemiterio Neutro, derrote dois inimigos basicos e capture a primeira alma.
+4. Derrote o Guardiao de Tumba e confirme que a Area Secreta fica desbloqueada.
+5. Salve/exporte e confirme que o JSON contem `objectiveProgress`, mas nao contem `screen`, `activeModal`, `selectedMenu` ou `inputLock`.
+6. Recarregue via Continuar, Carregar Local e MockCloud; todos devem voltar ao mapa, nao para Equipe.
 
 ## Hotfix v0.2.7
 
@@ -229,7 +251,7 @@ Na tela Conta ou Carregar Save:
 - `I` ou o botao `Importar JSON` abre um modal com textarea.
 - O fluxo de importacao valida JSON, migra save antigo, normaliza servos ativos/reserva, mostra resumo e substitui o save local apenas apos confirmacao.
 
-O SaveManager migra saves antigos para o schema atual quando necessario. A tela atual de UI nao e salva como estado persistente obrigatorio.
+O SaveManager migra saves antigos para o schema atual quando necessario. A tela atual de UI nao e salva como estado persistente obrigatorio. Na v0.2.8, o progresso persistente do tutorial fica limitado a `objectiveProgress`.
 
 ## Tela Carregar Save
 
@@ -261,7 +283,7 @@ A tela `Carregar Save` mostra:
 
 ## Telas Pequenas e Mobile
 
-A v0.2.6 reduz HUD, minimapa, menus e botoes em alturas/larguras menores. Menus de save usam modal rolavel com textarea responsiva. Os botoes mobile mantem area de toque grande, opacidade controlada e o botao contextual continua priorizando o alvo mais proximo: `Entrar` para portal, `Interagir` para objeto e `Falar` reservado para NPC futuro. A v0.2.7 preserva a direcao visual e altera apenas fluxo, input e navegacao de telas.
+A v0.2.6 reduz HUD, minimapa, menus e botoes em alturas/larguras menores. Menus de save usam modal rolavel com textarea responsiva. Os botoes mobile mantem area de toque grande, opacidade controlada e o botao contextual continua priorizando o alvo mais proximo: `Entrar` para portal, `Interagir` para objeto e `Falar` reservado para NPC futuro. A v0.2.7 preserva a direcao visual e altera apenas fluxo, input e navegacao de telas. A v0.2.8 acrescenta um bloco compacto de objetivo atual no HUD.
 
 ## Preparacao Android com Capacitor
 
@@ -318,6 +340,8 @@ Arquivos ignorados esperados:
 - [ ] portais mostram estados claros;
 - [ ] habilidades mostram efeitos melhores;
 - [ ] HUD e menus seguem o estilo dark fantasy;
+- [ ] objetivo inicial aparece no HUD;
+- [ ] objetivo avanca por interacao, combate, captura, chefe e area secreta;
 - [ ] seletor low/medium/high funciona;
 - [ ] importacao de save funciona pela UI;
 - [ ] exportacao de save funciona pela UI;
@@ -327,6 +351,19 @@ Arquivos ignorados esperados:
 - [ ] save local continua funcionando;
 - [ ] conta mock e mockCloud continuam disponiveis;
 - [ ] performance basica continua aceitavel.
+
+## Testes Realizados na v0.2.8
+
+- `node --check` em todos os arquivos JS;
+- `npm run check`;
+- Novo Jogo entra direto no gameplay;
+- Continuar, Carregar Local e MockCloud devem voltar ao gameplay;
+- ESC/M/Mapa/Voltar continuam fechando menus;
+- F10 continua recuperando UI presa;
+- objetivo inicial aparece no HUD;
+- objetivo avanca por interacao, combate, captura, chefe e desbloqueio da Area Secreta;
+- save/export contem `objectiveProgress`;
+- save/export nao contem `screen`, `activeModal`, `selectedMenu` ou `inputLock`.
 
 ## Testes Realizados na v0.2.7
 
@@ -358,21 +395,21 @@ Arquivos ignorados esperados:
 
 ## Bugs Conhecidos
 
-- Firebase real segue apenas preparado; a v0.2.7 continua usando mockCloud quando nao houver configuracao local.
+- Firebase real segue apenas preparado; a v0.2.8 continua usando mockCloud quando nao houver configuracao local.
 - O teste Android/Windows nativo ainda depende de ambiente Capacitor/Tauri dedicado.
 - Alguns textos permanecem em ASCII no codigo para manter compatibilidade com arquivos existentes.
 - O fluxo MockCloud depende de login mock e dados existentes em `localStorage`.
 
 ## Proxima Etapa Recomendada
 
-v0.2.8 deve focar em balanceamento de combate, mais telegraphs para inimigos especiais, preparacao real de build Android/Windows e uma tela dedicada de configuracoes fora da tela Conta.
+v0.2.9 deve focar em balanceamento de combate, mais telegraphs para inimigos especiais, preparacao real de build Android/Windows e uma tela dedicada de configuracoes fora da tela Conta.
 
 ## Comandos Git Recomendados
 
 ```bash
 git status -sb
 git add .
-git commit -m "v0.2.7 - hotfix fluxo de UI e tela de equipe"
+git commit -m "v0.2.8 - objetivos iniciais e regressao de gameplay"
 git push
 ```
 

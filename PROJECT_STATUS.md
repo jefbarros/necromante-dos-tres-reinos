@@ -2,7 +2,7 @@
 
 ## Versao Atual
 
-v0.2.7
+v0.2.8
 
 ## Estado Geral
 
@@ -18,26 +18,27 @@ O projeto esta em uma branch com a base hibrida de v0.2.3/v0.2.4 e a direcao vis
 - preparacao para Android e Windows;
 - arte dark fantasy/isometrica via `src/art.js`.
 
-A v0.2.7 e um hotfix emergencial de fluxo de UI. Ela corrige o travamento em que Novo Jogo, Continuar e Carregar Save terminavam na tela de Gerenciamento de Servos/Equipe e restaura o retorno confiavel ao gameplay.
+A v0.2.8 estabiliza o loop jogavel inicial com objetivo atual no HUD. O fluxo guia o jogador da Cripta Inicial ao Cemiterio Neutro, captura da primeira alma, queda do Guardiao de Tumba e desbloqueio da Area Secreta, preservando a correcao da v0.2.7 que impede abertura automatica da tela de Equipe.
 
 ## Sistemas Alterados
 
 - `ART_BIBLE.md`: novo documento permanente de direcao visual.
 - `docs/concept-art/README.md`: documenta uso de concept art e referencias.
-- `src/config.js`: versao atualizada para `0.2.7`.
-- `package.json`: versao atualizada para `0.2.7`.
+- `src/config.js`: versao atualizada para `0.2.8`.
+- `package.json`: versao atualizada para `0.2.8`.
 - `src/art.js`: qualidade visual dinamica `low`/`medium`/`high`, persistida localmente.
-- `src/game.js`: reset runtime de UI, fechamento central de telas, F10 de recuperacao, Novo Jogo/Continuar/Carregar Save voltando ao gameplay.
+- `src/game.js`: objetivo inicial, reset runtime de UI, fechamento central de telas, F10 de recuperacao, Novo Jogo/Continuar/Carregar Save voltando ao gameplay.
 - `src/input.js`: atalho `F10` e limpeza de input runtime.
-- `src/ui.js`: textos de navegacao atualizados para ESC/M/Mapa/F10.
-- `src/saveManager.js`: schema v0.2.7, migracao de saves antigos e remocao de campos runtime de UI.
-- `src/localSave.js`: schema/metadados v0.2.7.
+- `src/ui.js`: HUD com objetivo atual e textos de navegacao atualizados para ESC/M/Mapa/F10.
+- `src/saveManager.js`: schema v0.2.8, migracao de saves antigos, progresso de objetivo e remocao de campos runtime de UI.
+- `src/localSave.js`: schema/metadados v0.2.8.
 - `src/cloudSave.js`: metadados mockCloud mais completos.
 - `src/syncManager.js`: syncNow usa save local quando nenhum save e passado e Cancelar conflito preserva status de conflito.
 - `src/auth.js`: login mock direto para uso pela tela Conta.
 - `index.html`: modal de save/conflito.
 - `styles.css`: modal responsivo e ajustes de controles mobile.
-- `README.md`: documentacao atualizada para v0.2.7.
+- `README.md`: documentacao atualizada para v0.2.8.
+- `docs/tests/REGRESSION_v0.2.8.md`: roteiro de regressao do loop inicial e fluxo de UI.
 
 ## Bugs Corrigidos
 
@@ -53,11 +54,13 @@ A v0.2.7 e um hotfix emergencial de fluxo de UI. Ela corrige o travamento em que
 - Login mock da tela Conta agora possui funcao dedicada.
 - Qualidade visual pode ser alternada por UI e fica persistida localmente.
 - HUD, minimapa, botoes mobile e modais foram reduzidos para telas pequenas.
+- Objetivo atual aparece no HUD e guia o ciclo inicial de gameplay.
+- Save/export persiste `objectiveProgress` sem persistir `screen`, `activeModal`, `selectedMenu` ou `inputLock`.
 
 ## Arte e UI
 
 - Mantida a identidade dark fantasy/isometrica da v0.2.5.
-- A v0.2.7 nao altera arte, mapas, HUD, personagens, efeitos ou direcao visual.
+- A v0.2.8 preserva a direcao visual propria e apenas acrescenta o bloco de objetivo no HUD.
 - `ART_BIBLE.md` passa a ser referencia obrigatoria para mudancas visuais.
 - `VISUAL_QUALITY`/`GameConfig.visualQuality` segue `medium` por padrao.
 - `low` reduz particulas, auras e detalhes.
@@ -84,6 +87,10 @@ A v0.2.7 e um hotfix emergencial de fluxo de UI. Ela corrige o travamento em que
 - Exportar/Importar Save podem ser cancelados sem travar a UI.
 - Conflito local/nuvem mantem Cancelar funcional e opcoes Local/Nuvem sem prender input.
 - F10 recupera a UI e mostra `UI recuperada.`.
+- Objetivo inicial aparece no HUD.
+- Objetivo avanca por interacao na cripta, entrada no cemiterio, combate, captura, boss e area secreta.
+- Save/export contem `objectiveProgress`.
+- Save/export nao contem estado runtime de UI como `screen`, `activeModal`, `selectedMenu` ou `inputLock`.
 
 ## Bugs Conhecidos
 
@@ -94,7 +101,7 @@ A v0.2.7 e um hotfix emergencial de fluxo de UI. Ela corrige o travamento em que
 
 ## Proxima Etapa Recomendada
 
-v0.2.8 deve focar em balanceamento, telegraphs de inimigos, configuracoes dedicadas fora da tela Conta e validacao real em Android/Windows quando o ambiente Capacitor/Tauri estiver pronto.
+v0.2.9 deve focar em balanceamento, telegraphs de inimigos, configuracoes dedicadas fora da tela Conta e validacao real em Android/Windows quando o ambiente Capacitor/Tauri estiver pronto.
 
 ## Regra Permanente
 
