@@ -6,7 +6,7 @@
   // Encapsulated to allow future swap to IndexedDB
 
   var LOCAL_SAVE_KEY = "necromante_local_save";
-  var SCHEMA_VERSION = "0.2.8";
+  var SCHEMA_VERSION = "0.3.2";
 
   var LocalSaveService = {
 

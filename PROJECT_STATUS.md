@@ -2,11 +2,11 @@
 
 ## Versao Atual
 
-v0.3.1
+v0.3.2
 
 ## Estado Geral
 
-Padronizacao de metadados do mapa-mundi e refinamento da interface de exploracao global.
+Revisao de sistemas centrais e UX antes de expansoes maiores.
 
 - HTML5/JavaScript/Canvas;
 - SaveManager;
@@ -15,32 +15,32 @@ Padronizacao de metadados do mapa-mundi e refinamento da interface de exploracao
 - auth mock;
 - sync manager;
 - platform/deviceId;
-- preparacao para Android e Windows;
+- preparacao futura para Android e Windows;
 - arte dark fantasy/isometrica via `src/art.js`.
 
-A v0.2.9.1 refina a logica do Guardiao de Tumba, garantindo que o ataque AOE so ocorra sob condicoes especificas de proximidade, evitando gastos desnecessarios de recursos visuais e tornando o Boss mais reativo.
+A v0.3.2 melhora Equipe, Inventario, Talentos, Menu, coleta de almas, drops e ataque basico/auto-ataque. Neblina de Guerra, mapas maiores, builds nativos, 3D real e faccoes avancadas seguem fora desta versao.
 
 ## Sistemas Alterados
 
-- `src/config.js` & `package.json`: v0.3.1.
-- `src/map.js`: Padronizacao de `WorldRegions` com POIs e schema estrito.
-- `src/game.js`: Melhoria na leitura de requisitos para viagem rapida.
-- `src/ui.js`: Novo painel de detalhes de regiao no Mapa do Mundo.
-- `README.md`: Atualizado para v0.3.1.
-- `docs/tests/REGRESSION_v0.3.1.md`: Novo roteiro de testes focado em metadados.
+- `src/config.js` & `package.json`: v0.3.2.
+- `src/game.js`: gerenciamento de equipe, inventario estruturado, talentos, auto-coleta, drops e auto-ataque.
+- `src/ui.js`: telas de Equipe, Inventario, Talentos, Menu e HUD atualizadas.
+- `src/input.js` & `index.html`: sequencia de ataque/habilidades atualizada e botao de auto-ataque.
+- `src/saveManager.js` & `src/localSave.js`: schema 0.3.2 e migracao suave de inventario antigo.
+- `README.md`: atualizado para v0.3.2.
+- `docs/tests/REGRESSION_v0.3.2.md`: novo roteiro de regressao.
 
 ## Bugs Corrigidos
 
-- Dano de inimigos basicos reduzido para evitar mortes injustas no inicio do jogo.
-- Guardiao de Tumba melee e AOE com danos reduzidos.
-- Telegraph visual amarelo "cuidado!" 2 segundos antes do AOE do Guardiao.
-- **IA Fix**: AOE do Guardiao agora respeita condicao de ameaca proxima (v0.2.9.1).
-- **Visual/Audio Fix**: Pulso condicional (azul/vermelho) e som metalico indicam que o Guardiao esta carregado para o AOE.
+- Selecao de talentos agora percorre todos os talentos da lista.
+- Inventarios antigos sao normalizados para equipamentos, consumiveis e materiais.
+- Conta e Salvar/Carregar nao dependem mais de botoes superiores separados.
 
 ## Arte e UI
 
 - Mantida a identidade dark fantasy/isometrica da v0.2.5/v0.2.6/v0.2.8.
-- Telegraph visual do Guardiao de Tumba usa efeito amarelo para aviso de AOE.
+- HUD mostra Auto-ataque ON/OFF.
+- Telas de Equipe, Inventario e Talentos exibem dados e requisitos mais claros.
 - Save/export continua sem persistir estado runtime de UI.
 - Objetivo inicial continua no HUD.
 
@@ -53,24 +53,19 @@ A v0.2.9.1 refina a logica do Guardiao de Tumba, garantindo que o ataque AOE so 
 
 ## Testes Realizados
 
-- `node --check` em todos os arquivos JS.
-- `node --check src/config.js`, `src/ai.js`, `src/game.js`, `src/entities.js`.
-- Novo Jogo entra direto no gameplay com objetivo no HUD.
-- Inimigos basicos com dano reduzido visivel.
-- Guardiao de Tumba mostra telegraph antes do AOE.
-- Save/export contem `objectiveProgress`.
-- Save/export nao contem `screen`, `activeModal`, `selectedMenu` ou `inputLock`.
+- `npm.cmd run check`.
+- Regressao manual prevista em `docs/tests/REGRESSION_v0.3.2.md`.
 
 ## Bugs Conhecidos
 
 - Firebase real segue como estrutura preparada; sem `src/firebaseConfig.local.js`, o jogo usa mockCloud.
-- Builds Android/Windows nativos ainda nao foram gerados nesta maquina.
+- Builds Android/Windows nativos seguem fora da v0.3.2.
 - Algumas strings do codigo seguem em ASCII para manter consistencia com arquivos existentes.
 - MockCloud exige login mock e dados em `localStorage`.
 
 ## Proxima Etapa Recomendada
 
-v0.2.10 deve continuar refinando combat balance, adicionando mais telegraphs, construcao de area bosses e uma tela dedicada de configuracoes fora da tela Conta.
+Validar manualmente a regressao v0.3.2 e, depois, retomar priorizacao de mapa/visibilidade somente quando os sistemas centrais estiverem estaveis.
 
 ## Regra Permanente
 

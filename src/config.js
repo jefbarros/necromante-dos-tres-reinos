@@ -2,7 +2,7 @@
   "use strict";
 
   window.GameConfig = {
-    version: "0.3.1",
+    version: "0.3.2",
     title: "Necromante dos Tres Reinos",
     visualQuality: "medium",
     world: {
@@ -215,32 +215,124 @@
     },
     skillTree: [
       {
-        id: "invocador",
+        id: "invocador_vinculo",
         path: "Invocador",
         name: "Vinculo de Ossos",
         cost: 1,
-        text: "Servos recebem +18 vida maxima."
+        levelRequired: 1,
+        requires: "",
+        text: "Servos recebem +18 vida maxima.",
+        effect: "servantHp18"
       },
       {
-        id: "ceifador",
+        id: "invocador_limite",
+        path: "Invocador",
+        name: "Legiao Menor",
+        cost: 2,
+        levelRequired: 3,
+        requires: "invocador_vinculo",
+        text: "+1 soulControl do necromante, respeitando o limite ativo atual.",
+        effect: "soulControl1"
+      },
+      {
+        id: "invocador_protecao",
+        path: "Invocador",
+        name: "Carapaca Funeraria",
+        cost: 1,
+        levelRequired: 4,
+        requires: "invocador_vinculo",
+        text: "Servos recebem +1 defesa.",
+        effect: "servantDefense1"
+      },
+      {
+        id: "ceifador_dreno",
         path: "Ceifador",
         name: "Dreno Cruel",
         cost: 1,
-        text: "Dreno de Alma causa +10 dano."
+        levelRequired: 1,
+        requires: "",
+        text: "Dreno de Alma causa +10 dano.",
+        effect: "drainDamage10"
       },
       {
-        id: "senhor_almas",
+        id: "ceifador_lanca",
+        path: "Ceifador",
+        name: "Lanca Serrilhada",
+        cost: 1,
+        levelRequired: 3,
+        requires: "ceifador_dreno",
+        text: "Lanca Ossea causa +8 dano.",
+        effect: "boneSpearDamage8"
+      },
+      {
+        id: "ceifador_sangue_frio",
+        path: "Ceifador",
+        name: "Sangue Frio",
+        cost: 2,
+        levelRequired: 5,
+        requires: "ceifador_lanca",
+        text: "Ataque basico recebe +4 dano.",
+        effect: "attackDamage4"
+      },
+      {
+        id: "senhor_almas_mao",
         path: "Senhor das Almas",
         name: "Mao do Submundo",
         cost: 1,
-        text: "+12% chance de captura."
+        levelRequired: 1,
+        requires: "",
+        text: "+12% chance de captura.",
+        effect: "capture12"
       },
       {
-        id: "estrategista",
+        id: "senhor_almas_coleta",
+        path: "Senhor das Almas",
+        name: "Ceifa Silenciosa",
+        cost: 1,
+        levelRequired: 2,
+        requires: "senhor_almas_mao",
+        text: "Almas coletadas geram +1 fragmento.",
+        effect: "autoSoulFragment1"
+      },
+      {
+        id: "senhor_almas_dominio",
+        path: "Senhor das Almas",
+        name: "Dominio Necrotico",
+        cost: 2,
+        levelRequired: 5,
+        requires: "senhor_almas_coleta",
+        text: "+0.3 dominio necrotico.",
+        effect: "necroDomain03"
+      },
+      {
+        id: "estrategista_ordens",
         path: "Estrategista Sombrio",
         name: "Ordens Sombrias",
         cost: 1,
-        text: "Servos recebem +1 defesa e obedecem melhor comandos."
+        levelRequired: 1,
+        requires: "",
+        text: "Servos obedecem melhor comandos.",
+        effect: "commandEfficiency25"
+      },
+      {
+        id: "estrategista_ia",
+        path: "Estrategista Sombrio",
+        name: "Instinto de Guarda",
+        cost: 1,
+        levelRequired: 3,
+        requires: "estrategista_ordens",
+        text: "Servos defensivos protegem com mais vigor.",
+        effect: "protectBias25"
+      },
+      {
+        id: "estrategista_auto",
+        path: "Estrategista Sombrio",
+        name: "Mira Cadaverica",
+        cost: 2,
+        levelRequired: 4,
+        requires: "estrategista_ordens",
+        text: "Auto-ataque ganha +1 alcance.",
+        effect: "autoAttackRange1"
       }
     ],
     equipment: {
@@ -249,16 +341,127 @@
         text: "+5 dano magico.",
         slot: "weapon"
       },
+      rustyBlade: {
+        name: "Lamina Enferrujada",
+        text: "+3 dano do ataque basico.",
+        slot: "weapon"
+      },
       boneGrimoire: {
         name: "Grimorio de Ossos",
         text: "+10% chance de captura.",
         slot: "tome"
       },
+      boneAmulet: {
+        name: "Amuleto de Ossos",
+        text: "+12 vida maxima para servos.",
+        slot: "amulet"
+      },
       cryptRing: {
         name: "Anel da Cripta",
         text: "+10 vida maxima para servos.",
         slot: "ring"
+      },
+      shadowRing: {
+        name: "Anel Sombrio",
+        text: "+0.1 dominio necrotico.",
+        slot: "ring"
       }
+    },
+    consumables: {
+      healthPotion: {
+        name: "Pocao de Vida",
+        text: "Restaura 45 de vida.",
+        effect: "heal",
+        amount: 45
+      },
+      manaPotion: {
+        name: "Pocao de Mana",
+        text: "Restaura 35 de mana.",
+        effect: "mana",
+        amount: 35
+      }
+    },
+    materials: {
+      soulFragment: "Fragmento de Alma",
+      oldBone: "Osso Antigo",
+      darkCore: "Nucleo Sombrio",
+      demonAsh: "Cinza Demoniaca",
+      crackedDragonScale: "Escama Draconica Rachada"
+    },
+    dropTables: {
+      rat: [
+        { item: "oldBone", type: "materials", chance: 0.75, amount: 1 },
+        { item: "healthPotion", type: "consumables", chance: 0.08, amount: 1 }
+      ],
+      wolf: [
+        { item: "oldBone", type: "materials", chance: 0.85, amount: 1 },
+        { item: "rustyBlade", type: "equipment", chance: 0.08, amount: 1 }
+      ],
+      soldier: [
+        { item: "oldBone", type: "materials", chance: 0.9, amount: 2 },
+        { item: "healthPotion", type: "consumables", chance: 0.18, amount: 1 },
+        { item: "rustyBlade", type: "equipment", chance: 0.12, amount: 1 }
+      ],
+      elite: [
+        { item: "darkCore", type: "materials", chance: 1, amount: 1 },
+        { item: "shadowRing", type: "equipment", chance: 0.22, amount: 1 }
+      ],
+      hunter: [
+        { item: "oldBone", type: "materials", chance: 0.8, amount: 2 },
+        { item: "manaPotion", type: "consumables", chance: 0.14, amount: 1 }
+      ],
+      warhound: [
+        { item: "oldBone", type: "materials", chance: 0.8, amount: 1 },
+        { item: "boneAmulet", type: "equipment", chance: 0.08, amount: 1 }
+      ],
+      cultist: [
+        { item: "darkCore", type: "materials", chance: 0.75, amount: 1 },
+        { item: "manaPotion", type: "consumables", chance: 0.18, amount: 1 },
+        { item: "boneAmulet", type: "equipment", chance: 0.1, amount: 1 }
+      ],
+      imp: [
+        { item: "demonAsh", type: "materials", chance: 0.9, amount: 1 },
+        { item: "shadowRing", type: "equipment", chance: 0.1, amount: 1 }
+      ],
+      boss: [
+        { item: "darkCore", type: "materials", chance: 1, amount: 2 },
+        { item: "boneAmulet", type: "equipment", chance: 1, amount: 1 },
+        { item: "shadowRing", type: "equipment", chance: 0.5, amount: 1 }
+      ]
+    },
+    servantRoles: {
+      skeleton: "Tanque/defensivo",
+      veteran: "Tanque/defensivo",
+      feral: "Rapido/agressivo",
+      fallen: "Dano",
+      ember: "Dano",
+      hunterShade: "Rapido/agressivo",
+      cultistShade: "Suporte/magico"
+    },
+    reserveFilters: {
+      all: "Todos",
+      tank: "Tanque/defensivo",
+      damage: "Dano",
+      fast: "Rapido/agressivo",
+      support: "Suporte/magico"
+    },
+    inventoryTabs: {
+      equipment: "Equipamentos",
+      consumables: "Consumiveis",
+      materials: "Materiais"
+    },
+    menuOptions: {
+      root: [
+        "Continuar",
+        "Equipe",
+        "Inventario",
+        "Talentos",
+        "Mapa",
+        "Salvar/Carregar",
+        "Conta",
+        "Controles",
+        "Creditos"
+      ]
     }
   };
 })();

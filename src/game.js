@@ -77,6 +77,7 @@ window.NecromancerGame = function NecromancerGame(canvas, input) {
     this.mapState = this.createDefaultMapState();
     var initialSpawn = this.map.getSpawn("default");
     this.player = new window.Player(initialSpawn.x, initialSpawn.y);
+    this.player.baseNecroDomain = this.player.necroDomain;
     this.enemies = [];
     this.servants = [];
     this.reserveServants = [];
@@ -101,9 +102,14 @@ window.NecromancerGame = function NecromancerGame(canvas, input) {
     this.selectedPanel = null;
     this.inputLock = false;
     this.enteredMap = false;
+    this.teamColumn = "active";
+    this.selectedActive = 0;
     this.selectedReserve = 0;
+    this.reserveFilter = "all";
     this.selectedSkill = 0;
     this.selectedMenu = 0;
+    this.inventoryTab = "equipment";
+    this.selectedInventory = 0;
     this.selectedEquipment = 0;
     this.selectedLoadSave = 0;
     this.importCandidate = null;
@@ -137,6 +143,11 @@ window.NecromancerGame = function NecromancerGame(canvas, input) {
     this.messages = [];
     this.servantCommandIndex = 0;
     this.servantCommand = cfg.commands[this.servantCommandIndex];
+    this.autoAttackEnabled = false;
+    this.autoAttackRangeBonus = 0;
+    this.soulAutoCollectBonus = 0;
+    this.attackDamageBonus = 0;
+    this.boneSpearDamageBonus = 0;
     this.markedTarget = null;
     this.groupingDangerTimer = 0;
     this.tutorialCaptureDone = false;
@@ -434,12 +445,55 @@ this.respawnTimers = { common: 0, elite: 0 };
 
   NecromancerGame.prototype.defaultInventory = function () {
     return {
-      "Fragmento de Alma": 0,
-      "Osso Antigo": 0,
-      "Nucleo Sombrio": 0,
-      "Cinza Demoniaca": 0,
-      "Escama Draconica Rachada": 0
+      equipment: {
+        crackedStaff: 1,
+        boneGrimoire: 1,
+        cryptRing: 1,
+        rustyBlade: 0,
+        boneAmulet: 0,
+        shadowRing: 0
+      },
+      consumables: {
+        healthPotion: 1,
+        manaPotion: 1
+      },
+      materials: {
+        soulFragment: 0,
+        oldBone: 0,
+        darkCore: 0,
+        demonAsh: 0,
+        crackedDragonScale: 0
+      }
     };
+  };
+
+  NecromancerGame.prototype.normalizeInventory = function (inventory) {
+    var base = this.defaultInventory();
+    var source = inventory || {};
+    if (source.equipment || source.consumables || source.materials) {
+      ["equipment", "consumables", "materials"].forEach(function (section) {
+        base[section] = Object.assign(base[section], source[section] || {});
+      });
+      return base;
+    }
+
+    var legacyMap = {
+      "Fragmento de Alma": ["materials", "soulFragment"],
+      "Osso Antigo": ["materials", "oldBone"],
+      "Nucleo Sombrio": ["materials", "darkCore"],
+      "Cinza Demoniaca": ["materials", "demonAsh"],
+      "Escama Draconica Rachada": ["materials", "crackedDragonScale"],
+      "Pocao de Vida": ["consumables", "healthPotion"],
+      "Pocao de Mana": ["consumables", "manaPotion"],
+      "Amuleto de Ossos": ["equipment", "boneAmulet"],
+      "Lamina Enferrujada": ["equipment", "rustyBlade"],
+      "Anel Sombrio": ["equipment", "shadowRing"]
+    };
+    Object.keys(source).forEach(function (name) {
+      var target = legacyMap[name];
+      if (target) base[target[0]][target[1]] = Math.max(base[target[0]][target[1]] || 0, source[name] || 0);
+    });
+    return base;
   };
 
   NecromancerGame.prototype.defaultReputation = function () {
@@ -683,6 +737,7 @@ this.respawnTimers = { common: 0, elite: 0 };
     this.currentMapId = this.map.currentId;
     var spawn = this.map.getSpawn("default");
     this.player = new window.Player(spawn.x, spawn.y);
+    this.player.baseNecroDomain = this.player.necroDomain;
     this.servants = [];
     this.reserveServants = [];
     this.projectiles = [];
@@ -712,9 +767,15 @@ this.respawnTimers = { common: 0, elite: 0 };
     this.areaTitleTimer = 3;
     this.tutorialCaptureDone = false;
     this.enteredMap = false;
+    this.teamColumn = "active";
+    this.selectedActive = 0;
     this.selectedReserve = 0;
+    this.reserveFilter = "all";
     this.selectedSkill = 0;
+    this.inventoryTab = "equipment";
+    this.selectedInventory = 0;
     this.selectedEquipment = 0;
+    this.autoAttackEnabled = false;
     this.respawnTimers = { common: 0, elite: 0 };
     this.setupWorld();
     this.setupStarterReserve();
@@ -812,9 +873,10 @@ NecromancerGame.prototype.saveGame = function (silent) {
       unlockedRegions: this.unlockedRegions,
       objectiveProgress: this.objectiveProgress,
       tutorialCaptureDone: this.tutorialCaptureDone,
-      dragonSignalSeen: this.dragonSignalSeen
+      dragonSignalSeen: this.dragonSignalSeen,
+      autoAttackEnabled: this.autoAttackEnabled
     };
-    data.inventory["Fragmento de Alma"] = this.player.fragments;
+    data.inventory.materials.soulFragment = this.player.fragments;
     try {
       localStorage.setItem(this.saveKey, JSON.stringify(data));
       this.lastSaveStatus = "Salvo agora";
@@ -874,6 +936,7 @@ NecromancerGame.prototype.loadGame = function () {
     this.player.hp = this.player.maxHp;
     this.player.mana = this.player.maxMana;
     this.player.necroDomain = data.player && data.player.necroDomain || this.player.necroDomain;
+    this.player.baseNecroDomain = this.player.necroDomain;
     this.player.x = data.currentMapId && data.player && typeof data.player.x === "number" ? data.player.x : loadedSpawn.x;
     this.player.y = data.currentMapId && data.player && typeof data.player.y === "number" ? data.player.y : loadedSpawn.y;
     this.map.secretUnlocked = Boolean(data.secretUnlocked);
@@ -882,14 +945,19 @@ NecromancerGame.prototype.loadGame = function () {
       this.bossDefeated = true;
       this.map.secretUnlocked = true;
     }
-    this.inventory = Object.assign(this.defaultInventory(), data.inventory || {});
+    this.inventory = this.normalizeInventory(data.inventory);
+    this.inventory.materials.soulFragment = data.player && data.player.fragments || this.inventory.materials.soulFragment || 0;
     this.equipmentOwned = Object.assign({ crackedStaff: true, boneGrimoire: true, cryptRing: true }, data.equipmentOwned || {});
+    Object.keys(this.inventory.equipment).forEach(function (key) {
+      if (this.inventory.equipment[key] > 0) this.equipmentOwned[key] = true;
+    }.bind(this));
     this.equipment = Object.assign({ weapon: "crackedStaff", tome: "boneGrimoire", ring: "cryptRing" }, data.equipment || {});
     this.unlockedSkills = Object.assign(Object.create(null), data.unlockedSkills || {});
     this.skillPoints = data.skillPoints || 0;
     this.reputation = Object.assign(this.defaultReputation(), data.reputation || {});
     this.tutorialCaptureDone = Boolean(data.tutorialCaptureDone);
     this.dragonSignalSeen = Boolean(data.dragonSignalSeen);
+    this.autoAttackEnabled = Boolean(data.autoAttackEnabled);
     this.unlockedRegions = Object.assign({
       cripta_inicial: true,
       cemiterio_neutro: true,
@@ -964,7 +1032,7 @@ NecromancerGame.prototype.deleteSave = function () {
       return;
     }
     this.handleInput(dt);
-    this.inventory["Fragmento de Alma"] = this.player.fragments;
+    this.inventory.materials.soulFragment = this.player.fragments;
     this.itemNoticeTimer = Math.max(0, this.itemNoticeTimer - dt);
     this.reputationNoticeTimer = Math.max(0, this.reputationNoticeTimer - dt);
     this.portalCooldown = Math.max(0, this.portalCooldown - dt);
@@ -983,6 +1051,7 @@ NecromancerGame.prototype.deleteSave = function () {
       return;
     }
     this.player.update(dt, this);
+    this.updateAutoAttack();
     this.trainingUpdate(dt);
     this.narrativeUpdate();
     this.groupingDangerTimer = Math.max(0, this.groupingDangerTimer - dt);
@@ -1104,15 +1173,30 @@ if (this.input.consume("manage")) {
     if (this.input.consume("fusion")) this.fuseSelectedKind();
 
 if (this.screen !== "map") {
-      if (this.input.consume("command")) this.nextMenuSelection();
+      if (this.input.consume("command")) {
+        if (this.screen === "team") this.cycleTeamColumn();
+        else if (this.screen === "inventory") this.cycleInventoryTab();
+        else this.nextMenuSelection();
+      }
       if (this.input.consume("capture") || this.input.consume("attack")) this.confirmMenuAction();
-      if (this.input.consume("skill1")) this.selectedSkill = 0;
-      if (this.input.consume("skill2")) this.selectedSkill = 1;
+      if (this.input.consume("skill1")) {
+        if (this.screen === "team") this.nextMenuSelection();
+        else if (this.screen === "inventory") this.nextMenuSelection();
+        else if (this.screen === "skills") this.selectedSkill = 0;
+      }
+      if (this.input.consume("skill2")) {
+        if (this.screen === "team") this.replaceActiveWithReserve();
+        else if (this.screen === "skills") this.selectedSkill = 1;
+      }
       if (this.input.consume("skill3")) {
         if (this.screen === "team") this.sendActiveToReserve();
         else this.selectedSkill = 2;
       }
-      if (this.input.consume("skill4")) this.fuseSelectedKind();
+      if (this.input.consume("skill4")) {
+        if (this.screen === "team") this.cycleReserveFilter();
+        else this.selectedSkill = Math.min(3, cfg.skillTree.length - 1);
+      }
+      if (this.input.consume("fusion")) this.fuseSelectedKind();
       return;
     }
 
@@ -1120,6 +1204,7 @@ if (this.screen !== "map") {
     this.player.move(move.x, move.y, this.player.speed, dt, this.map);
 
     if (this.input.consume("attack")) this.castAttack();
+    if (this.input.consume("autoAttack")) this.toggleAutoAttack();
     if (this.input.consume("skill1")) this.castDrain();
     if (this.input.consume("skill2")) this.castBoneSpear();
     if (this.input.consume("skill3")) this.castMark();
@@ -1135,10 +1220,10 @@ if (this.screen !== "map") {
     this.activeMenu = screen === "map" ? null : screen;
     this.activeModal = null;
     this.inputLock = false;
-    if (screen === "mainMenu") this.message("Menu principal: CMD alterna, CAP confirma.");
-    if (screen === "team") this.message("Gerenciamento: CMD alterna reserva, CAP ativa/remove, F funde repetidos.");
-    if (screen === "inventory") this.message("Inventario aberto. Mapa/Enter retorna ao jogo.");
-    if (screen === "skills") this.message("Habilidades: CMD alterna, CAP compra com pontos.");
+    if (screen === "mainMenu") this.message("Menu: CMD alterna, CAP confirma.");
+    if (screen === "team") this.message("Equipe: CMD coluna, 2 substitui, 3 reserva, 5 filtro.");
+    if (screen === "inventory") this.message("Inventario: CMD aba, 2 item, CAP usa/equipa.");
+    if (screen === "skills") this.message("Talentos: CMD alterna, CAP compra com pontos.");
     if (screen === "loadSave") this.message("Carregar Save: CMD alterna, CAP confirma, I importa, P exporta.");
     if (screen === "account") this.message("Conta: CMD alterna, CAP confirma, 3 muda qualidade visual.");
     if (screen === "worldMap") this.message("Mapa do Mundo: CMD alterna regiao, CAP viaja.");
@@ -1463,12 +1548,12 @@ NecromancerGame.prototype.nextMenuSelection = function () {
     if (this.screen === "mainMenu") {
       this.selectedMenu = (this.selectedMenu + 1) % this.getMainMenuOptions().length;
     } else if (this.screen === "team") {
-      this.selectedReserve = (this.selectedReserve + 1) % Math.max(1, this.reserveServants.length);
+      if (this.teamColumn === "active") this.selectedActive = (this.selectedActive + 1) % Math.max(1, Math.min(MAX_ACTIVE_SERVANTS, this.player.soulControl));
+      else this.selectedReserve = (this.selectedReserve + 1) % Math.max(1, this.filteredReserveServants().length);
     } else if (this.screen === "skills") {
       this.selectedSkill = (this.selectedSkill + 1) % cfg.skillTree.length;
     } else if (this.screen === "inventory") {
-      var equipmentKeys = Object.keys(cfg.equipment);
-      this.selectedEquipment = (this.selectedEquipment + 1) % equipmentKeys.length;
+      this.selectedInventory = (this.selectedInventory + 1) % Math.max(1, this.getInventoryEntries(this.inventoryTab).length);
     } else if (this.screen === "account") {
       // Cycle through action buttons using selection state
       this.selectedEquipment = (this.selectedEquipment + 1) % 6;
@@ -1479,72 +1564,153 @@ NecromancerGame.prototype.nextMenuSelection = function () {
 
   NecromancerGame.prototype.confirmMenuAction = function () {
     if (this.screen === "mainMenu") this.confirmMainMenu();
-    else if (this.screen === "team") this.toggleSelectedReserve();
+    else if (this.screen === "team") this.confirmTeamSelection();
     else if (this.screen === "skills") this.unlockSelectedSkill();
-    else if (this.screen === "inventory") this.equipSelectedItem();
+    else if (this.screen === "inventory") this.confirmInventorySelection();
     else if (this.screen === "account") this.confirmAccountAction();
     else if (this.screen === "loadSave") this.confirmLoadSaveAction();
     else if (this.screen === "controls" || this.screen === "credits") this.openScreen("mainMenu");
   };
 
 NecromancerGame.prototype.getMainMenuOptions = function () {
-    var options = ["Novo Jogo"];
-    if (this.hasSave()) options.push("Continuar");
-    options.push("Carregar Save", "Conta", "Controles", "Creditos", "Apagar Save");
+    var options = ["Continuar", "Equipe", "Inventario", "Talentos", "Mapa", "Salvar/Carregar", "Conta", "Controles", "Creditos"];
+    if (!this.enteredMap) options.unshift("Novo Jogo");
     return options;
   };
 
 NecromancerGame.prototype.confirmMainMenu = function () {
     var option = this.getMainMenuOptions()[this.selectedMenu] || "Novo Jogo";
     if (option === "Novo Jogo") this.newGame();
-    else if (option === "Continuar") this.loadGame();
-    else if (option === "Carregar Save") this.openScreen("loadSave");
+    else if (option === "Continuar") {
+      if (!this.hasSave()) this.message("Nenhum save local encontrado.");
+      else this.loadGame();
+    }
+    else if (option === "Equipe") this.openScreen("team");
+    else if (option === "Inventario") this.openScreen("inventory");
+    else if (option === "Talentos") this.openScreen("skills");
+    else if (option === "Mapa") this.closeAllMenusAndReturnToGame();
+    else if (option === "Salvar/Carregar") this.openScreen("loadSave");
     else if (option === "Conta") this.openScreen("account");
     else if (option === "Controles") this.openScreen("controls");
     else if (option === "Creditos") this.openScreen("credits");
-    else if (option === "Apagar Save") this.deleteSave();
   };
 
 NecromancerGame.prototype.toggleSelectedReserve = function () {
-    if (this.reserveServants.length === 0) {
+    this.confirmTeamSelection();
+  };
+
+  NecromancerGame.prototype.getServantRole = function (servant) {
+    return cfg.servantRoles[servant.kind] || "Dano";
+  };
+
+  NecromancerGame.prototype.getServantPower = function (servant) {
+    return Math.round(servant.level * 8 + servant.maxHp * 0.18 + servant.damage * 2.4 + servant.defense * 5 + servant.speed * 3);
+  };
+
+  NecromancerGame.prototype.filteredReserveServants = function () {
+    var filter = this.reserveFilter || "all";
+    return this.reserveServants.filter(function (servant) {
+      var role = this.getServantRole(servant);
+      if (filter === "tank") return role === "Tanque/defensivo";
+      if (filter === "damage") return role === "Dano";
+      if (filter === "fast") return role === "Rapido/agressivo";
+      if (filter === "support") return role === "Suporte/magico";
+      return true;
+    }.bind(this)).sort(function (a, b) {
+      if (filter === "power") return this.getServantPower(b) - this.getServantPower(a);
+      return 0;
+    }.bind(this));
+  };
+
+  NecromancerGame.prototype.cycleTeamColumn = function () {
+    this.teamColumn = this.teamColumn === "active" ? "reserve" : "active";
+  };
+
+  NecromancerGame.prototype.cycleReserveFilter = function () {
+    var keys = ["all", "tank", "damage", "fast", "support", "power"];
+    var index = keys.indexOf(this.reserveFilter || "all");
+    this.reserveFilter = keys[(index + 1) % keys.length];
+    this.selectedReserve = 0;
+    this.message("Filtro da reserva: " + this.getReserveFilterLabel() + ".");
+  };
+
+  NecromancerGame.prototype.getReserveFilterLabel = function () {
+    if (this.reserveFilter === "power") return "Poder";
+    return cfg.reserveFilters[this.reserveFilter || "all"] || "Todos";
+  };
+
+  NecromancerGame.prototype.activateReserveServant = function (servant) {
+    if (!servant) {
       this.message("Reserva vazia.");
-      return;
+      return false;
     }
-    var activeCount = this.servants.filter(function (s) { return !s.destroyed; }).length;
-    
-    // If at max, move one active to reserve first
-    if (activeCount >= MAX_ACTIVE_SERVANTS) {
-      var toMove = this.servants.pop();
-      if (toMove) {
-        toMove.dead = false;
-        toMove.destroyed = false;
-        this.reserveServants.push(toMove);
-      }
+    if (this.servants.length >= Math.min(MAX_ACTIVE_SERVANTS, this.player.soulControl)) {
+      this.message("Equipe ativa cheia. Substitua ou remova um servo.");
+      return false;
     }
-    
-    // Now add selected from reserve
-    var servant = this.reserveServants[this.selectedReserve];
-    if (!servant) return;
-    
-    this.reserveServants.splice(this.selectedReserve, 1);
+    this.removeServant(servant);
     servant.dead = false;
     servant.destroyed = false;
-    servant.hp = servant.maxHp;
+    servant.hp = Math.max(1, servant.hp);
     servant.x = this.player.x - 0.8 + this.servants.length * 0.7;
     servant.y = this.player.y + 0.9;
     this.servants.push(servant);
-    this.selectedReserve = Math.min(this.selectedReserve, Math.max(0, this.reserveServants.length - 1));
+    this.repositionServants();
     this.message(servant.name + " entrou na equipe ativa.");
+    this.saveGame(true);
+    return true;
+  };
+
+  NecromancerGame.prototype.confirmTeamSelection = function () {
+    if (this.teamColumn === "active") {
+      var active = this.servants[this.selectedActive];
+      if (!active) {
+        this.teamColumn = "reserve";
+        this.message("Selecione um servo da reserva para preencher o espaco.");
+        return;
+      }
+      this.sendActiveToReserve(this.selectedActive);
+      return;
+    }
+    var filtered = this.filteredReserveServants();
+    var reserve = filtered[this.selectedReserve];
+    this.activateReserveServant(reserve);
+  };
+
+  NecromancerGame.prototype.replaceActiveWithReserve = function () {
+    var filtered = this.filteredReserveServants();
+    var reserve = filtered[this.selectedReserve];
+    var active = this.servants[this.selectedActive];
+    if (!reserve) {
+      this.message("Reserva vazia.");
+      return;
+    }
+    if (!active) {
+      this.activateReserveServant(reserve);
+      return;
+    }
+    this.removeServant(reserve);
+    this.servants[this.selectedActive] = reserve;
+    active.dead = false;
+    active.destroyed = false;
+    this.reserveServants.push(active);
+    this.repositionServants();
+    this.message(reserve.name + " substituiu " + active.name + ".");
     this.saveGame(true);
   };
 
-  NecromancerGame.prototype.sendActiveToReserve = function () {
+  NecromancerGame.prototype.sendActiveToReserve = function (index) {
     if (this.servants.length === 0) return;
-    var servant = this.servants.pop();
+    var selectedIndex = typeof index === "number" ? index : this.selectedActive;
+    var servant = this.servants.splice(Math.max(0, Math.min(this.servants.length - 1, selectedIndex)), 1)[0];
+    if (!servant) return;
     servant.dead = false;
     servant.destroyed = false;
     this.reserveServants.push(servant);
+    this.selectedActive = Math.min(this.selectedActive, Math.max(0, this.servants.length - 1));
+    this.repositionServants();
     this.message(servant.name + " voltou para a reserva.");
+    this.saveGame(true);
   };
 
   NecromancerGame.prototype.allServants = function () {
@@ -1597,20 +1763,29 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
       this.message("Talento ja desbloqueado.");
       return;
     }
+    if (this.player.level < node.levelRequired) {
+      this.message("Nivel necessario: " + node.levelRequired + ".");
+      return;
+    }
+    if (node.requires && !this.unlockedSkills[node.requires]) {
+      this.message("Requer talento anterior: " + this.getTalentName(node.requires) + ".");
+      return;
+    }
     if (this.skillPoints < node.cost) {
-      this.message("Pontos de habilidade insuficientes para " + node.path + ".");
+      this.message("Pontos necessarios: " + node.cost + ".");
       return;
     }
     this.skillPoints -= node.cost;
     this.unlockedSkills[node.id] = true;
-    if (node.id === "invocador") {
+    if (node.effect === "servantHp18") {
       this.allServants().forEach(function (servant) {
         servant.maxHp += 18;
         servant.hp += 18;
       });
-    } else if (node.id === "estrategista") {
+    } else if (node.effect === "servantDefense1") {
+      this.allServants().forEach(function (servant) { servant.defense += 1; });
+    } else if (node.effect === "protectBias25") {
       this.allServants().forEach(function (servant) {
-        servant.defense += 1;
         servant.protectBias += 0.25;
       });
     }
@@ -1619,15 +1794,64 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     this.message("Talento desbloqueado: " + node.name + ".", true);
   };
 
-  NecromancerGame.prototype.addItem = function (name, amount) {
+  NecromancerGame.prototype.getTalentName = function (id) {
+    var node = cfg.skillTree.filter(function (item) { return item.id === id; })[0];
+    return node ? node.name : id;
+  };
+
+  NecromancerGame.prototype.getTalentRequirementText = function (node) {
+    if (!node) return "";
+    var parts = [];
+    if (this.player.level < node.levelRequired) parts.push("nivel " + node.levelRequired);
+    if (this.skillPoints < node.cost) parts.push(node.cost + " ponto(s)");
+    if (node.requires && !this.unlockedSkills[node.requires]) parts.push(this.getTalentName(node.requires));
+    return parts.length ? "Requer: " + parts.join(" | ") : "Pronto para desbloquear";
+  };
+
+  NecromancerGame.prototype.getItemDisplayName = function (section, key) {
+    if (section === "equipment" && cfg.equipment[key]) return cfg.equipment[key].name;
+    if (section === "consumables" && cfg.consumables[key]) return cfg.consumables[key].name;
+    if (section === "materials" && cfg.materials[key]) return cfg.materials[key];
+    return key;
+  };
+
+  NecromancerGame.prototype.resolveLegacyItem = function (name) {
+    var legacy = {
+      "Fragmento de Alma": ["materials", "soulFragment"],
+      "Osso Antigo": ["materials", "oldBone"],
+      "Nucleo Sombrio": ["materials", "darkCore"],
+      "Cinza Demoniaca": ["materials", "demonAsh"],
+      "Escama Draconica Rachada": ["materials", "crackedDragonScale"],
+      "Pocao de Vida": ["consumables", "healthPotion"],
+      "Pocao de Mana": ["consumables", "manaPotion"],
+      "Amuleto de Ossos": ["equipment", "boneAmulet"],
+      "Lamina Enferrujada": ["equipment", "rustyBlade"],
+      "Anel Sombrio": ["equipment", "shadowRing"]
+    };
+    return legacy[name] || null;
+  };
+
+  NecromancerGame.prototype.addItem = function (name, amount, section) {
     if (!amount) return;
-    this.inventory[name] = (this.inventory[name] || 0) + amount;
-    this.itemNotice = "+" + amount + " " + name;
+    if (!this.inventory || !this.inventory.equipment) this.inventory = this.normalizeInventory(this.inventory);
+    var resolved = section ? [section, name] : this.resolveLegacyItem(name);
+    if (!resolved) {
+      if (cfg.equipment[name]) resolved = ["equipment", name];
+      else if (cfg.consumables[name]) resolved = ["consumables", name];
+      else if (cfg.materials[name]) resolved = ["materials", name];
+    }
+    if (!resolved) resolved = ["materials", name];
+    var bucket = resolved[0];
+    var key = resolved[1];
+    this.inventory[bucket][key] = (this.inventory[bucket][key] || 0) + amount;
+    if (bucket === "equipment") this.equipmentOwned[key] = true;
+    if (key === "soulFragment") this.player.fragments = this.inventory.materials.soulFragment;
+    this.itemNotice = "+" + amount + " " + this.getItemDisplayName(bucket, key);
     this.itemNoticeTimer = 3;
   };
 
   NecromancerGame.prototype.applySkillBonusesToServant = function (servant) {
-    if (this.unlockedSkills.invocador) {
+    if (this.unlockedSkills.invocador || this.unlockedSkills.invocador_vinculo) {
       servant.maxHp += 18;
       servant.hp = Math.min(servant.maxHp, servant.hp + 18);
     }
@@ -1635,8 +1859,14 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
       servant.maxHp += 10;
       servant.hp = Math.min(servant.maxHp, servant.hp + 10);
     }
-    if (this.unlockedSkills.estrategista) {
+    if (this.equipment.amulet === "boneAmulet") {
+      servant.maxHp += 12;
+      servant.hp = Math.min(servant.maxHp, servant.hp + 12);
+    }
+    if (this.unlockedSkills.estrategista || this.unlockedSkills.invocador_protecao) {
       servant.defense += 1;
+    }
+    if (this.unlockedSkills.estrategista || this.unlockedSkills.estrategista_ia) {
       servant.protectBias += 0.25;
     }
   };
@@ -1654,14 +1884,30 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     this.magicDamageBonus = 0;
     this.servantHpBonus = 0;
     this.commandEfficiency = 1;
+    this.autoAttackRangeBonus = 0;
+    this.soulAutoCollectBonus = 0;
+    this.attackDamageBonus = 0;
+    this.boneSpearDamageBonus = 0;
+    this.player.soulControl = cfg.player.soulControl;
+    if (typeof this.player.baseNecroDomain !== "number") this.player.baseNecroDomain = this.player.necroDomain;
+    this.player.necroDomain = Math.max(this.player.baseNecroDomain, cfg.player.necroDomain);
     if (this.equipment.weapon === "crackedStaff") this.magicDamageBonus += 5;
+    if (this.equipment.weapon === "rustyBlade") this.attackDamageBonus += 3;
     if (this.equipment.tome === "boneGrimoire") this.captureBonus += 0.1;
     if (this.equipment.ring === "cryptRing") this.servantHpBonus += 10;
-    if (this.unlockedSkills.ceifador) cfg.skills.skill1.damage = 30;
+    if (this.equipment.ring === "shadowRing") this.player.necroDomain += 0.1;
+    if (this.equipment.amulet === "boneAmulet") this.servantHpBonus += 12;
+    if (this.unlockedSkills.ceifador || this.unlockedSkills.ceifador_dreno) cfg.skills.skill1.damage = 30;
     else cfg.skills.skill1.damage = 20;
-    if (this.unlockedSkills.senhor_almas) this.captureBonus += 0.12;
-    if (this.unlockedSkills.estrategista) this.commandEfficiency = 1.25;
-    if (this.unlockedSkills.invocador) this.servantHpBonus += 18;
+    cfg.skills.skill2.damage = this.unlockedSkills.ceifador_lanca ? 39 : 31;
+    if (this.unlockedSkills.ceifador_sangue_frio) this.attackDamageBonus += 4;
+    if (this.unlockedSkills.senhor_almas || this.unlockedSkills.senhor_almas_mao) this.captureBonus += 0.12;
+    if (this.unlockedSkills.senhor_almas_coleta) this.soulAutoCollectBonus += 1;
+    if (this.unlockedSkills.senhor_almas_dominio) this.player.necroDomain += 0.3;
+    if (this.unlockedSkills.estrategista || this.unlockedSkills.estrategista_ordens) this.commandEfficiency = 1.25;
+    if (this.unlockedSkills.estrategista_auto) this.autoAttackRangeBonus += 1;
+    if (this.unlockedSkills.invocador || this.unlockedSkills.invocador_vinculo) this.servantHpBonus += 18;
+    if (this.unlockedSkills.invocador_limite) this.player.soulControl += 1;
   };
 
   NecromancerGame.prototype.equipSelectedItem = function () {
@@ -1675,6 +1921,76 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     this.applyAllBonuses();
     this.saveGame();
     this.message("Equipado: " + item.name + ".", true);
+  };
+
+  NecromancerGame.prototype.getInventoryEntries = function (tab) {
+    if (!this.inventory || !this.inventory.equipment) this.inventory = this.normalizeInventory(this.inventory);
+    var section = tab || this.inventoryTab || "equipment";
+    var bucket = this.inventory[section] || {};
+    return Object.keys(bucket).filter(function (key) {
+      if (section === "equipment" || section === "consumables") return bucket[key] > 0;
+      return true;
+    }).map(function (key) {
+      return { key: key, amount: bucket[key] || 0, section: section, name: this.getItemDisplayName(section, key) };
+    }.bind(this));
+  };
+
+  NecromancerGame.prototype.cycleInventoryTab = function () {
+    var tabs = ["equipment", "consumables", "materials"];
+    var index = tabs.indexOf(this.inventoryTab || "equipment");
+    this.inventoryTab = tabs[(index + 1) % tabs.length];
+    this.selectedInventory = 0;
+    this.message("Inventario: " + cfg.inventoryTabs[this.inventoryTab] + ".");
+  };
+
+  NecromancerGame.prototype.confirmInventorySelection = function () {
+    var entries = this.getInventoryEntries(this.inventoryTab);
+    var entry = entries[this.selectedInventory];
+    if (!entry) {
+      this.message("Nada selecionado.");
+      return;
+    }
+    if (entry.section === "equipment") {
+      this.toggleEquipment(entry.key);
+    } else if (entry.section === "consumables") {
+      this.useConsumable(entry.key);
+    } else {
+      this.message(entry.name + ": " + entry.amount + ".");
+    }
+  };
+
+  NecromancerGame.prototype.toggleEquipment = function (key) {
+    var item = cfg.equipment[key];
+    if (!item || !this.inventory.equipment[key]) {
+      this.message("Equipamento indisponivel.");
+      return;
+    }
+    if (this.equipment[item.slot] === key) {
+      this.equipment[item.slot] = "";
+      this.applyAllBonuses();
+      this.saveGame(true);
+      this.message("Desequipado: " + item.name + ".", true);
+      return;
+    }
+    this.equipment[item.slot] = key;
+    this.equipmentOwned[key] = true;
+    this.applyAllBonuses();
+    this.saveGame(true);
+    this.message("Equipado: " + item.name + ".", true);
+  };
+
+  NecromancerGame.prototype.useConsumable = function (key) {
+    var item = cfg.consumables[key];
+    if (!item || !this.inventory.consumables[key]) {
+      this.message("Consumivel indisponivel.");
+      return;
+    }
+    if (item.effect === "heal") this.player.hp = Math.min(this.player.maxHp, this.player.hp + item.amount);
+    if (item.effect === "mana") this.player.mana = Math.min(this.player.maxMana, this.player.mana + item.amount);
+    this.inventory.consumables[key] -= 1;
+    this.selectedInventory = Math.min(this.selectedInventory, Math.max(0, this.getInventoryEntries("consumables").length - 1));
+    this.saveGame(true);
+    this.message("Usado: " + item.name + ".", true);
   };
 
   NecromancerGame.prototype.findNearestEnemy = function (range, includePassive) {
@@ -1716,11 +2032,24 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     var dir = this.aimDirection(skill.range);
     this.projectiles.push(new window.Projectile(this.player, this.player.x, this.player.y, dir.x, dir.y, {
       speed: skill.speed,
-      damage: skill.damage + this.magicDamageBonus,
+      damage: skill.damage + this.magicDamageBonus + this.attackDamageBonus,
       life: skill.range / skill.speed,
       color: "#8f5dff"
     }));
     this.effects.push(new window.AreaEffect(this.player.x + dir.x * 0.7, this.player.y + dir.y * 0.7, 0.45, "#8f5dff"));
+  };
+
+  NecromancerGame.prototype.toggleAutoAttack = function () {
+    this.autoAttackEnabled = !this.autoAttackEnabled;
+    this.message("Auto-ataque: " + (this.autoAttackEnabled ? "ON" : "OFF") + ".");
+  };
+
+  NecromancerGame.prototype.updateAutoAttack = function () {
+    if (!this.autoAttackEnabled || this.screen !== "map") return;
+    var skill = cfg.skills.attack;
+    var target = this.findNearestEnemy(skill.range + this.autoAttackRangeBonus, true);
+    if (!target || this.player.cooldowns.attack > 0) return;
+    this.castAttack();
   };
 
   NecromancerGame.prototype.castDrain = function () {
@@ -1866,7 +2195,7 @@ var kind = this.servantKindForSoul(soul);
       this.message("Objetivo concluido: primeira alma capturada.", true);
     }
     this.player.fragments += soul.fragments + 1;
-    this.inventory["Fragmento de Alma"] = this.player.fragments;
+    this.inventory.materials.soulFragment = this.player.fragments;
     if (soul.sourceType === "soldier" || soul.sourceType === "hunter") this.adjustReputation("Humanos", -3);
     if (soul.sourceType === "elite") this.addItem("Nucleo Sombrio", 1);
     this.saveGame();
@@ -1944,30 +2273,43 @@ var kind = this.servantKindForSoul(soul);
       if (!enemy.dead && enemy.hp <= 0) {
         enemy.dead = true;
         this.player.gainExp(enemy.exp, this);
-        this.player.fragments += enemy.fragments;
+        this.collectEnemySoul(enemy);
         this.applyEnemyRewards(enemy);
         this.incrementBasicObjectiveKill(enemy);
-        this.souls.push(new window.Soul(enemy));
-        this.floatText("alma", enemy.x, enemy.y, "#8ff2df");
         if (enemy === this.boss) this.defeatBoss();
       }
     }.bind(this));
   };
 
+  NecromancerGame.prototype.collectEnemySoul = function (enemy) {
+    var gained = Math.max(1, (enemy.fragments || 0) + this.soulAutoCollectBonus);
+    this.player.fragments += gained;
+    this.inventory.materials.soulFragment = this.player.fragments;
+    this.floatText("+" + gained + " alma", enemy.x, enemy.y, "#8ff2df");
+    this.message("Alma coletada: " + enemy.name);
+    if (!this.tutorialCaptureDone && enemy.captureKey !== "boss") {
+      this.tutorialCaptureDone = true;
+      if (this.completeObjectiveStep("captureFirstSoul")) {
+        this.message("Objetivo concluido: primeira alma coletada.", true);
+      }
+    }
+  };
+
   NecromancerGame.prototype.applyEnemyRewards = function (enemy) {
-    if (enemy.type === "rat" || enemy.type === "wolf" || enemy.type === "warhound") {
-      this.addItem("Osso Antigo", 1);
-    } else if (enemy.type === "soldier" || enemy.type === "elite" || enemy.type === "hunter") {
-      this.addItem("Osso Antigo", 2);
+    var table = cfg.dropTables[enemy.type] || [];
+    table.forEach(function (drop) {
+      if (Math.random() <= drop.chance) {
+        this.addItem(drop.item, drop.amount || 1, drop.type);
+        this.message("Item obtido: " + this.getItemDisplayName(drop.type, drop.item));
+      }
+    }.bind(this));
+    if (enemy.type === "soldier" || enemy.type === "elite" || enemy.type === "hunter") {
       this.adjustReputation("Humanos", -2);
     } else if (enemy.type === "cultist") {
-      this.addItem("Nucleo Sombrio", 1);
       this.adjustReputation("Humanos", -1);
     } else if (enemy.type === "imp") {
-      this.addItem("Cinza Demoniaca", 1);
       this.adjustReputation("Demonios", -2);
     } else if (enemy.type === "boss") {
-      this.addItem("Nucleo Sombrio", 2);
       this.adjustReputation("Humanos", 3);
       this.adjustReputation("Mortos-vivos", 8);
     }
