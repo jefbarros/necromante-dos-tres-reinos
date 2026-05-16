@@ -1,329 +1,274 @@
-# Necromante dos Três Reinos
+# Necromante dos Tres Reinos
 
-Protótipo jogável v0.2.3 em HTML5, JavaScript e Canvas. O foco é validar um RPG de ação semi-automático mobile-first com necromancia, captura, servos autônomos, gerenciamento de equipe, save local, save em nuvem, sincronização entre dispositivos e suporte híbrido Web/Android/Windows.
+Prototipo jogavel v0.2.5 em HTML5, JavaScript e Canvas. O jogo continua mobile-first e preparado para uso hibrido em Web, Android via Capacitor e Windows via Tauri, com save local, conta mock, save em nuvem mock e sincronizacao futura entre dispositivos.
+
+## Direcao de Arte v0.2.5
+
+A v0.2.5 melhora a identidade visual propria do jogo com uma leitura 2.5D/isometrica dark fantasy. As referencias externas devem ser entendidas apenas como clima: necromancia, progressao sombria, mortos-vivos, energia espiritual, runas, sombras e cenas dramaticas. O jogo nao copia personagens, simbolos, mapas, roupas, composicoes ou assets protegidos.
+
+Melhorias visuais:
+
+- novo `src/art.js` com helpers reutilizaveis de Canvas;
+- sombras isometricas, aura, runas, barras estilizadas e labels;
+- tiles com variacao deterministica por mapa;
+- portais com circulo magico, particulas, anel pulsante e estado visual;
+- necromante com capuz, manto rasgado, olhos brilhantes, grimorio/cajado e particulas;
+- servos visualmente diferenciados;
+- inimigos visualmente diferenciados;
+- Guardiao de Tumba maior, com runas, nucleo espiritual, aura e telegraph de area;
+- projeteis, dreno, captura, marca e explosoes com efeitos melhores;
+- HUD e menus com paineis dark fantasy, verde espectral, azul de mana/sync, dourado de recompensa e vermelho de perigo.
 
 ## Como Rodar
 
-Abra `index.html` diretamente no navegador.
+Abra `index.html` diretamente no navegador ou use servidor local:
 
-Também pode usar um servidor estático:
+```bash
+npm run dev
+```
+
+Tambem funciona com:
 
 ```bash
 python -m http.server 8000
 ```
 
-Depois accesses `http://localhost:8000`.
+Depois acesse `http://localhost:8000`.
+
+## Scripts
+
+```bash
+npm run dev
+npm run start
+npm run check
+npm run build:web
+```
+
+`npm run check` executa `node --check` nos arquivos JavaScript principais.
 
 ## Controles
 
 PC:
 
 - WASD ou setas: mover.
-- J ou Espaço: ataque básico.
+- J ou Espaco: ataque basico.
 - 1: Dreno de Alma.
-- 2: Lança Osséa.
-- 3: Marca da Submissão.
-- 4: Explosão Cadavérica.
+- 2: Lanca Ossea.
+- 3: Marca da Submissao.
+- 4: Explosao Cadaverica.
 - C: Capturar Alma ou confirmar em menus.
-- Q: alternar comando dos servos ou opção selecionada em menus.
+- Q: alternar comando dos servos ou opcao selecionada.
 - M: gerenciamento de servos.
-- I: inventário/equipamentos/reputação.
-- K: árvore de habilidades.
+- I: inventario/equipamentos/reputacao.
+- K: arvore de habilidades.
+- L: Conta.
 - P: salvar.
 - Esc: menu principal.
-- E: entrar em portal ou interagir com objeto próximo.
+- E: entrar em portal ou interagir com objeto proximo.
 - Enter: confirmar no menu principal ou entrar no mapa.
-- F: fusão na tela de servos.
+- F: fusao na tela de servos.
 - X: apagar save local.
 
 Mobile:
 
-- Joystick virtual à esquerda.
-- Botões de ataque, habilidades, captura e comando à direita.
-- Botões superiores: Menu, Equipe, Inventário, Talentos, Salvar e Mapa.
-- Botão contextual Entrar aparece perto de portais.
-- Botão contextual Interagir aparece perto de objetos.
-- Em menus, use CMD para alternar seleção e CAP/ATK para confirmar.
-
-Se o necromante estiver perto de um portal e de um objeto ao mesmo tempo, o alvo mais próximo é priorizado.
+- Joystick virtual a esquerda.
+- Botoes de ataque, habilidades, captura e comando a direita.
+- Botoes superiores: Menu, Conta, Equipe, Inventario, Talentos, Salvar e Mapa.
+- Botao contextual Entrar aparece perto de portais.
+- Botao contextual Interagir aparece perto de objetos.
 
 ## Sistemas Mantidos
 
-- Movimentação do necromante.
-- Combate com projéteis e habilidades.
-- Captura com primeira captura garantida.
-- Até 3 servos ativos.
-- Comandos gerais dos servos.
-- IA autônoma de servos.
-- Aprendizado contra agrupamento após dano em área.
-- Chefe Guardião de Tumba.
-- Evolução de Esqueleto Guerreiro para Esqueleto Veterano.
-- Área secreta desbloqueável.
-- Morte e renascimento na Cripta Inicial.
-- HUD funcional.
-- Menu, equipe, inventário, talentos, reputação, save/load e fusão.
-- Mapas independentes com portais, spawn por origem, fade de transição e câmera por mapa.
-- Minimap.
-- Pontos de interesse interativos.
-- Respawn de inimigos.
-- Estado por mapa persistido.
+- mapas separados;
+- portais;
+- minimapa;
+- pontos de interesse;
+- respawn;
+- interacao contextual;
+- captura;
+- servos ativos e reserva;
+- inventario;
+- equipamentos;
+- arvore de habilidades;
+- fusao;
+- reputacao;
+- area secreta;
+- save local;
+- SaveManager;
+- mockCloud;
+- conta mock;
+- HUD;
+- preparacao para Android e Windows.
 
-## Sistemas Adicionados na v0.2.3
+## Arquitetura Visual
 
-- **Tela de Conta**: Menu de gerenciamento de conta, login, logout, sincronização.
-- **Detecção de Plataforma**: Identifica web, android ou windows automaticamente.
-- **Device ID**: Identificador único persistente por dispositivo.
-- **Save em Nuvem (Mock)**: Simulação de save em nuvem para testes sem Firebase.
-- **Sincronização**: Syncnow para enviar/receber saves entre local e nuvem.
-- **Exportar/Importar Save**: JSON para backup externo.
-- **Indicador de Sync na HUD**: Mostra status local/nuvem/sincronizando/pendente/offline.
-- **Autosave com Debounce**: Salva automaticamente após mudanças importantes.
-- **Preparação para Capacitor**: Estrutura pronta para build Android.
-- **Preparação para Tauri**: Estrutura pronta para build Windows.
+Arquivo novo:
 
-## Arquitetura Híbrida
+- `src/art.js`: helpers visuais e renderizacao detalhada.
 
-### Save Local (localStorage)
+Helpers principais:
 
-O save local funciona sem internet ou conta:
+- `drawIsoShadow(ctx, x, y, w, h, alpha)`
+- `drawAura(ctx, x, y, radius, color, pulse)`
+- `drawRuneCircle(ctx, x, y, radius, color, pulse)`
+- `drawFloatingLabel(ctx, text, x, y, color)`
+- `drawDetailedPortal(ctx, portal, unlocked, label, tick)`
+- `drawNecromancer(ctx, player, tick)`
+- `drawSkeletonServant(ctx, servant, tick)`
+- `drawFeralServant(ctx, servant, tick)`
+- `drawFallenServant(ctx, servant, tick)`
+- `drawEnemyHumanoid(ctx, enemy, tick)`
+- `drawDemonImp(ctx, enemy, tick)`
+- `drawTombGuardian(ctx, boss, tick)`
 
-- `SaveManager.saveGame()` - Salva localmente.
-- `SaveManager.loadGame()` - Carrega save local.
-- `SaveManager.deleteLocalSave()` - Apaga save local.
-- `SaveManager.hasLocalSave()` - Verifica existência.
-
-### Save em Nuvem (Cloud)
-
-Dois modos disponíveis:
-
-1. **mockCloud** (padrão): Simula save em nuvem usando localStorage separado. Usa para desenvolvimento sem Firebase configurado.
-
-2. **Firebase**: Integre com Firebase Firestore quando `firebaseConfig.local.js` existir.
-
-### Conta de Jogador
-
-Estados:
-
-- **guest**: Não logado, usa save local apenas.
-- **loggedIn**: Logado, pode sincronizar com nuvem.
-- **offline**: Sem conexão, salva local e marca pendente.
-- **error**: Erro de conexão/auth.
-
-Mock login disponível para testes:
+Qualidade visual:
 
 ```js
-// Mock sign in
-AuthService.signInWithMock();
-
-// Check status
-AuthService.isLoggedIn();
-AuthService.getCurrentUser();
+GameConfig.visualQuality = "medium";
 ```
 
-### Sincronização
+Valores previstos: `low`, `medium`, `high`. A v0.2.5 usa `medium` por padrao.
 
-Regras de sync:
+## Mapas Detalhados
 
-- Se não logado: salva apenas local.
-- Se logado e online: salva local e envia para nuvem.
-- Se offline: salva local e marca sync pendente.
-- Quando voltar online: sincroniza automaticamente.
-- Conflito: abre tela de resolução.
+Cripta Inicial:
 
-## Detecção de Plataforma
+- piso rachado com variacao por tile;
+- altar de renascimento com aura;
+- trono/obelisco funerario mais marcado;
+- sarcofagos/tumulos adicionais;
+- velas e runas sugeridas por prop e tile;
+- portal com arco e runas.
 
-O jogo detecta automaticamente:
+Cemiterio Neutro:
 
-- **web**: Navegador padrão.
-- **android**: Mobile Android ou iOS.
-- **windows**: Desktop Windows/Mac/Linux.
+- tumulos variados;
+- arvores mortas;
+- ossadas;
+- arena do Guardiao com pilares e runas;
+- fissura infernal com brilho.
 
-Também detecta wrappers nativos:
+Estrada dos Enforcados:
 
-- Capacitor (window.Capacitor)
-- Tauri (window.__TAURI__)
+- forcas quebradas;
+- arvores mortas;
+- placas e restos de execucao;
+- barro/trilha via tiles;
+- portal futuro apagado.
 
-Display na HUD: `web | guest` ou `android | Logado`.
+Area Secreta da Cripta:
 
-## Como Testar Conta e Sync
+- marcas draconicas;
+- escama brilhante;
+- obeliscos;
+- mural/ritual sugerido por runas;
+- bau e pontos de lore mantidos.
 
-1. Inicie Novo Jogo.
-2. Vá ao menu principal e selecione "Conta".
-3. Shows show informações de estado, plataforma e device ID.
-4. Pressione **1** ou **Menu** para fazer mock login (Convidado → Logado).
-5. Pressione **2** para sincronizar (Syncnow).
-6. Pressione **P** para exportar save para console.
-7. Pressione **Mapa/Enter** para voltar ao menu.
+## Conta, Save Local e Nuvem Mock
 
-## Como Testar Export/Import
+A branch atual ja possui a base hibrida:
 
-1. Na tela de Conta, pressione **P**.
-2. O save JSON será logged no console do navegador.
-3. Copie o JSON inteiro.
-4. Para importar, no console:
+- `src/platform.js`: detecta plataforma e deviceId.
+- `src/localSave.js`: save local em `localStorage`.
+- `src/cloudSave.js`: cloud save mock via `localStorage` separado.
+- `src/auth.js`: autenticacao mock.
+- `src/syncManager.js`: sincronizacao local/nuvem.
+- `src/saveManager.js`: camada unificada de save.
 
-```js
-var json = "COLE_AQUI_O_JSON";
-SaveManager.importSave(json);
-```
+Sem login, o jogo salva localmente. Com mock login, `SyncManager.syncNow()` tenta comparar e sincronizar com o mock cloud.
 
-5. O jogo recarregará com o save importado.
+## Exportar e Importar Save
 
-## Como Testar Conflito de Save
+Na tela Conta:
 
-1. Faça login mock.
+- `P` exporta o save para o console.
+- Importacao ainda pode ser feita pelo console usando `SaveManager.importSave(JSON)`.
+
+O SaveManager migra saves antigos para o schema atual quando necessario.
+
+## Testar Sync Mock
+
+1. Inicie um Novo Jogo.
+2. Abra Conta com `L` ou pelo botao superior.
+3. Use `1` ou Menu para mock login.
+4. Use `2` para sincronizar agora.
+5. Salve com `P`.
+6. Veja o indicador da HUD: Local, OK, Sincronizando, Pendente, Offline, Conflito ou Erro.
+
+## Testar Conflito
+
+1. Faca mock login.
 2. Salve localmente.
-3. Altere o save na nuvem (simule outro dispositivo).
-4. Execute Syncnow.
-5. Se houver conflito, escolha:
+3. Altere manualmente o mock cloud no `localStorage` para ter outro `revision`, `updatedAt`, `platform` ou `deviceId`.
+4. Execute sync.
+5. A tela Carregar Save mostra o resumo de conflito se `SyncManager.pendingConflict` estiver preenchido.
 
-- **Usar save local**: Mantém o save do dispositivo atual.
-- **Usar save nuvem**: Baixa o save da nuvem.
-- **Cancelar**: Aborta a sincronização.
+## Preparacao Android com Capacitor
 
-## Preparação para Capacitor (Android)
-
-Para criar build Android com Capacitor:
+A pasta `android/` nao precisa existir nesta etapa. Fluxo esperado:
 
 ```bash
-# Instalar dependências
 npm install
-npm install @capacitor/core @capacitor/android
-
-# Inicializar Capacitor (uma vez)
-npx cap init "Necromante dos Três Reinos" "com.necromante.tresreinos"
-
-# Adicionar Android
+npm install @capacitor/core @capacitor/cli @capacitor/android
+npx cap init "Necromante dos Tres Reinos" "com.seudominio.necromante"
 npx cap add android
-
-# Sincronizar
 npx cap sync android
-
-# Abrir Android Studio
 npx cap open android
 ```
 
-Nota: A pasta `android/` não é criada nesta versão. Execute os comandos acima quando o ambiente estiver pronto.
+## Preparacao Windows com Tauri
 
-## Preparação para Tauri (Windows)
-
-Para criar build Windows com Tauri:
+A pasta `src-tauri/` nao precisa existir nesta etapa. Fluxo esperado:
 
 ```bash
-# Criar package.json
-npm init -y
-
-# Instalar Tauri CLI
+npm install
 npm install -D @tauri-apps/cli
-
-# Inicializar Tauri (uma vez)
 npm run tauri init
-
-# Build
 npm run tauri build
 ```
 
-Nota: A pasta `src-tauri/` não é criada nesta versão. Execute os comandos acima quando Rust/Tauri estiver instalado.
+Requer Rust/Tauri configurado no ambiente.
 
-## Segurança - Nunca Commite Segredos
+## Seguranca
 
-Arquivos que NÃO devem ser commitados:
+Nunca coloque chaves privadas, tokens ou credenciais no repositorio.
 
-- `src/firebaseConfig.local.js` - Credenciais reais do Firebase.
-- `.env` / `.env.local` - Variáveis de ambiente.
-- `node_modules/` - Dependências npm.
-- `dist/` - Build de produção.
-- `android/` - Build Android.
-- `src-tauri/target/` - Build Tauri.
+Arquivos ignorados esperados:
 
-O `.gitignore` já está configurado para ignorar esses arquivos.
+- `src/firebaseConfig.local.js`
+- `.env`
+- `.env.local`
+- `dist/`
+- `node_modules/`
+- `android/`
+- `src-tauri/target/`
 
-## Estrutura de Arquivos
+## Checklist de Validacao
 
-```
-src/
-├── config.js        - Configurações do jogo.
-├── platform.js    - Detecção de plataforma e device ID.
-├── localSave.js   - Save local (localStorage).
-├── cloudSave.js   - Save em nuvem (mock/Firebase).
-├── auth.js       - Autenticação (mock/Firebase).
-├── syncManager.js - Sincronização entre local e nuvem.
-├── saveManager.js - Camada unificada de save.
-├��─ input.js     - Entrada de usuário.
-├── map.js       - Mapas e portais.
-├── entities.js  - Entidades do jogo.
-├── ai.js       - IA de servos e inimigos.
-├── ui.js       - Interface Visual.
-├── game.js     - Lógica principal.
-├── main.js     - Inicialização.
-├── firebaseConfig.example.js  - Exemplo de config Firebase.
-└── firebaseConfig.local.js  - (NÃO COMMITTED) Sua config Firebase.
+- [ ] jogo abre no navegador sem erros;
+- [ ] `node --check` passa em todos os JS;
+- [ ] Cripta Inicial renderiza com visual melhor;
+- [ ] Cemiterio Neutro renderiza com visual melhor;
+- [ ] Estrada dos Enforcados renderiza com visual melhor;
+- [ ] Area Secreta renderiza com visual melhor;
+- [ ] necromante esta mais detalhado;
+- [ ] servos estao distinguiveis;
+- [ ] inimigos estao distinguiveis;
+- [ ] Guardiao de Tumba parece chefe;
+- [ ] portais mostram estados claros;
+- [ ] habilidades mostram efeitos melhores;
+- [ ] HUD e menus seguem o estilo dark fantasy;
+- [ ] save local continua funcionando;
+- [ ] conta mock e mockCloud continuam disponiveis;
+- [ ] performance basica continua aceitavel.
 
-index.html     - HTML principal.
-styles.css    - Estilos.
-README.md    - Este arquivo.
-package.json  - Scripts npm.
-```
+## Comandos Git Recomendados
 
-## Scripts do package.json
-
-```json
-{
-  "scripts": {
-    "dev": "python -m http.server 8000",
-    "start": "python -m http.server 8000"
-  }
-}
+```bash
+git status -sb
+git add README.md PROJECT_STATUS.md index.html package.json src/art.js src/config.js src/entities.js src/game.js src/map.js src/syncManager.js src/ui.js
+git commit -m "Evolui direcao de arte para v0.2.5"
+git push
 ```
 
-Para desenvolvimento: `npm run dev`
-
-Para verificar JavaScript: `node --check src/*.js`
-
-## Migração de Saves Antigos
-
-O SaveManager detecta automaticamente saves da v0.2.2 e earlier e migra para o novo schema:
-
-- `schemaVersion`: "0.2.3"
-- `player`, `servants`, `inventory`, etc: mantidos.
-
-Saves antigos funcionam normalmente com "Continuar".
-
-## Checklist de Validação
-
-- [ ] Jogo abre no navegador sem erros.
-- [ ] node --check passa em todos os arquivos JS.
-- [ ] Save local funciona.
-- [ ] Saves antigos da v0.2.2 são migrados.
-- [ ] Plataforma detectada e mostrada.
-- [ ] Device ID persistente gerado.
-- [ ] Tela de Conta acessível.
-- [ ] Modo convidado funciona.
-- [ ] Mock login funciona.
-- [ ] Mock cloud save funciona.
-- [ ] Syncnow envia/baixa save.
-- [ ] HUD mostra status de sync.
-- [ ] Autosave funciona com debounce.
-- [ ] Export save gera JSON válido.
-- [ ] Import save substitui após confirmação.
-- [ ] Conflito de save mostra escolha.
-- [ ] Nenhum sistema anterior removido.
-- [ ] README atualizado com híbrida, conta, sync.
-
-## Suporte a múltiplas plataformas
-
-O jogo detecta automaticamente onde está rodando:
-
-- **Web**: Abra `index.html` no navegador.
-- **Android**: Build com Capacitor (futuro).
-- **Windows**: Build com Tauri (futuro).
-
-O save local funciona em qualquer plataforma. O save em nuvem permitirá sincronização entre dispositivos.
-
-## Autores
-
-Protótipo original criado em HTML5, JavaScript e Canvas. Visual simbólico feito apenas com formas, texto e partículas simples, sem assets externos obrigatória.
-
----
-
-Para dúvidas ou contribuições, abra uma issue no repositório.
+Inclua outros arquivos apenas se fizerem parte da mudanca intencional.

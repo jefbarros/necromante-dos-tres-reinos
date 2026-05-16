@@ -2,6 +2,10 @@
   "use strict";
 
   function bar(ctx, x, y, w, h, ratio, fill, label) {
+    if (window.GameArt) {
+      window.GameArt.drawHealthBar(ctx, x + w * 0.5, y, w, h, ratio, fill, label);
+      return;
+    }
     ctx.fillStyle = "rgba(0, 0, 0, 0.48)";
     ctx.fillRect(x, y, w, h);
     ctx.fillStyle = fill;
@@ -24,6 +28,10 @@
   };
 
   GameUI.prototype.drawPanel = function (ctx, x, y, w, h) {
+    if (window.GameArt) {
+      window.GameArt.drawPanel(ctx, x, y, w, h);
+      return;
+    }
     ctx.fillStyle = "rgba(7, 10, 14, 0.64)";
     ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = "rgba(227, 241, 226, 0.16)";
@@ -51,7 +59,7 @@ ctx.fillStyle = "#ecf4dc";
     ctx.fillText("Pontos: " + game.skillPoints, 330, 101);
 
     // Draw sync/platform status indicator
-    this.drawSyncStatus(ctx, x, 130, width);
+    this.drawSyncStatus(ctx, 12, 130, width);
 
     var zone = game.map.current.name;
     this.drawPanel(ctx, Math.max(12, width - 312), 12, 300, 58);
@@ -299,7 +307,7 @@ if (game.screen === "skills") this.drawSkillTreeScreen(ctx, x, y, panelW, panelH
     ctx.fillText("Necromante dos Tres Reinos", x + 24, y + 42);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-ctx.fillText("v0.2.3 - CMD/Q alterna, L Conta, CAP/C ou ATK/J confirma. X apaga save.", x + 24, y + 68);
+ctx.fillText("v0.2.5 - CMD/Q alterna, L Conta, CAP/C ou ATK/J confirma. X apaga save.", x + 24, y + 68);
     options.forEach(function (option, index) {
       var selected = index === game.selectedMenu;
       ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
@@ -614,5 +622,63 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText("Importar", x + 30 + btnW + btnW / 2, y + 300);
 
     ctx.textAlign = "left";
+  };
+
+  GameUI.prototype.drawLoadSaveScreen = function (ctx, x, y, w, h) {
+    var hasSave = window.SaveManager ? window.SaveManager.hasLocalSave() : this.game.hasSave();
+    var save = window.SaveManager && window.SaveManager.getCurrentSave ? window.SaveManager.getCurrentSave() : null;
+    if (!save && window.LocalSaveService) save = window.LocalSaveService.loadLocal();
+    ctx.fillStyle = "#f3f7ef";
+    ctx.font = "900 24px system-ui, sans-serif";
+    ctx.fillText("Carregar Save", x + 24, y + 42);
+    ctx.font = "700 13px system-ui, sans-serif";
+    ctx.fillStyle = "#b9cbc0";
+    ctx.fillText("CAP/ATK volta ao menu. Use Continuar no menu principal para carregar.", x + 24, y + 68);
+
+    this.drawPanel(ctx, x + 24, y + 96, w - 48, 160);
+    ctx.font = "800 14px system-ui, sans-serif";
+    ctx.fillStyle = hasSave ? "#9ff3d8" : "#f1b2bf";
+    ctx.fillText(hasSave ? "Save local encontrado" : "Nenhum save local encontrado", x + 44, y + 126);
+    ctx.fillStyle = "#dbe9e1";
+    if (save) {
+      var player = save.player || {};
+      ctx.fillText("Schema: " + (save.schemaVersion || save.version || "legado"), x + 44, y + 154);
+      ctx.fillText("Versao do jogo: " + (save.gameVersion || save.version || "desconhecida"), x + 44, y + 178);
+      ctx.fillText("Mapa: " + (save.currentMapId || (save.world && save.world.currentMapId) || "desconhecido"), x + 44, y + 202);
+      ctx.fillText("Nivel: " + (player.level || 1) + " | Fragmentos: " + (player.fragments || 0), x + 44, y + 226);
+    } else {
+      this.wrapText(ctx, "Inicie um Novo Jogo e salve para criar um arquivo local. Exportacao/importacao ficam na tela Conta e no SaveManager.", x + 44, y + 154, w - 88, 18);
+    }
+
+    if (window.SyncManager && window.SyncManager.pendingConflict) {
+      this.drawConflictSummary(ctx, x + 24, y + 278, w - 48, h - 302, window.SyncManager.pendingConflict);
+    }
+  };
+
+  GameUI.prototype.drawConflictSummary = function (ctx, x, y, w, h, conflict) {
+    function summary(save) {
+      var player = save && save.player || {};
+      return {
+        version: save && (save.gameVersion || save.version || save.schemaVersion) || "-",
+        map: save && (save.currentMapId || (save.world && save.world.currentMapId)) || "-",
+        level: player.level || 1,
+        fragments: player.fragments || 0,
+        updatedAt: save && save.updatedAt ? new Date(save.updatedAt).toLocaleString() : "-",
+        platform: save && save.platform || "-"
+      };
+    }
+    var local = summary(conflict.local);
+    var cloud = summary(conflict.cloud);
+    this.drawPanel(ctx, x, y, w, Math.max(120, h));
+    ctx.fillStyle = "#ffe698";
+    ctx.font = "900 16px system-ui, sans-serif";
+    ctx.fillText("Encontramos dois saves diferentes.", x + 16, y + 26);
+    ctx.font = "800 12px system-ui, sans-serif";
+    ctx.fillStyle = "#9ff3d8";
+    ctx.fillText("Save Local: v" + local.version + " | " + local.map + " | Nv " + local.level + " | Frag " + local.fragments, x + 16, y + 54);
+    ctx.fillText(local.updatedAt + " | " + local.platform, x + 16, y + 72);
+    ctx.fillStyle = "#9fc5ff";
+    ctx.fillText("Save Nuvem: v" + cloud.version + " | " + cloud.map + " | Nv " + cloud.level + " | Frag " + cloud.fragments, x + 16, y + 100);
+    ctx.fillText(cloud.updatedAt + " | " + cloud.platform, x + 16, y + 118);
   };
 })();

@@ -10,3 +10,5 @@ Thumbs.db
 .env
 .env.local
 src/firebaseConfig.local.js
+android/
+src-tauri/target/

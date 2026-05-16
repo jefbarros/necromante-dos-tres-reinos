@@ -2,8 +2,9 @@
   "use strict";
 
 window.GameConfig = {
-    version: "0.2.4",
+    version: "0.2.5",
     title: "Necromante dos Tres Reinos",
+    visualQuality: "medium",
     world: {
       cols: 40,
       rows: 30,

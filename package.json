@@ -1,13 +1,13 @@
 {
-  "name": "necromante-dos tres-reinos",
-  "version": "0.2.3",
-  "description": "Necromante dos Três Reinos - RPG HTML5 mobile-first",
+  "name": "necromante-dos-tres-reinos",
+  "version": "0.2.5",
+  "description": "Necromante dos Tres Reinos - RPG HTML5 mobile-first",
   "main": "index.html",
   "scripts": {
     "dev": "python -m http.server 8000",
     "start": "python -m http.server 8000",
-    "build:web": "echo 'Web build not needed - open index.html directly'",
-    "check": "node --check"
+    "build:web": "echo \"Web build not needed - open index.html directly\"",
+    "check": "node --check src/config.js src/platform.js src/localSave.js src/cloudSave.js src/auth.js src/syncManager.js src/saveManager.js src/art.js src/input.js src/map.js src/entities.js src/ai.js src/ui.js src/game.js src/main.js"
   },
   "keywords": [
     "game",

@@ -23,7 +23,11 @@
       props: [
         { x: 4, y: 7, t: "crypt" },
         { x: 8.2, y: 6.8, t: "obelisk" },
-        { x: 12.8, y: 7.2, t: "grave" }
+        { x: 12.8, y: 7.2, t: "grave" },
+        { x: 5.6, y: 4.5, t: "grave" },
+        { x: 10.5, y: 4.2, t: "crypt" },
+        { x: 6.8, y: 9.6, t: "grave" },
+        { x: 13.8, y: 9.3, t: "obelisk" }
       ],
       interestPoints: [
         {
@@ -100,7 +104,10 @@
         { x: 12.5, y: 7.3, t: "grave" }, { x: 15.8, y: 10.5, t: "grave" },
         { x: 21.1, y: 9.2, t: "grave" }, { x: 24.6, y: 14.1, t: "tree" },
         { x: 8.8, y: 21.8, t: "tree" }, { x: 31.6, y: 8.2, t: "dummy" },
-        { x: 23.4, y: 21.2, t: "bossgate" }, { x: 5.8, y: 12.1, t: "rift" }
+        { x: 23.4, y: 21.2, t: "bossgate" }, { x: 5.8, y: 12.1, t: "rift" },
+        { x: 11.4, y: 13.8, t: "grave" }, { x: 18.6, y: 15.2, t: "tree" },
+        { x: 28.2, y: 5.6, t: "grave" }, { x: 33.8, y: 11.3, t: "tree" },
+        { x: 20.1, y: 23.8, t: "obelisk" }, { x: 25.2, y: 24.5, t: "obelisk" }
       ],
       interestPoints: [
         {
@@ -206,7 +213,9 @@
       ],
       props: [
         { x: 14.3, y: 5.1, t: "gallows" }, { x: 20.5, y: 6.7, t: "gallows" },
-        { x: 8.8, y: 13.2, t: "tree" }, { x: 26.8, y: 12.2, t: "grave" }
+        { x: 8.8, y: 13.2, t: "tree" }, { x: 26.8, y: 12.2, t: "grave" },
+        { x: 11.8, y: 4.2, t: "gallows" }, { x: 23.8, y: 4.1, t: "tree" },
+        { x: 18.2, y: 13.4, t: "grave" }, { x: 28.2, y: 8.7, t: "obelisk" }
       ],
       interestPoints: [
         {
@@ -297,7 +306,10 @@
       props: [
         { x: 10.5, y: 7.2, t: "dragonmark" },
         { x: 11.2, y: 8.3, t: "scale" },
-        { x: 15.4, y: 11.4, t: "obelisk" }
+        { x: 15.4, y: 11.4, t: "obelisk" },
+        { x: 7.4, y: 5.2, t: "obelisk" },
+        { x: 13.3, y: 5.4, t: "dragonmark" },
+        { x: 16.3, y: 8.4, t: "grave" }
       ],
       interestPoints: [
         {
@@ -521,6 +533,7 @@
   GameMap.prototype.drawProps = function (ctx, camera, canvas) {
     (this.current.props || []).forEach(function (prop) {
       var p = this.project(prop.x, prop.y, camera, canvas);
+      if (window.GameArt && window.GameArt.drawMapProp(ctx, prop, p, this.currentId)) return;
       ctx.save();
       ctx.translate(p.x, p.y);
       if (prop.t === "crypt") {
@@ -625,6 +638,10 @@
       var p = this.project(point.x, point.y, camera, canvas);
       ctx.save();
       ctx.translate(p.x, p.y);
+      if (window.GameArt) {
+        if (!done) window.GameArt.drawAura(ctx, 0, -15, 24, "rgba(231,213,138,0.35)", performance.now() / 1000);
+        if (point.t === "seal" || point.t === "altar") window.GameArt.drawRuneCircle(ctx, 0, -5, 25, done ? "#7c8b86" : "#e7d58a", performance.now() / 1000);
+      }
       ctx.globalAlpha = done ? 0.55 : 0.95;
       ctx.fillStyle = "rgba(6, 9, 12, 0.48)";
       ctx.beginPath();
@@ -689,6 +706,11 @@
       var unlocked = this.isPortalUnlocked(portal, flags);
       ctx.save();
       ctx.translate(p.x, p.y);
+      if (window.GameArt) {
+        window.GameArt.drawDetailedPortal(ctx, portal, unlocked, this.getPortalDisplayName(portal, flags), performance.now() / 1000);
+        ctx.restore();
+        return;
+      }
       ctx.globalAlpha = 0.95;
       ctx.strokeStyle = portal.future ? "#8a7b5e" : unlocked ? "#7df0cd" : "#d36c84";
       ctx.fillStyle = portal.future ? "rgba(138,123,94,0.18)" : unlocked ? "rgba(125,240,205,0.16)" : "rgba(211,108,132,0.16)";
@@ -728,8 +750,11 @@
         if ((x + y) % 2 !== 0) continue;
         var p = this.project(x, y, camera, canvas);
         if (p.x < -90 || p.x > canvas.width + 90 || p.y < -70 || p.y > canvas.height + 70) continue;
-        var shade = (x + y) % 4 === 0 ? "#111719" : "#0e1417";
-        this.drawDiamond(ctx, p, this.tileW, this.tileH, shade, "rgba(181, 198, 183, 0.045)");
+        if (window.GameArt) window.GameArt.drawIsoTile(ctx, p, this.tileW, this.tileH, this.currentId, x, y);
+        else {
+          var shade = (x + y) % 4 === 0 ? "#111719" : "#0e1417";
+          this.drawDiamond(ctx, p, this.tileW, this.tileH, shade, "rgba(181, 198, 183, 0.045)");
+        }
       }
     }
 

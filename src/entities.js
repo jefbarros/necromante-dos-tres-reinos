@@ -131,6 +131,13 @@ var e = game.enemies[i];
 
   Player.prototype.draw = function (ctx, map, camera, canvas) {
     var p = map.project(this.x, this.y, camera, canvas);
+    if (window.GameArt) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      window.GameArt.drawNecromancer(ctx, this, performance.now() / 1000);
+      ctx.restore();
+      return;
+    }
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.globalAlpha = 0.9;
@@ -202,6 +209,17 @@ var e = game.enemies[i];
 
   Enemy.prototype.draw = function (ctx, map, camera, canvas) {
     var p = map.project(this.x, this.y, camera, canvas);
+    if (window.GameArt) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      var tick = performance.now() / 1000;
+      if (this.type === "boss") window.GameArt.drawTombGuardian(ctx, this, tick);
+      else if (this.type === "imp") window.GameArt.drawDemonImp(ctx, this, tick);
+      else if (this.type === "rat" || this.type === "wolf" || this.type === "warhound") window.GameArt.drawBeastEnemy(ctx, this, tick);
+      else window.GameArt.drawEnemyHumanoid(ctx, this, tick);
+      ctx.restore();
+      return;
+    }
     var scale = this.type === "boss" ? 1.55 : this.type === "elite" ? 1.18 : 1;
     ctx.save();
     ctx.translate(p.x, p.y);
@@ -331,6 +349,16 @@ var e = game.enemies[i];
   Servant.prototype.draw = function (ctx, map, camera, canvas) {
     if (this.destroyed) return;
     var p = map.project(this.x, this.y, camera, canvas);
+    if (window.GameArt) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      var tick = performance.now() / 1000;
+      if (this.kind === "feral") window.GameArt.drawFeralServant(ctx, this, tick);
+      else if (this.kind === "fallen" || this.kind === "hunterShade" || this.kind === "cultistShade" || this.kind === "ember") window.GameArt.drawFallenServant(ctx, this, tick);
+      else window.GameArt.drawSkeletonServant(ctx, this, tick);
+      ctx.restore();
+      return;
+    }
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.fillStyle = "rgba(0, 0, 0, 0.34)";
@@ -385,6 +413,11 @@ var e = game.enemies[i];
     var p = map.project(this.x, this.y, camera, canvas);
     ctx.save();
     ctx.translate(p.x, p.y);
+    if (window.GameArt) {
+      window.GameArt.drawProjectile(ctx, this, performance.now() / 1000);
+      ctx.restore();
+      return;
+    }
     ctx.fillStyle = this.color;
     ctx.shadowColor = this.color;
     ctx.shadowBlur = 14;
@@ -425,6 +458,10 @@ var e = game.enemies[i];
     var bob = Math.sin(this.float) * 5;
     ctx.save();
     ctx.translate(p.x, p.y + bob - 14);
+    if (window.GameArt) {
+      window.GameArt.drawAura(ctx, 0, 0, 22, this.sourceType === "boss" ? "rgba(193,165,255,0.75)" : "rgba(124,230,212,0.78)", this.float);
+      window.GameArt.drawRuneCircle(ctx, 0, 0, 18, this.marked ? "#ff79a8" : "rgba(124,230,212,0.72)", this.float);
+    }
     ctx.globalAlpha = Math.max(0.22, this.life / this.maxLife);
     ctx.fillStyle = this.sourceType === "boss" ? "#c1a5ff" : "#7ce6d4";
     ctx.shadowColor = ctx.fillStyle;
@@ -459,6 +496,11 @@ var e = game.enemies[i];
     var p = map.project(this.x, this.y, camera, canvas);
     ctx.save();
     ctx.globalAlpha = Math.max(0, this.life);
+    if (window.GameArt) {
+      window.GameArt.drawFloatingLabel(ctx, this.text, p.x, p.y - 42, this.color);
+      ctx.restore();
+      return;
+    }
     ctx.fillStyle = this.color;
     ctx.font = "800 14px system-ui, sans-serif";
     ctx.textAlign = "center";
@@ -488,11 +530,51 @@ var e = game.enemies[i];
     var p = map.project(this.x, this.y, camera, canvas);
     var ratio = 1 - this.life / this.maxLife;
     ctx.save();
+    ctx.translate(p.x, p.y);
+    if (window.GameArt) {
+      window.GameArt.drawAreaEffect(ctx, this, map, ratio, performance.now() / 1000);
+      ctx.restore();
+      return;
+    }
     ctx.globalAlpha = Math.max(0, 1 - ratio);
     ctx.strokeStyle = this.color;
     ctx.lineWidth = 5;
     ctx.beginPath();
     ctx.ellipse(0, 0, this.radius * map.tileW * 0.5 * ratio, this.radius * map.tileH * 0.55 * ratio, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  function SpiritBeamEffect(from, to, color) {
+    this.from = from;
+    this.to = to;
+    this.color = color || "#70e3c2";
+    this.life = 0.38;
+    this.maxLife = this.life;
+    this.dead = false;
+  }
+
+  SpiritBeamEffect.prototype.update = function (dt) {
+    this.life -= dt;
+    if (this.life <= 0) this.dead = true;
+  };
+
+  SpiritBeamEffect.prototype.draw = function (ctx, map, camera, canvas) {
+    if (!this.from || !this.to) return;
+    var a = map.project(this.from.x, this.from.y, camera, canvas);
+    var b = map.project(this.to.x, this.to.y, camera, canvas);
+    var ratio = 1 - this.life / this.maxLife;
+    if (window.GameArt) {
+      window.GameArt.drawSpiritBeam(ctx, a.x, a.y - 28, b.x, b.y - 25, this.color, ratio, performance.now() / 1000);
+      return;
+    }
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, 1 - ratio);
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y - 28);
+    ctx.lineTo(b.x, b.y - 25);
     ctx.stroke();
     ctx.restore();
   };
@@ -505,4 +587,5 @@ var e = game.enemies[i];
   window.Soul = Soul;
   window.FloatingText = FloatingText;
   window.AreaEffect = AreaEffect;
+  window.SpiritBeamEffect = SpiritBeamEffect;
 })();

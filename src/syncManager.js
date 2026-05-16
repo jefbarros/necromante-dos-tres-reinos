@@ -221,6 +221,7 @@
     getSyncStatus: function () {
       return {
         status: this.status,
+        label: this.getStatusLabel(),
         lastSyncAt: this.lastSyncAt,
         pendingSync: this.pendingSync,
         hasConflict: !!this.pendingConflict
@@ -238,7 +239,7 @@
           return "Pendente";
         case SyncStatus.OFFLINE:
           return "Offline";
-        case SyncStatus.CONFLITO:
+        case SyncStatus.CONFLICT:
           return "Conflito";
         case SyncStatus.ERROR:
           return "Erro";

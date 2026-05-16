@@ -1116,8 +1116,9 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
       speed: skill.speed,
       damage: skill.damage + this.magicDamageBonus,
       life: skill.range / skill.speed,
-      color: "#a972ff"
+      color: "#8f5dff"
     }));
+    this.effects.push(new window.AreaEffect(this.player.x + dir.x * 0.7, this.player.y + dir.y * 0.7, 0.45, "#8f5dff"));
   };
 
   NecromancerGame.prototype.castDrain = function () {
@@ -1133,6 +1134,7 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     this.player.hp = Math.min(this.player.maxHp, this.player.hp + 10);
     this.player.mana = Math.min(this.player.maxMana, this.player.mana + 5);
     this.effects.push(new window.AreaEffect(target.x, target.y, 0.75, "#70e3c2"));
+    if (window.SpiritBeamEffect) this.effects.push(new window.SpiritBeamEffect(target, this.player, "#70e3c2"));
     this.floatText("dreno", target.x, target.y, "#85f5d2");
   };
 
@@ -1149,6 +1151,7 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
       radius: 0.25,
       pierce: 1
     }));
+    this.effects.push(new window.AreaEffect(this.player.x + dir.x * 0.5, this.player.y + dir.y * 0.5, 0.35, "#93d7ff"));
   };
 
   NecromancerGame.prototype.castMark = function () {
@@ -1163,6 +1166,7 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     target.markTimer = 9;
     target.aggro = true;
     this.markedTarget = target;
+    this.effects.push(new window.AreaEffect(target.x, target.y, 0.9, "#e95b86"));
     this.floatText("marcado", target.x, target.y, "#ff8ab0");
     this.message("Servos focando: " + target.name + ".");
   };
@@ -1235,6 +1239,8 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     }
     var chance = this.getCaptureChance(soul);
     var success = Math.random() <= chance;
+    if (window.SpiritBeamEffect) this.effects.push(new window.SpiritBeamEffect(soul, this.player, "#8ff2df"));
+    this.effects.push(new window.AreaEffect(soul.x, soul.y, 0.8, success ? "#7df0cd" : "#d36c84"));
     if (!success) {
       soul.dead = true;
       this.player.fragments += Math.max(1, Math.floor(soul.fragments * 0.5));
