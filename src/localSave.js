@@ -6,7 +6,7 @@
   // Encapsulated to allow future swap to IndexedDB
 
   var LOCAL_SAVE_KEY = "necromante_local_save";
-  var SCHEMA_VERSION = "0.2.3";
+  var SCHEMA_VERSION = "0.2.7";
 
   var LocalSaveService = {
 
@@ -91,9 +91,14 @@
       return {
         schemaVersion: data.schemaVersion,
         gameVersion: data.gameVersion,
-        updatedAt: data.savedAt,
+        revision: data.revision,
+        updatedAt: data.updatedAt || data.savedAt,
         playerLevel: data.player ? data.player.level : null,
         currentMapId: data.currentMapId,
+        fragments: data.player ? data.player.fragments : 0,
+        activeServants: Array.isArray(data.servants) ? data.servants.length : 0,
+        reserveServants: Array.isArray(data.reserveServants) ? data.reserveServants.length : 0,
+        platform: data.platform,
         playerName: "Jogador"
       };
     }

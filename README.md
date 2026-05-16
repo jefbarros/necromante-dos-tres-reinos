@@ -1,10 +1,33 @@
 # Necromante dos Tres Reinos
 
-Prototipo jogavel v0.2.5 em HTML5, JavaScript e Canvas. O jogo continua mobile-first e preparado para uso hibrido em Web, Android via Capacitor e Windows via Tauri, com save local, conta mock, save em nuvem mock e sincronizacao futura entre dispositivos.
+Prototipo jogavel v0.2.7 em HTML5, JavaScript e Canvas. O jogo continua mobile-first e preparado para uso hibrido em Web, Android via Capacitor e Windows via Tauri, com save local, conta mock, save em nuvem mock e sincronizacao futura entre dispositivos.
 
-## Direcao de Arte v0.2.5
+## Hotfix v0.2.7
 
-A v0.2.5 melhora a identidade visual propria do jogo com uma leitura 2.5D/isometrica dark fantasy. As referencias externas devem ser entendidas apenas como clima: necromancia, progressao sombria, mortos-vivos, energia espiritual, runas, sombras e cenas dramaticas. O jogo nao copia personagens, simbolos, mapas, roupas, composicoes ou assets protegidos.
+A v0.2.7 e um hotfix emergencial de fluxo de UI. Ela corrige o travamento em que Novo Jogo, Continuar e Carregar Save abriam diretamente a tela de gerenciamento de servos/equipe e deixavam o jogador preso fora do gameplay.
+
+Mudancas do hotfix:
+
+- Novo Jogo, Continuar, Carregar Save Local, Carregar Save Nuvem e Importar Save agora resetam a UI temporaria e entram no mapa.
+- A tela de equipe, inventario, talentos, conta e carregar save podem ser fechadas por `ESC`, `M` ou `Mapa/Enter`.
+- `F10` executa recuperacao emergencial de UI e volta ao gameplay.
+- `window.forceReturnToGame()` e `window.debugUIState()` ficam disponiveis no console para diagnostico.
+- Saves antigos sao migrados para `0.2.7` ignorando campos de UI runtime como tela atual, modal aberto e inputLock.
+
+Teste manual minimo:
+
+1. Clique em `Novo Jogo` e confirme que a Cripta Inicial abre em gameplay.
+2. Mova o personagem.
+3. Abra `Equipe`, feche com `ESC`, abra novamente e feche com `Mapa/Enter`.
+4. Abra e feche `Inventario`, `Talentos` e `Conta`.
+5. Salve, recarregue o navegador e use `Continuar`; confirme que volta ao mapa.
+6. Use `Carregar Save` > `Carregar Local`; confirme que a tela fecha e o personagem move.
+7. Abra `Exportar Save` e `Importar Save`, cancele/volte e confirme que o input nao fica preso.
+8. Abra uma tela qualquer e pressione `F10`; a mensagem `UI recuperada.` deve aparecer.
+
+## Direcao de Arte v0.2.6
+
+A v0.2.6 consolida a identidade visual propria do jogo com leitura 2.5D/isometrica dark fantasy, seletor de qualidade visual e documentacao permanente em `ART_BIBLE.md`. As referencias externas devem ser entendidas apenas como concept art/clima: necromancia, progressao sombria, mortos-vivos, energia espiritual, runas, sombras e cenas dramaticas. O jogo nao copia personagens, simbolos, mapas, roupas, composicoes ou assets protegidos.
 
 Melhorias visuais:
 
@@ -17,7 +40,15 @@ Melhorias visuais:
 - inimigos visualmente diferenciados;
 - Guardiao de Tumba maior, com runas, nucleo espiritual, aura e telegraph de area;
 - projeteis, dreno, captura, marca e explosoes com efeitos melhores;
-- HUD e menus com paineis dark fantasy, verde espectral, azul de mana/sync, dourado de recompensa e vermelho de perigo.
+- HUD e menus com paineis dark fantasy, verde espectral, azul de mana/sync, dourado de recompensa e vermelho de perigo;
+- escala de HUD, minimapa, botoes mobile e modais ajustada para telas pequenas.
+
+## Biblia de Arte e Concept Art
+
+- `ART_BIBLE.md`: documenta direcao visual, principios, necromante, servos, inimigos, mapas, portais, HUD e regras de uso de referencias.
+- `docs/concept-art/`: pasta para imagens de referencia/concept art usadas apenas para documentacao.
+
+As imagens de `docs/concept-art/` nao sao carregadas pelo jogo em runtime. Se alguma imagem virar asset real futuramente, ela deve ser movida para `assets/images/` e ter licenca/origem documentadas.
 
 ## Como Rodar
 
@@ -58,15 +89,16 @@ PC:
 - 4: Explosao Cadaverica.
 - C: Capturar Alma ou confirmar em menus.
 - Q: alternar comando dos servos ou opcao selecionada.
-- M: gerenciamento de servos.
+- M: abre gerenciamento de servos no jogo; fecha a tela atual quando algum menu/modal esta aberto.
 - I: inventario/equipamentos/reputacao.
 - K: arvore de habilidades.
 - L: Conta.
 - P: salvar.
-- Esc: menu principal.
+- Esc: fecha a tela/modal atual; no gameplay abre o menu principal.
 - E: entrar em portal ou interagir com objeto proximo.
-- Enter: confirmar no menu principal ou entrar no mapa.
+- Enter/Mapa: confirmar no menu principal; fechar a tela atual e voltar ao gameplay quando um menu esta aberto.
 - F: fusao na tela de servos.
+- F10: recuperacao emergencial de UI presa.
 - X: apagar save local.
 
 Mobile:
@@ -127,7 +159,19 @@ Qualidade visual:
 GameConfig.visualQuality = "medium";
 ```
 
-Valores previstos: `low`, `medium`, `high`. A v0.2.5 usa `medium` por padrao.
+Valores: `low`, `medium`, `high`. A v0.2.6 usa `medium` por padrao e salva a escolha em `localStorage`.
+
+Como alterar pela UI:
+
+- Abra `Conta` com `L` ou pelo botao superior.
+- Use `CMD/Q` para selecionar `Qualidade` e confirme com `CAP/ATK`.
+- Atalho: tecla `3` na tela Conta alterna entre Baixa, Media e Alta.
+
+Efeitos por qualidade:
+
+- `low`: menos particulas, menos auras, menos detalhes de tile e portal.
+- `medium`: equilibrio padrao para Web/Android.
+- `high`: mais particulas, auras completas, portais mais brilhantes e mais detalhes decorativos.
 
 ## Mapas Detalhados
 
@@ -177,20 +221,30 @@ A branch atual ja possui a base hibrida:
 
 Sem login, o jogo salva localmente. Com mock login, `SyncManager.syncNow()` tenta comparar e sincronizar com o mock cloud.
 
-## Exportar e Importar Save
+## Exportar e Importar Save pela UI
 
-Na tela Conta:
+Na tela Conta ou Carregar Save:
 
-- `P` exporta o save para o console.
-- Importacao ainda pode ser feita pelo console usando `SaveManager.importSave(JSON)`.
+- `P` ou o botao `Exportar Save` abre um modal com JSON formatado para copiar.
+- `I` ou o botao `Importar JSON` abre um modal com textarea.
+- O fluxo de importacao valida JSON, migra save antigo, normaliza servos ativos/reserva, mostra resumo e substitui o save local apenas apos confirmacao.
 
-O SaveManager migra saves antigos para o schema atual quando necessario.
+O SaveManager migra saves antigos para o schema atual quando necessario. A tela atual de UI nao e salva como estado persistente obrigatorio.
+
+## Tela Carregar Save
+
+A tela `Carregar Save` mostra:
+
+- Save Local;
+- Save Nuvem/MockCloud;
+- metadados de versao, mapa, nivel, fragmentos, data, plataforma e revision;
+- botoes para Carregar Local, Carregar Nuvem, Sincronizar, Importar JSON, Exportar Save e Voltar.
 
 ## Testar Sync Mock
 
 1. Inicie um Novo Jogo.
 2. Abra Conta com `L` ou pelo botao superior.
-3. Use `1` ou Menu para mock login.
+3. Use `1` para mock login.
 4. Use `2` para sincronizar agora.
 5. Salve com `P`.
 6. Veja o indicador da HUD: Local, OK, Sincronizando, Pendente, Offline, Conflito ou Erro.
@@ -202,6 +256,12 @@ O SaveManager migra saves antigos para o schema atual quando necessario.
 3. Altere manualmente o mock cloud no `localStorage` para ter outro `revision`, `updatedAt`, `platform` ou `deviceId`.
 4. Execute sync.
 5. A tela Carregar Save mostra o resumo de conflito se `SyncManager.pendingConflict` estiver preenchido.
+6. Abra o modal de conflito pela tela Carregar Save ou pelo sync automatico.
+7. Escolha `Usar Local`, `Usar Nuvem` ou `Cancelar`.
+
+## Telas Pequenas e Mobile
+
+A v0.2.6 reduz HUD, minimapa, menus e botoes em alturas/larguras menores. Menus de save usam modal rolavel com textarea responsiva. Os botoes mobile mantem area de toque grande, opacidade controlada e o botao contextual continua priorizando o alvo mais proximo: `Entrar` para portal, `Interagir` para objeto e `Falar` reservado para NPC futuro. A v0.2.7 preserva a direcao visual e altera apenas fluxo, input e navegacao de telas.
 
 ## Preparacao Android com Capacitor
 
@@ -258,16 +318,61 @@ Arquivos ignorados esperados:
 - [ ] portais mostram estados claros;
 - [ ] habilidades mostram efeitos melhores;
 - [ ] HUD e menus seguem o estilo dark fantasy;
+- [ ] seletor low/medium/high funciona;
+- [ ] importacao de save funciona pela UI;
+- [ ] exportacao de save funciona pela UI;
+- [ ] conflito permite escolher Local ou Nuvem;
+- [ ] tela Carregar Save mostra metadados local/nuvem;
+- [ ] UI fica usavel em tela pequena;
 - [ ] save local continua funcionando;
 - [ ] conta mock e mockCloud continuam disponiveis;
 - [ ] performance basica continua aceitavel.
+
+## Testes Realizados na v0.2.7
+
+- `node --check` em todos os arquivos JS;
+- `npm run check`;
+- Novo Jogo entra direto no gameplay;
+- Equipe abre e fecha com `ESC`, `M`, `Mapa/Enter` e `window.forceReturnToGame()`;
+- Inventario, Talentos, Conta e Carregar Save fecham sem prender input;
+- Continuar carrega save e volta ao mapa;
+- Carregar Save Local e MockCloud voltam ao gameplay;
+- Exportar/Importar Save podem ser cancelados sem travar a UI;
+- Conflito local/nuvem foi forçado via importacao de save, testando `Cancelar` e `Usar Local`;
+- F10 recupera a UI presa;
+- save v0.2.7 nao persiste tela/menu/modal como estado obrigatorio.
+
+## Testes Realizados na v0.2.6
+
+- `node --check` nos arquivos alterados durante a implementacao;
+- `node --check` em todos os arquivos JS;
+- `npm run check`;
+- abertura do jogo em servidor local;
+- novo jogo e continuar;
+- exportacao/importacao pela UI;
+- mock login e mock sync;
+- conflito local/nuvem;
+- qualidade visual `low`, `medium` e `high`;
+- Cripta Inicial, Cemiterio Neutro, Estrada dos Enforcados e Area Secreta da Cripta;
+- combate, captura, portais, minimapa, menus e redimensionamento para tela pequena.
+
+## Bugs Conhecidos
+
+- Firebase real segue apenas preparado; a v0.2.7 continua usando mockCloud quando nao houver configuracao local.
+- O teste Android/Windows nativo ainda depende de ambiente Capacitor/Tauri dedicado.
+- Alguns textos permanecem em ASCII no codigo para manter compatibilidade com arquivos existentes.
+- O fluxo MockCloud depende de login mock e dados existentes em `localStorage`.
+
+## Proxima Etapa Recomendada
+
+v0.2.8 deve focar em balanceamento de combate, mais telegraphs para inimigos especiais, preparacao real de build Android/Windows e uma tela dedicada de configuracoes fora da tela Conta.
 
 ## Comandos Git Recomendados
 
 ```bash
 git status -sb
-git add README.md PROJECT_STATUS.md index.html package.json src/art.js src/config.js src/entities.js src/game.js src/map.js src/syncManager.js src/ui.js
-git commit -m "Evolui direcao de arte para v0.2.5"
+git add .
+git commit -m "v0.2.7 - hotfix fluxo de UI e tela de equipe"
 git push
 ```
 

@@ -185,9 +185,12 @@
             schemaVersion: data.schemaVersion,
             gameVersion: data.gameVersion,
             revision: data.revision,
-            updatedAt: data.cloudUploadedAt || data.savedAt,
+            updatedAt: data.cloudUploadedAt || data.updatedAt || data.savedAt,
             playerLevel: data.player ? data.player.level : null,
             currentMapId: data.currentMapId,
+            fragments: data.player ? data.player.fragments : 0,
+            activeServants: Array.isArray(data.servants) ? data.servants.length : 0,
+            reserveServants: Array.isArray(data.reserveServants) ? data.reserveServants.length : 0,
             platform: data.platform
           };
         } catch (error) {

@@ -21,7 +21,7 @@
           <button class="menu-button" data-action="inventory" aria-label="Inventario">Inventario</button>
           <button class="menu-button" data-action="skills" aria-label="Arvore de habilidades">Talentos</button>
           <button class="menu-button" data-action="save" aria-label="Salvar jogo">Salvar</button>
-          <button class="menu-button start" data-action="start" aria-label="Entrar ou voltar ao mapa">Mapa</button>
+          <button class="menu-button start" data-action="returnToGame" aria-label="Entrar ou voltar ao mapa">Mapa</button>
         </div>
 
         <button id="portalButton" class="portal-button" data-action="enterPortal" aria-label="Entrar no portal">Entrar</button>
@@ -38,6 +38,22 @@
           <button class="control-button" data-action="skill4" aria-label="Explosao Cadaverica">4</button>
           <button class="control-button capture" data-action="capture" aria-label="Capturar Alma">CAP</button>
           <button class="control-button command" data-action="command" aria-label="Comando dos Servos">CMD</button>
+        </div>
+      </section>
+
+      <section id="saveOverlay" class="save-overlay" aria-modal="true" role="dialog" hidden>
+        <div class="save-dialog">
+          <h2 id="saveOverlayTitle">Save</h2>
+          <p id="saveOverlayMessage"></p>
+          <pre id="saveOverlaySummary"></pre>
+          <textarea id="saveOverlayText" spellcheck="false" aria-label="Conteudo JSON do save"></textarea>
+          <div class="save-actions">
+            <button id="saveOverlayValidate" type="button">Validar</button>
+            <button id="saveOverlayConfirm" type="button">Importar</button>
+            <button id="saveOverlayLocal" type="button">Usar Local</button>
+            <button id="saveOverlayCloud" type="button">Usar Nuvem</button>
+            <button id="saveOverlayCancel" type="button">Cancelar</button>
+          </div>
         </div>
       </section>
     </main>

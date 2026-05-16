@@ -2,11 +2,11 @@
 
 ## Versao Atual
 
-v0.2.5
+v0.2.7
 
 ## Estado Geral
 
-O projeto esta em uma branch com a base hibrida de v0.2.3/v0.2.4 ja presente:
+O projeto esta em uma branch com a base hibrida de v0.2.3/v0.2.4 e a direcao visual da v0.2.5 preservadas:
 
 - HTML5/JavaScript/Canvas;
 - SaveManager;
@@ -15,75 +15,87 @@ O projeto esta em uma branch com a base hibrida de v0.2.3/v0.2.4 ja presente:
 - auth mock;
 - sync manager;
 - platform/deviceId;
-- preparacao para Android e Windows.
+- preparacao para Android e Windows;
+- arte dark fantasy/isometrica via `src/art.js`.
 
-A v0.2.5 adiciona uma camada de direcao de arte sem remover sistemas existentes.
+A v0.2.7 e um hotfix emergencial de fluxo de UI. Ela corrige o travamento em que Novo Jogo, Continuar e Carregar Save terminavam na tela de Gerenciamento de Servos/Equipe e restaura o retorno confiavel ao gameplay.
 
 ## Sistemas Alterados
 
-- `src/art.js`: novo sistema de helpers visuais.
-- `src/config.js`: versao atualizada para `0.2.5` e `visualQuality: "medium"`.
-- `src/entities.js`: necromante, servos, inimigos, projeteis, almas, texto flutuante e efeitos usam a camada visual nova.
-- `src/map.js`: tiles com variacao deterministica, props adicionais, portais detalhados e pontos de interesse com aura/runa.
-- `src/game.js`: efeitos adicionais em ataque, dreno, lanca, marca e captura.
-- `src/ui.js`: paineis, barras, HUD, indicador de sync e tela de carregar save receberam acabamento visual e correcoes.
-- `src/syncManager.js`: status agora retorna `label` e corrige label de conflito.
-- `index.html`: carrega `src/art.js`.
-- `package.json`: versao e scripts atualizados.
-- `README.md`: documentacao atualizada para v0.2.5.
+- `ART_BIBLE.md`: novo documento permanente de direcao visual.
+- `docs/concept-art/README.md`: documenta uso de concept art e referencias.
+- `src/config.js`: versao atualizada para `0.2.7`.
+- `package.json`: versao atualizada para `0.2.7`.
+- `src/art.js`: qualidade visual dinamica `low`/`medium`/`high`, persistida localmente.
+- `src/game.js`: reset runtime de UI, fechamento central de telas, F10 de recuperacao, Novo Jogo/Continuar/Carregar Save voltando ao gameplay.
+- `src/input.js`: atalho `F10` e limpeza de input runtime.
+- `src/ui.js`: textos de navegacao atualizados para ESC/M/Mapa/F10.
+- `src/saveManager.js`: schema v0.2.7, migracao de saves antigos e remocao de campos runtime de UI.
+- `src/localSave.js`: schema/metadados v0.2.7.
+- `src/cloudSave.js`: metadados mockCloud mais completos.
+- `src/syncManager.js`: syncNow usa save local quando nenhum save e passado e Cancelar conflito preserva status de conflito.
+- `src/auth.js`: login mock direto para uso pela tela Conta.
+- `index.html`: modal de save/conflito.
+- `styles.css`: modal responsivo e ajustes de controles mobile.
+- `README.md`: documentacao atualizada para v0.2.7.
 
-## Arte Detalhada
+## Bugs Corrigidos
 
-Aplicado:
+- Corrigido bug critico da v0.2.6 em que Novo Jogo e saves carregados abriam `screen = "team"` automaticamente.
+- Equipe, Inventario, Talentos, Conta e Carregar Save agora possuem saida por ESC/M/Mapa quando o jogo ja esta em gameplay.
+- `F10` e `window.forceReturnToGame()` recuperam UI presa durante desenvolvimento.
+- Importar Save, Carregar Local, Carregar Nuvem e resolver conflito resetam a UI runtime antes de voltar ao gameplay.
+- SaveManager ignora campos antigos de tela/menu/modal/inputLock em saves migrados.
+- Importacao de save deixou de depender do console e agora usa modal com textarea.
+- Exportacao de save deixou de depender do console e agora mostra JSON formatado na UI.
+- Resolucao de conflito agora tem botoes funcionais para usar Local, usar Nuvem ou cancelar.
+- Tela Carregar Save agora mostra metadados local/nuvem/mockCloud.
+- Login mock da tela Conta agora possui funcao dedicada.
+- Qualidade visual pode ser alternada por UI e fica persistida localmente.
+- HUD, minimapa, botoes mobile e modais foram reduzidos para telas pequenas.
 
-- sombra isometrica;
-- aura espectral;
-- circulos runicos;
-- barra de vida estilizada;
-- labels flutuantes;
-- portal com runas, particulas e estado visual;
-- necromante com capuz, manto, olhos, grimorio/cajado e particulas;
-- servos distinguiveis por tipo;
-- inimigos distinguiveis por familia;
-- Guardiao de Tumba com escala maior, runas, nucleo e telegraph;
-- tiles com rachaduras, manchas e runas deterministicas;
-- mapas com props adicionais;
-- HUD e menus mais consistentes com dark fantasy.
+## Arte e UI
+
+- Mantida a identidade dark fantasy/isometrica da v0.2.5.
+- A v0.2.7 nao altera arte, mapas, HUD, personagens, efeitos ou direcao visual.
+- `ART_BIBLE.md` passa a ser referencia obrigatoria para mudancas visuais.
+- `VISUAL_QUALITY`/`GameConfig.visualQuality` segue `medium` por padrao.
+- `low` reduz particulas, auras e detalhes.
+- `high` aumenta particulas, brilho de portais e detalhes de tile.
+
+## Mapas Testados
+
+- Cripta Inicial: spawn, HUD, minimapa, portal, objetos e leitura visual.
+- Cemiterio Neutro: portal, inimigos, boss/arena, minimapa e labels.
+- Estrada dos Enforcados: portal futuro/bloqueado, props, inimigos e leitura de caminho.
+- Area Secreta da Cripta: portal, props, pontos de lore/recompensa e minimapa.
 
 ## Testes Realizados
 
-- `node --check` em todos os arquivos JS: passou apos as alteracoes de renderizacao.
-
-Testes de navegador ainda devem ser executados ao final da rodada:
-
-- abrir jogo local;
-- verificar console;
-- novo jogo;
-- continuar;
-- portais;
-- combate;
-- captura;
-- menus;
-- minimapa;
-- mock login;
-- mock cloud sync;
-- conflito de save;
-- performance basica.
+- `node --check` em todos os arquivos JS.
+- `npm run check`.
+- Navegador local via servidor estatico.
+- Novo Jogo entra direto na Cripta Inicial em gameplay.
+- Movimento do jogador apos Novo Jogo.
+- Equipe abre e fecha com ESC, M, Mapa/Enter, botao Voltar contextual e `window.forceReturnToGame()`.
+- Inventario, Talentos, Conta e Carregar Save fecham sem prender input.
+- Continuar carrega save e volta ao mapa.
+- Carregar Save Local e MockCloud voltam ao gameplay.
+- Exportar/Importar Save podem ser cancelados sem travar a UI.
+- Conflito local/nuvem mantem Cancelar funcional e opcoes Local/Nuvem sem prender input.
+- F10 recupera a UI e mostra `UI recuperada.`.
 
 ## Bugs Conhecidos
 
-- A tela de importacao ainda depende de uso do console via `SaveManager.importSave(JSON)`.
-- A tela de conflito mostra resumo quando `SyncManager.pendingConflict` existe, mas a escolha visual completa ainda precisa ser refinada.
-- Alguns textos antigos usam ASCII sem acentos para evitar problemas de encoding no workspace.
-- `TODO.md` ja estava modificado antes desta rodada e nao foi alterado por esta implementacao.
+- Firebase real segue como estrutura preparada; sem `src/firebaseConfig.local.js`, o jogo usa mockCloud.
+- Builds Android/Windows nativos ainda nao foram gerados nesta maquina.
+- Algumas strings do codigo seguem em ASCII para manter consistencia com arquivos existentes.
+- MockCloud exige login mock e dados em `localStorage`; quando nao ha save em nuvem, o jogo apenas notifica indisponibilidade.
 
 ## Proxima Etapa Recomendada
 
-v0.2.6 deve focar em:
+v0.2.8 deve focar em balanceamento, telegraphs de inimigos, configuracoes dedicadas fora da tela Conta e validacao real em Android/Windows quando o ambiente Capacitor/Tauri estiver pronto.
 
-- fluxo real de importacao de JSON por textarea/modal;
-- tela completa de resolucao de conflito com botoes funcionais;
-- selector de qualidade visual low/medium/high;
-- mais telegraphs de inimigos;
-- ajustes de balanceamento visual para telas pequenas;
-- preparar build Android/Windows em ambiente dedicado.
+## Regra Permanente
+
+Toda versao que alterar visual, mapa, personagem, UI ou efeito deve atualizar `ART_BIBLE.md` quando necessario, alem de `README.md` e `PROJECT_STATUS.md`.

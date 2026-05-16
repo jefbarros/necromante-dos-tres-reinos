@@ -51,11 +51,19 @@ window.NecromancerGame = function NecromancerGame(canvas, input) {
     this.unlockedSkills = Object.create(null);
     this.skillPoints = 0;
     this.screen = "mainMenu";
+    this.uiMode = "menu";
+    this.activeMenu = "mainMenu";
+    this.activeModal = null;
+    this.selectedPanel = null;
+    this.inputLock = false;
     this.enteredMap = false;
     this.selectedReserve = 0;
     this.selectedSkill = 0;
     this.selectedMenu = 0;
     this.selectedEquipment = 0;
+    this.selectedLoadSave = 0;
+    this.importCandidate = null;
+    this.saveOverlayMode = "";
     this.captureBonus = 0;
     this.magicDamageBonus = 0;
     this.servantHpBonus = 0;
@@ -104,7 +112,255 @@ this.respawnTimers = { common: 0, elite: 0 };
     this.setupStarterReserve();
     this.applyAllBonuses();
     this.allServants().forEach(this.applySkillBonusesToServant.bind(this));
+    this.setupSaveOverlay();
     this.lastSaveStatus = this.hasSave() ? "Save encontrado" : "Sem save local";
+    this.exposeRuntimeDebugTools();
+  };
+
+  NecromancerGame.prototype.setupSaveOverlay = function () {
+    var overlay = document.getElementById("saveOverlay");
+    if (!overlay) return;
+    this.saveOverlay = overlay;
+    this.saveOverlayTitle = document.getElementById("saveOverlayTitle");
+    this.saveOverlayMessage = document.getElementById("saveOverlayMessage");
+    this.saveOverlaySummary = document.getElementById("saveOverlaySummary");
+    this.saveOverlayText = document.getElementById("saveOverlayText");
+    this.saveOverlayValidate = document.getElementById("saveOverlayValidate");
+    this.saveOverlayConfirm = document.getElementById("saveOverlayConfirm");
+    this.saveOverlayLocal = document.getElementById("saveOverlayLocal");
+    this.saveOverlayCloud = document.getElementById("saveOverlayCloud");
+    this.saveOverlayCancel = document.getElementById("saveOverlayCancel");
+
+    this.saveOverlayValidate.addEventListener("click", this.validateImportFromOverlay.bind(this));
+    this.saveOverlayConfirm.addEventListener("click", this.confirmSaveOverlay.bind(this));
+    this.saveOverlayLocal.addEventListener("click", this.resolveSaveConflict.bind(this, "local"));
+    this.saveOverlayCloud.addEventListener("click", this.resolveSaveConflict.bind(this, "cloud"));
+    this.saveOverlayCancel.addEventListener("click", this.cancelSaveOverlay.bind(this));
+  };
+
+  NecromancerGame.prototype.setSaveOverlayButtons = function (mode) {
+    if (!this.saveOverlay) return;
+    this.saveOverlayValidate.hidden = mode !== "import";
+    this.saveOverlayConfirm.hidden = mode === "conflict";
+    this.saveOverlayLocal.hidden = mode !== "conflict";
+    this.saveOverlayCloud.hidden = mode !== "conflict";
+    this.saveOverlayText.hidden = mode === "conflict";
+    this.saveOverlayConfirm.textContent = mode === "export" ? "Copiar" : "Importar";
+  };
+
+  NecromancerGame.prototype.showSaveOverlay = function (mode, title, message, text, summary) {
+    if (!this.saveOverlay) {
+      this.message("Interface de save indisponivel.");
+      return;
+    }
+    this.saveOverlayMode = mode;
+    this.activeModal = mode;
+    this.inputLock = true;
+    this.importCandidate = null;
+    this.setSaveOverlayButtons(mode);
+    this.saveOverlayTitle.textContent = title;
+    this.saveOverlayMessage.textContent = message || "";
+    this.saveOverlaySummary.textContent = summary || "";
+    this.saveOverlayText.value = text || "";
+    this.saveOverlay.hidden = false;
+    if (mode === "import") this.saveOverlayText.focus();
+  };
+
+  NecromancerGame.prototype.hideSaveOverlay = function () {
+    if (this.saveOverlay) this.saveOverlay.hidden = true;
+    this.saveOverlayMode = "";
+    this.importCandidate = null;
+    this.activeModal = null;
+    this.inputLock = false;
+  };
+
+  NecromancerGame.prototype.cancelSaveOverlay = function () {
+    if (this.saveOverlayMode === "conflict" && window.SyncManager) {
+      window.SyncManager.resolveConflict("cancel");
+      this.message("Conflito mantido para resolver depois.");
+    }
+    this.hideSaveOverlay();
+  };
+
+  NecromancerGame.prototype.resetRuntimeUIState = function () {
+    this.hideSaveOverlay();
+    this.screen = "map";
+    this.uiMode = "game";
+    this.activeMenu = null;
+    this.activeModal = null;
+    this.selectedPanel = null;
+    this.selectedMenu = 0;
+    this.selectedLoadSave = 0;
+    this.inputLock = false;
+    this.enteredMap = true;
+    this.nearbyPortal = null;
+    this.nearbyInterest = null;
+    this.nearbyContext = null;
+    if (this.input && this.input.clearRuntimeInput) this.input.clearRuntimeInput();
+  };
+
+  NecromancerGame.prototype.closeAllMenusAndReturnToGame = function () {
+    if (!this.enteredMap && this.screen !== "map") {
+      this.hideSaveOverlay();
+      this.screen = "mainMenu";
+      this.uiMode = "menu";
+      this.activeMenu = "mainMenu";
+      this.activeModal = null;
+      this.selectedPanel = null;
+      this.inputLock = false;
+      if (this.input && this.input.clearRuntimeInput) this.input.clearRuntimeInput();
+      return false;
+    }
+    this.resetRuntimeUIState();
+    this.markMapVisited(this.currentMapId);
+    return true;
+  };
+
+  NecromancerGame.prototype.exposeRuntimeDebugTools = function () {
+    var self = this;
+    window.debugUIState = function () {
+      return {
+        currentScreen: self.screen,
+        activeMenu: self.activeMenu,
+        activeModal: self.activeModal,
+        uiMode: self.uiMode,
+        inputLock: self.inputLock,
+        saveOverlayMode: self.saveOverlayMode,
+        overlayVisible: Boolean(self.saveOverlay && !self.saveOverlay.hidden)
+      };
+    };
+    window.forceReturnToGame = function () {
+      return self.closeAllMenusAndReturnToGame();
+    };
+  };
+
+  NecromancerGame.prototype.saveSummaryText = function (save, title) {
+    if (!save) return title + "\nIndisponivel.";
+    var player = save.player || {};
+    var updated = save.updatedAt || save.savedAt || save.cloudUploadedAt;
+    return [
+      title,
+      "Versao: " + (save.gameVersion || save.version || save.schemaVersion || "-"),
+      "Mapa: " + (save.currentMapId || "-"),
+      "Nivel: " + (player.level || 1),
+      "Fragmentos: " + (player.fragments || 0),
+      "Servos ativos: " + (Array.isArray(save.servants) ? save.servants.length : 0),
+      "Servos reserva: " + (Array.isArray(save.reserveServants) ? save.reserveServants.length : 0),
+      "Atualizado: " + (updated ? new Date(updated).toLocaleString() : "-"),
+      "Plataforma: " + (save.platform || "-"),
+      "Revision: " + (save.revision || 0)
+    ].join("\n");
+  };
+
+  NecromancerGame.prototype.openSaveExport = function () {
+    if (!window.SaveManager) return;
+    if (!window.SaveManager.getCurrentSave() && !window.SaveManager.hasLocalSave()) this.saveGame(true);
+    var exported = window.SaveManager.exportSave();
+    if (!exported) {
+      this.message("Nenhum save para exportar.");
+      return;
+    }
+    this.showSaveOverlay("export", "Exportar Save", "Save exportado. Copie o conteudo abaixo.", exported, "");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(exported).then(function () {
+        this.saveOverlayMessage.textContent = "Save exportado e copiado. Copie novamente se necessario.";
+      }.bind(this)).catch(function () {});
+    }
+  };
+
+  NecromancerGame.prototype.openSaveImport = function () {
+    this.showSaveOverlay("import", "Importar Save", "Cole o JSON do save e use Validar antes de importar.", "", "");
+  };
+
+  NecromancerGame.prototype.validateImportFromOverlay = function () {
+    if (!window.SaveManager || !this.saveOverlayText) return false;
+    var raw = this.saveOverlayText.value.trim();
+    if (!raw) {
+      this.saveOverlaySummary.textContent = "Cole um JSON de save antes de validar.";
+      return false;
+    }
+    var data = window.SaveManager.importSave(raw);
+    if (!data) {
+      this.importCandidate = null;
+      this.saveOverlaySummary.textContent = "Save invalido. Verifique se o JSON esta completo e pertence ao jogo.";
+      return false;
+    }
+    if (window.SaveManager.validateSaveData) {
+      var validation = window.SaveManager.validateSaveData(data);
+      if (!validation.valid) {
+        this.importCandidate = null;
+        this.saveOverlaySummary.textContent = "Save invalido: " + validation.error;
+        return false;
+      }
+    }
+    this.importCandidate = window.SaveManager.normalizeServantRoster ? window.SaveManager.normalizeServantRoster(data) : data;
+    this.saveOverlaySummary.textContent = this.saveSummaryText(this.importCandidate, "Resumo do save importado");
+    this.saveOverlayMessage.textContent = "Save valido. Confirme para substituir o save local.";
+    return true;
+  };
+
+  NecromancerGame.prototype.confirmSaveOverlay = function () {
+    if (this.saveOverlayMode === "export") {
+      var text = this.saveOverlayText ? this.saveOverlayText.value : "";
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          this.message("Save copiado.", true);
+        }.bind(this)).catch(function () {
+          this.message("Save exportado. Copie o conteudo do campo.", true);
+        }.bind(this));
+      } else {
+        this.message("Save exportado. Copie o conteudo do campo.", true);
+      }
+      return;
+    }
+    if (this.saveOverlayMode !== "import") return;
+    if (!this.importCandidate && !this.validateImportFromOverlay()) return;
+    if (!window.SaveManager.applyImportedSave(this.importCandidate)) {
+      this.saveOverlaySummary.textContent = "Falha ao gravar o save importado.";
+      return;
+    }
+    if (window.SyncManager) {
+      window.SyncManager.markDirty();
+      window.SyncManager.queueSync();
+    }
+    this.applyLoadedData(this.importCandidate);
+    this.hideSaveOverlay();
+    this.message("Save importado.", true);
+  };
+
+  NecromancerGame.prototype.openSaveConflict = function () {
+    if (!window.SyncManager || !window.SyncManager.pendingConflict) {
+      this.message("Nenhum conflito de save pendente.");
+      return;
+    }
+    var conflict = window.SyncManager.pendingConflict;
+    var summary = this.saveSummaryText(conflict.local, "Save Local") + "\n\n" + this.saveSummaryText(conflict.cloud, "Save Nuvem");
+    this.showSaveOverlay("conflict", "Conflito de Save", "Encontramos dois saves diferentes.", "", summary);
+  };
+
+  NecromancerGame.prototype.resolveSaveConflict = function (choice) {
+    if (!window.SyncManager) return;
+    var self = this;
+    window.SyncManager.resolveConflict(choice).then(function (result) {
+      if (choice === "cloud" && result && result.success && result.data) {
+        if (!window.SaveManager.applyImportedSave(result.data)) {
+          self.message("Save da nuvem invalido.");
+          self.hideSaveOverlay();
+          return;
+        }
+        self.applyLoadedData(window.SaveManager.getCurrentSave() || result.data);
+      }
+      if (choice === "local") self.message("Save local enviado para a nuvem mock.", true);
+      if (choice === "cloud") self.message("Save da nuvem aplicado.", true);
+      self.hideSaveOverlay();
+      if (result && result.success && !result.cancelled) self.closeAllMenusAndReturnToGame();
+    });
+  };
+
+  NecromancerGame.prototype.getCloudMetadata = function () {
+    if (!window.AuthService || !window.AuthService.isLoggedIn() || !window.CloudSaveService) return null;
+    var user = window.AuthService.getCurrentUser();
+    return user ? window.CloudSaveService.getCloudSaveMetadata(user.userId) : null;
   };
 
   // Normalize servant roster - ensure max 3 active
@@ -310,8 +566,9 @@ this.respawnTimers = { common: 0, elite: 0 };
     this.setupStarterReserve();
     this.applyAllBonuses();
     this.allServants().forEach(this.applySkillBonusesToServant.bind(this));
-    this.screen = "team";
-    this.message("Novo jogo iniciado. Selecione ate 3 servos antes de explorar.", true);
+    this.resetRuntimeUIState();
+    this.markMapVisited(this.currentMapId);
+    this.message("Novo jogo iniciado.", true);
   };
 
   NecromancerGame.prototype.spawnEnemy = function (type, x, y, options) {
@@ -493,8 +750,9 @@ this.servants = (data.servants || []).map(this.deserializeServant.bind(this));
     this.areaTitle = this.map.current.name;
     this.areaTitleTimer = 3;
     this.portalCooldown = 1;
-    this.screen = "team";
-    this.message("Save carregado. Revise a equipe antes de explorar.", true);
+    this.resetRuntimeUIState();
+    this.markMapVisited(this.currentMapId);
+    this.message("Save carregado.", true);
     return true;
   };
 
@@ -554,6 +812,7 @@ NecromancerGame.prototype.deleteSave = function () {
     this.nearbyInterest = this.screen === "map" ? this.map.getNearbyInterestInfo(this.player.x, this.player.y, this.getWorldFlags()) : null;
     this.nearbyContext = this.getNearbyContext();
     this.updateContextButton();
+    this.updateReturnButton();
     if (this.screen !== "map") {
       this.messages.forEach(function (msg) { msg.life -= dt; });
       this.messages = this.messages.filter(function (msg) { return msg.life > 0; });
@@ -583,17 +842,92 @@ NecromancerGame.prototype.deleteSave = function () {
   };
 
   NecromancerGame.prototype.handleInput = function (dt) {
-    if (this.input.consume("menu")) this.openScreen("mainMenu");
+    if (this.input.consume("recoverUI")) {
+      this.closeAllMenusAndReturnToGame();
+      this.message("UI recuperada.", true);
+      return;
+    }
+    if (this.saveOverlay && !this.saveOverlay.hidden) {
+      if (this.input.consume("menu")) {
+        this.cancelSaveOverlay();
+      } else if (this.input.consume("start") || this.input.consume("returnToGame") || this.input.consume("manage")) {
+        this.cancelSaveOverlay();
+        this.closeAllMenusAndReturnToGame();
+      }
+      return;
+    }
+    if (this.screen === "account") {
+      if (this.input.consume("menu") || this.input.consume("start") || this.input.consume("returnToGame") || this.input.consume("manage")) {
+        this.closeAllMenusAndReturnToGame();
+        return;
+      }
+      if (this.input.consume("command")) this.selectedEquipment = (this.selectedEquipment + 1) % 6;
+      if (this.input.consume("capture") || this.input.consume("attack")) this.confirmAccountAction();
+      if (this.input.consume("skill1")) this.toggleMockLogin();
+      if (this.input.consume("skill2")) this.syncNow();
+      if (this.input.consume("skill3")) this.cycleVisualQuality();
+      if (this.input.consume("save")) this.openSaveExport();
+      if (this.input.consume("inventory")) this.openSaveImport();
+      if (this.input.consume("deleteSave")) this.deleteSave();
+      return;
+    }
+    if (this.screen === "loadSave") {
+      if (this.input.consume("menu") || this.input.consume("start") || this.input.consume("returnToGame") || this.input.consume("manage")) {
+        this.closeAllMenusAndReturnToGame();
+        return;
+      }
+      if (this.input.consume("command")) this.nextMenuSelection();
+      if (this.input.consume("capture") || this.input.consume("attack")) this.confirmLoadSaveAction();
+      if (this.input.consume("skill1")) this.loadGame();
+      if (this.input.consume("skill2")) this.loadCloudSave();
+      if (this.input.consume("skill3")) this.syncNow();
+      if (this.input.consume("skill4")) this.openSaveConflict();
+      if (this.input.consume("save")) this.openSaveExport();
+      if (this.input.consume("inventory")) this.openSaveImport();
+      return;
+    }
+    if (this.input.consume("menu")) {
+      if (this.screen === "map") this.openScreen("mainMenu");
+      else this.closeAllMenusAndReturnToGame();
+      return;
+    }
+    if (this.input.consume("returnToGame")) {
+      if (this.screen !== "map") this.closeAllMenusAndReturnToGame();
+      return;
+    }
     if (this.input.consume("save")) this.saveGame();
     if (this.input.consume("deleteSave")) this.deleteSave();
-if (this.input.consume("manage")) this.openScreen("team");
-    if (this.input.consume("account")) this.openScreen("account");
-    if (this.input.consume("inventory")) this.openScreen("inventory");
-    if (this.input.consume("skills")) this.openScreen("skills");
+if (this.input.consume("manage")) {
+      if (this.screen === "map") this.openScreen("team");
+      else this.closeAllMenusAndReturnToGame();
+      return;
+    }
+    if (this.input.consume("account")) {
+      if (this.screen === "map" || this.screen === "mainMenu") this.openScreen("account");
+      else this.closeAllMenusAndReturnToGame();
+      return;
+    }
+    if (this.input.consume("inventory")) {
+      if (this.screen === "map") this.openScreen("inventory");
+      else this.closeAllMenusAndReturnToGame();
+      return;
+    }
+    if (this.input.consume("skills")) {
+      if (this.screen === "map") this.openScreen("skills");
+      else this.closeAllMenusAndReturnToGame();
+      return;
+    }
     if (this.input.consume("start")) {
       if (this.screen === "mainMenu") this.confirmMainMenu();
-      else if (this.screen === "controls" || this.screen === "credits") this.screen = "mainMenu";
-      else this.enterMap();
+      else if (this.screen === "controls" || this.screen === "credits") {
+        if (this.enteredMap) this.closeAllMenusAndReturnToGame();
+        else this.openScreen("mainMenu");
+      } else if (this.screen === "map") {
+        this.enterMap();
+      } else {
+        this.closeAllMenusAndReturnToGame();
+      }
+      return;
     }
     if (this.input.consume("fusion")) this.fuseSelectedKind();
 
@@ -607,37 +941,6 @@ if (this.screen !== "map") {
         else this.selectedSkill = 2;
       }
       if (this.input.consume("skill4")) this.fuseSelectedKind();
-      if (this.screen === "account") {
-        if (this.input.consume("start") || this.input.consume("inventory")) this.openScreen("mainMenu");
-        if (window.AuthService && (this.input.consume("skill1") || this.input.consume("menu"))) {
-          if (window.AuthService.isLoggedIn()) {
-            window.AuthService.signOut();
-            this.message("Deslogado.");
-          } else {
-            window.AuthService.signInWithMock();
-            this.message("Logado como Convidado.");
-          }
-        }
-        if (window.SyncManager && this.input.consume("skill2")) {
-          window.SyncManager.syncNow();
-          this.message("Sincronizando...");
-        }
-        if ((this.input.consume("save")) && window.SaveManager) {
-          var exported = window.SaveManager.exportSave();
-          if (exported) {
-            this.message("Save exportado para console.");
-            console.log("=== EXPORTED SAVE ===");
-            console.log(exported);
-            console.log("====================");
-          }
-        }
-        if ((this.input.consume("inventory")) && window.SaveManager) {
-          // Import handled via paste in console for now
-          this.message("Para importar, use SaveManager.importSave(JSON) no console.");
-        }
-        if (this.input.consume("deleteSave")) this.deleteSave();
-        return;
-      }
       return;
     }
 
@@ -656,14 +959,95 @@ if (this.screen !== "map") {
 
   NecromancerGame.prototype.openScreen = function (screen) {
     this.screen = screen;
+    this.uiMode = screen === "map" ? "game" : "menu";
+    this.activeMenu = screen === "map" ? null : screen;
+    this.activeModal = null;
+    this.inputLock = false;
     if (screen === "mainMenu") this.message("Menu principal: CMD alterna, CAP confirma.");
     if (screen === "team") this.message("Gerenciamento: CMD alterna reserva, CAP ativa/remove, F funde repetidos.");
     if (screen === "inventory") this.message("Inventario aberto. Mapa/Enter retorna ao jogo.");
     if (screen === "skills") this.message("Habilidades: CMD alterna, CAP compra com pontos.");
+    if (screen === "loadSave") this.message("Carregar Save: CMD alterna, CAP confirma, I importa, P exporta.");
+    if (screen === "account") this.message("Conta: CMD alterna, CAP confirma, 3 muda qualidade visual.");
+  };
+
+  NecromancerGame.prototype.toggleMockLogin = function () {
+    if (!window.AuthService) return;
+    if (window.AuthService.isLoggedIn()) {
+      window.AuthService.signOut();
+      this.message("Deslogado.");
+    } else {
+      window.AuthService.signInWithMock();
+      this.message("Login mock ativo.");
+    }
+  };
+
+  NecromancerGame.prototype.syncNow = function () {
+    if (!window.SyncManager) return;
+    window.SyncManager.syncNow(window.SaveManager ? window.SaveManager.getCurrentSave() : null).then(function (result) {
+      if (result && result.conflict) this.openSaveConflict();
+      else if (result && result.success) this.message("Sincronizacao concluida.", true);
+      else this.message("Sincronizacao pendente ou indisponivel.");
+    }.bind(this));
+    this.message("Sincronizando...");
+  };
+
+  NecromancerGame.prototype.cycleVisualQuality = function () {
+    if (!window.GameArt || !window.GameArt.nextQuality) return;
+    window.GameArt.nextQuality();
+    this.message("Qualidade visual: " + window.GameArt.getQualityLabel() + ".", true);
+  };
+
+  NecromancerGame.prototype.confirmAccountAction = function () {
+    var action = this.selectedEquipment % 6;
+    if (action === 0) this.toggleMockLogin();
+    else if (action === 1) this.syncNow();
+    else if (action === 2) this.cycleVisualQuality();
+    else if (action === 3) this.openSaveExport();
+    else if (action === 4) this.openSaveImport();
+    else this.deleteSave();
+  };
+
+  NecromancerGame.prototype.getLoadSaveOptions = function () {
+    return ["Carregar Local", "Carregar Nuvem", "Sincronizar", "Importar JSON", "Exportar Save", "Voltar"];
+  };
+
+  NecromancerGame.prototype.confirmLoadSaveAction = function () {
+    var option = this.getLoadSaveOptions()[this.selectedLoadSave] || "Voltar";
+    if (option === "Carregar Local") this.loadGame();
+    else if (option === "Carregar Nuvem") this.loadCloudSave();
+    else if (option === "Sincronizar") this.syncNow();
+    else if (option === "Importar JSON") this.openSaveImport();
+    else if (option === "Exportar Save") this.openSaveExport();
+    else this.closeAllMenusAndReturnToGame();
+  };
+
+  NecromancerGame.prototype.loadCloudSave = function () {
+    if (!window.AuthService || !window.AuthService.isLoggedIn() || !window.CloudSaveService) {
+      this.message("Entre na conta mock antes de carregar nuvem.");
+      return;
+    }
+    var user = window.AuthService.getCurrentUser();
+    window.CloudSaveService.downloadSave(user.userId).then(function (result) {
+      if (!result.success || !result.data) {
+        this.message("Nenhum save em nuvem encontrado.");
+        return;
+      }
+      if (!window.SaveManager.applyImportedSave(result.data)) {
+        this.message("Save da nuvem invalido.");
+        return;
+      }
+      this.applyLoadedData(window.SaveManager.getCurrentSave() || result.data);
+      this.message("Save da nuvem carregado.", true);
+    }.bind(this));
   };
 
   NecromancerGame.prototype.enterMap = function () {
     this.screen = "map";
+    this.uiMode = "game";
+    this.activeMenu = null;
+    this.activeModal = null;
+    this.inputLock = false;
     this.portalCooldown = Math.max(this.portalCooldown, 0.6);
     if (!this.enteredMap) {
       this.enteredMap = true;
@@ -701,6 +1085,14 @@ if (this.screen !== "map") {
     } else {
       button.classList.remove("is-visible");
     }
+  };
+
+  NecromancerGame.prototype.updateReturnButton = function () {
+    var button = document.querySelector(".menu-button.start");
+    if (!button) return;
+    var shouldReturn = this.screen !== "map" && (this.screen !== "mainMenu" || this.enteredMap);
+    button.textContent = shouldReturn ? "Voltar" : "Mapa";
+    button.setAttribute("aria-label", shouldReturn ? "Voltar ao jogo" : "Entrar ou voltar ao mapa");
   };
 
   NecromancerGame.prototype.useContextAction = function () {
@@ -873,7 +1265,9 @@ NecromancerGame.prototype.nextMenuSelection = function () {
       this.selectedEquipment = (this.selectedEquipment + 1) % equipmentKeys.length;
     } else if (this.screen === "account") {
       // Cycle through action buttons using selection state
-      this.selectedEquipment = (this.selectedEquipment + 1) % 4;
+      this.selectedEquipment = (this.selectedEquipment + 1) % 6;
+    } else if (this.screen === "loadSave") {
+      this.selectedLoadSave = (this.selectedLoadSave + 1) % this.getLoadSaveOptions().length;
     }
   };
 
@@ -882,7 +1276,9 @@ NecromancerGame.prototype.nextMenuSelection = function () {
     else if (this.screen === "team") this.toggleSelectedReserve();
     else if (this.screen === "skills") this.unlockSelectedSkill();
     else if (this.screen === "inventory") this.equipSelectedItem();
-    else if (this.screen === "controls" || this.screen === "credits") this.screen = "mainMenu";
+    else if (this.screen === "account") this.confirmAccountAction();
+    else if (this.screen === "loadSave") this.confirmLoadSaveAction();
+    else if (this.screen === "controls" || this.screen === "credits") this.openScreen("mainMenu");
   };
 
 NecromancerGame.prototype.getMainMenuOptions = function () {
@@ -898,8 +1294,8 @@ NecromancerGame.prototype.confirmMainMenu = function () {
     else if (option === "Continuar") this.loadGame();
     else if (option === "Carregar Save") this.openScreen("loadSave");
     else if (option === "Conta") this.openScreen("account");
-    else if (option === "Controles") this.screen = "controls";
-    else if (option === "Creditos") this.screen = "credits";
+    else if (option === "Controles") this.openScreen("controls");
+    else if (option === "Creditos") this.openScreen("credits");
     else if (option === "Apagar Save") this.deleteSave();
   };
 

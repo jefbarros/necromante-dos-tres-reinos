@@ -61,7 +61,7 @@ button {
   left: 50%;
   translate: -50% 0;
   display: grid;
-  grid-template-columns: repeat(6, minmax(58px, 92px));
+  grid-template-columns: repeat(7, minmax(54px, 88px));
   gap: 8px;
   pointer-events: auto;
 }
@@ -81,7 +81,7 @@ button {
 
 @media (max-width: 760px) {
   .top-menu {
-    grid-template-columns: repeat(6, minmax(46px, 1fr));
+    grid-template-columns: repeat(7, minmax(38px, 1fr));
     width: calc(100vw - 18px);
     gap: 5px;
   }
@@ -89,6 +89,119 @@ button {
   .menu-button {
     padding: 0 3px;
     font-size: 10px;
+  }
+}
+
+.save-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  background: rgba(3, 5, 8, 0.74);
+  pointer-events: auto;
+}
+
+.save-overlay[hidden] {
+  display: none;
+}
+
+.save-dialog {
+  width: min(900px, 100%);
+  max-height: min(86vh, 720px);
+  display: grid;
+  grid-template-rows: auto auto auto minmax(180px, 1fr) auto;
+  gap: 10px;
+  padding: clamp(14px, 2.5vw, 22px);
+  border: 1px solid rgba(125, 240, 205, 0.34);
+  border-radius: 8px;
+  background: rgba(5, 8, 12, 0.96);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.58), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  color: #edf8ee;
+}
+
+.save-dialog h2 {
+  margin: 0;
+  font-size: clamp(18px, 3vw, 24px);
+  letter-spacing: 0;
+}
+
+.save-dialog p {
+  margin: 0;
+  color: #b9cbc0;
+  font-size: clamp(12px, 2vw, 14px);
+  line-height: 1.4;
+}
+
+#saveOverlaySummary {
+  margin: 0;
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: #dbe9e1;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 10px;
+  font: 700 12px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+#saveOverlayText {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  border: 1px solid rgba(143, 241, 220, 0.25);
+  border-radius: 6px;
+  padding: 10px;
+  color: #eef9f1;
+  background: rgba(1, 4, 7, 0.72);
+  font: 700 12px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.save-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.save-actions button {
+  min-height: 38px;
+  min-width: 108px;
+  border: 1px solid rgba(220, 231, 224, 0.24);
+  border-radius: 8px;
+  color: #eef9f1;
+  background: rgba(18, 28, 34, 0.88);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.save-actions button:active {
+  transform: translateY(1px);
+  background: rgba(56, 91, 82, 0.92);
+}
+
+@media (max-width: 620px), (max-height: 460px) {
+  .save-dialog {
+    max-height: calc(100vh - 20px);
+    grid-template-rows: auto auto auto minmax(130px, 1fr) auto;
+  }
+
+  #saveOverlaySummary {
+    max-height: 120px;
+  }
+
+  #saveOverlayText {
+    min-height: 130px;
+  }
+
+  .save-actions {
+    justify-content: stretch;
+  }
+
+  .save-actions button {
+    flex: 1 1 120px;
   }
 }
 
@@ -224,5 +337,33 @@ button {
 
   #mobileControls:hover {
     opacity: 1;
+  }
+}
+
+@media (max-height: 520px) {
+  .top-menu {
+    top: max(5px, env(safe-area-inset-top));
+    gap: 4px;
+  }
+
+  .menu-button {
+    height: 28px;
+    font-size: 10px;
+  }
+
+  .portal-button {
+    bottom: max(70px, calc(env(safe-area-inset-bottom) + 58px));
+    height: 36px;
+  }
+
+  .joystick {
+    width: clamp(86px, 14vw, 118px);
+    opacity: 0.82;
+  }
+
+  .action-grid {
+    grid-template-columns: repeat(3, clamp(46px, 7vw, 62px));
+    grid-auto-rows: clamp(40px, 7vw, 54px);
+    gap: 6px;
   }
 }

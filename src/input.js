@@ -26,6 +26,7 @@ function keyToAction(key) {
     if (key === "tab") return "command";
     if (key === "f") return "fusion";
     if (key === "l") return "account";
+    if (key === "f10") return "recoverUI";
     return "";
   }
 
@@ -74,7 +75,8 @@ function keyToAction(key) {
         key === "e" ||
         key === "enter" ||
         key === "tab" ||
-        key === "f"
+        key === "f" ||
+        key === "f10"
       ) {
         event.preventDefault();
       }
@@ -179,5 +181,16 @@ function keyToAction(key) {
 
   InputManager.prototype.getLastAim = function () {
     return this.lastAim;
+  };
+
+  InputManager.prototype.clearRuntimeInput = function () {
+    this.pending = Object.create(null);
+    this.keys.clear();
+    this.joystick.active = false;
+    this.joystick.id = null;
+    this.joystick.x = 0;
+    this.joystick.y = 0;
+    var knob = document.getElementById("joystickKnob");
+    if (knob) knob.style.transform = "translate(0, 0)";
   };
 })();

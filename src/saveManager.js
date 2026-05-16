@@ -6,8 +6,26 @@
   // Handles save, load, delete, export, import, sync
   // Uses versioned save format with migration support
 
-  var SCHEMA_VERSION = "0.2.3";
-  var GAME_VERSION = "0.2.3";
+  var SCHEMA_VERSION = "0.2.7";
+  var GAME_VERSION = "0.2.7";
+  var RUNTIME_UI_FIELDS = [
+    "screen",
+    "currentScreen",
+    "currentMenu",
+    "activeMenu",
+    "activeModal",
+    "activePanel",
+    "selectedMenu",
+    "selectedPanel",
+    "selectedLoadSave",
+    "uiMode",
+    "gameMode",
+    "inputLock",
+    "menuState",
+    "uiState",
+    "overlayState",
+    "saveOverlayMode"
+  ];
 
   // Legacy save key from v0.2.2
   var LEGACY_SAVE_KEY = "necromanteTresReinosSaveV02";
@@ -185,6 +203,14 @@
         data = this.migrateSave(data);
       }
 
+      data = this.sanitizeRuntimeUIFields(data);
+      data = this.normalizeServantRoster(data);
+      var validation = this.validateSaveData(data);
+      if (!validation.valid) {
+        console.warn("Local save invalid:", validation.error);
+        return null;
+      }
+
       this.currentSave = data;
       return data;
     },
@@ -204,48 +230,49 @@
     migrateSave: function (oldSave) {
       if (!oldSave) return null;
 
+      var cleanOldSave = this.sanitizeRuntimeUIFields(Object.assign({}, oldSave));
       var newSave = {
         schemaVersion: SCHEMA_VERSION,
-        gameVersion: oldSave.version || oldSave.gameVersion || GAME_VERSION,
+        gameVersion: GAME_VERSION,
         userId: null,
         slotId: "default",
         deviceId: window.PlatformService ? window.PlatformService.getDeviceId() : null,
         platform: "web",
-        revision: 1,
-        savedAt: oldSave.savedAt || Date.now(),
-        updatedAt: Date.now(),
+        revision: cleanOldSave.revision || 1,
+        savedAt: cleanOldSave.savedAt || Date.now(),
+        updatedAt: cleanOldSave.updatedAt || Date.now(),
 
         // Player
         player: {
-          level: oldSave.player ? oldSave.player.level : 1,
-          exp: oldSave.player ? oldSave.player.exp : 0,
-          expToNext: oldSave.player ? oldSave.player.expToNext : 100,
-          fragments: oldSave.player ? oldSave.player.fragments : 0,
-          maxHp: oldSave.player ? oldSave.player.maxHp : 130,
-          maxMana: oldSave.player ? oldSave.player.maxMana : 100,
-          necroDomain: oldSave.player ? oldSave.player.necroDomain : 1,
-          x: oldSave.player ? oldSave.player.x : 5.5,
-          y: oldSave.player ? oldSave.player.y : 5.2
+          level: cleanOldSave.player ? cleanOldSave.player.level : 1,
+          exp: cleanOldSave.player ? cleanOldSave.player.exp : 0,
+          expToNext: cleanOldSave.player ? cleanOldSave.player.expToNext : 100,
+          fragments: cleanOldSave.player ? cleanOldSave.player.fragments : 0,
+          maxHp: cleanOldSave.player ? cleanOldSave.player.maxHp : 130,
+          maxMana: cleanOldSave.player ? cleanOldSave.player.maxMana : 100,
+          necroDomain: cleanOldSave.player ? cleanOldSave.player.necroDomain : 1,
+          x: cleanOldSave.player ? cleanOldSave.player.x : 5.5,
+          y: cleanOldSave.player ? cleanOldSave.player.y : 5.2
         },
 
-        currentMapId: oldSave.currentMapId || "cripta_inicial",
-        servants: oldSave.servants || [],
-        reserveServants: oldSave.reserveServants || [],
-        bossDefeated: oldSave.bossDefeated || false,
-        secretUnlocked: oldSave.secretUnlocked || false,
-        inventory: oldSave.inventory || {},
-        equipment: oldSave.equipment || {},
-        equipmentOwned: oldSave.equipmentOwned || {},
-        unlockedSkills: oldSave.unlockedSkills || {},
-        skillPoints: oldSave.skillPoints || 0,
-        reputation: oldSave.reputation || {},
-        mapState: oldSave.mapState || {},
-        tutorialCaptureDone: oldSave.tutorialCaptureDone || false,
-        dragonSignalSeen: oldSave.dragonSignalSeen || false
+        currentMapId: cleanOldSave.currentMapId || "cripta_inicial",
+        servants: cleanOldSave.servants || [],
+        reserveServants: cleanOldSave.reserveServants || [],
+        bossDefeated: cleanOldSave.bossDefeated || false,
+        secretUnlocked: cleanOldSave.secretUnlocked || false,
+        inventory: cleanOldSave.inventory || {},
+        equipment: cleanOldSave.equipment || {},
+        equipmentOwned: cleanOldSave.equipmentOwned || {},
+        unlockedSkills: cleanOldSave.unlockedSkills || {},
+        skillPoints: cleanOldSave.skillPoints || 0,
+        reputation: cleanOldSave.reputation || {},
+        mapState: cleanOldSave.mapState || {},
+        tutorialCaptureDone: cleanOldSave.tutorialCaptureDone || false,
+        dragonSignalSeen: cleanOldSave.dragonSignalSeen || false
       };
 
       // Handle legacy mapState formats
-      if (oldSave.bossDefeated) {
+      if (cleanOldSave.bossDefeated) {
         if (!newSave.mapState.cemiterio_neutro) {
           newSave.mapState.cemiterio_neutro = {};
         }
@@ -256,7 +283,7 @@
         };
       }
 
-      if (oldSave.dragonSignalSeen) {
+      if (cleanOldSave.dragonSignalSeen) {
         if (!newSave.mapState.area_secreta_cripta) {
           newSave.mapState.area_secreta_cripta = {};
         }
@@ -266,7 +293,7 @@
         };
       }
 
-      console.log("Save migrated from", oldSave.version || oldSave.schemaVersion || "legacy", "to", SCHEMA_VERSION);
+      console.log("Save migrated from", cleanOldSave.version || cleanOldSave.schemaVersion || "legacy", "to", SCHEMA_VERSION);
 
       return newSave;
     },
@@ -295,15 +322,17 @@
       try {
         var data = JSON.parse(jsonString);
 
-        // Validate basic structure
-        if (!data.player && !data.schemaVersion && !data.version) {
-          console.warn("Invalid save format");
-          return null;
-        }
-
         // Migrate if needed
         if (data.schemaVersion !== SCHEMA_VERSION) {
           data = this.migrateSave(data);
+        }
+
+        data = this.sanitizeRuntimeUIFields(data);
+        data = this.normalizeServantRoster(data);
+        var validation = this.validateSaveData(data);
+        if (!validation.valid) {
+          console.warn("Invalid save format:", validation.error);
+          return null;
         }
 
         return data;
@@ -313,9 +342,57 @@
       }
     },
 
+    validateSaveData: function (data) {
+      if (!data || typeof data !== "object") {
+        return { valid: false, error: "JSON nao contem um objeto de save." };
+      }
+      if (!data.schemaVersion && !data.version) {
+        return { valid: false, error: "Save sem schemaVersion ou versao legada." };
+      }
+      if (!data.player || typeof data.player !== "object") {
+        return { valid: false, error: "Save sem dados do jogador." };
+      }
+      if (!data.currentMapId) {
+        return { valid: false, error: "Save sem mapa atual." };
+      }
+      if (data.schemaVersion && data.schemaVersion !== SCHEMA_VERSION) {
+        return { valid: false, error: "Schema nao migrado para " + SCHEMA_VERSION + "." };
+      }
+      return { valid: true, error: "" };
+    },
+
+    normalizeServantRoster: function (data) {
+      if (!data) return data;
+      var active = Array.isArray(data.servants) ? data.servants.filter(Boolean) : [];
+      var reserve = Array.isArray(data.reserveServants) ? data.reserveServants.filter(Boolean) : [];
+      if (active.length > 3) {
+        reserve = reserve.concat(active.slice(3));
+        active = active.slice(0, 3);
+      }
+      data.servants = active;
+      data.reserveServants = reserve;
+      return data;
+    },
+
+    sanitizeRuntimeUIFields: function (data) {
+      if (!data || typeof data !== "object") return data;
+      RUNTIME_UI_FIELDS.forEach(function (field) {
+        if (Object.prototype.hasOwnProperty.call(data, field)) delete data[field];
+      });
+      return data;
+    },
+
     // Apply imported save
     applyImportedSave: function (data) {
       if (!data) return false;
+      if (data.schemaVersion !== SCHEMA_VERSION) data = this.migrateSave(data);
+      data = this.sanitizeRuntimeUIFields(data);
+      data = this.normalizeServantRoster(data);
+      var validation = this.validateSaveData(data);
+      if (!validation.valid) {
+        console.warn("Cannot apply imported save:", validation.error);
+        return false;
+      }
 
       // Save locally
       var result = window.LocalSaveService.saveLocal(data);

@@ -1,8 +1,60 @@
 (function () {
   "use strict";
 
-  var QUALITY = (window.GameConfig && window.GameConfig.visualQuality) || "medium";
-  var qualityScale = QUALITY === "high" ? 1.2 : QUALITY === "low" ? 0.65 : 1;
+  var QUALITY_KEY = "necromante_visual_quality";
+  var QUALITY = normalizeQuality(loadStoredQuality() || (window.GameConfig && window.GameConfig.visualQuality) || "medium");
+  var qualityScale = scaleForQuality(QUALITY);
+
+  function normalizeQuality(value) {
+    return value === "low" || value === "high" ? value : "medium";
+  }
+
+  function loadStoredQuality() {
+    try {
+      return localStorage.getItem(QUALITY_KEY);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function scaleForQuality(value) {
+    if (value === "high") return 1.35;
+    if (value === "low") return 0.5;
+    return 1;
+  }
+
+  function setQuality(value) {
+    QUALITY = normalizeQuality(value);
+    qualityScale = scaleForQuality(QUALITY);
+    if (window.GameConfig) window.GameConfig.visualQuality = QUALITY;
+    window.VISUAL_QUALITY = QUALITY;
+    try {
+      localStorage.setItem(QUALITY_KEY, QUALITY);
+    } catch (error) {
+      // Ignore private-mode storage failures.
+    }
+    return QUALITY;
+  }
+
+  function getQuality() {
+    return QUALITY;
+  }
+
+  function getQualityLabel() {
+    if (QUALITY === "low") return "Baixa";
+    if (QUALITY === "high") return "Alta";
+    return "Media";
+  }
+
+  function nextQuality() {
+    if (QUALITY === "low") return setQuality("medium");
+    if (QUALITY === "medium") return setQuality("high");
+    return setQuality("low");
+  }
+
+  function qualityCount(low, medium, high) {
+    return QUALITY === "low" ? low : QUALITY === "high" ? high : medium;
+  }
 
   function clamp01(value) {
     return Math.max(0, Math.min(1, value));
@@ -56,13 +108,14 @@
   }
 
   function drawAura(ctx, x, y, radius, color, pulse) {
+    if (QUALITY === "low" && radius > 44) return;
     var r = radius * (1 + Math.sin(pulse || 0) * 0.08);
     var gradient = ctx.createRadialGradient(x, y, 2, x, y, r);
     gradient.addColorStop(0, color);
     gradient.addColorStop(1, "rgba(0,0,0,0)");
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = 0.42;
+    ctx.globalAlpha = QUALITY === "high" ? 0.5 : QUALITY === "low" ? 0.26 : 0.42;
     ctx.fillStyle = gradient;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -79,8 +132,9 @@
     ctx.beginPath();
     ctx.ellipse(x, y, radius, radius * 0.42, 0, 0, Math.PI * 2);
     ctx.stroke();
-    for (var i = 0; i < 10; i += 1) {
-      var a = i / 10 * Math.PI * 2 + tick * 0.25;
+    var runeCount = qualityCount(5, 10, 14);
+    for (var i = 0; i < runeCount; i += 1) {
+      var a = i / runeCount * Math.PI * 2 + tick * 0.25;
       var rx = x + Math.cos(a) * radius * 0.84;
       var ry = y + Math.sin(a) * radius * 0.36;
       ctx.beginPath();
@@ -156,6 +210,14 @@
       ctx.strokeStyle = mapId === "area_secreta_cripta" ? "rgba(112,205,255,0.35)" : "rgba(121,238,203,0.2)";
       ctx.beginPath();
       ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    if (QUALITY === "high" && hash(s + 18) > 0.78) {
+      ctx.strokeStyle = "rgba(227,241,229,0.09)";
+      ctx.beginPath();
+      ctx.moveTo(p.x - w * 0.35, p.y);
+      ctx.lineTo(p.x, p.y + h * 0.35);
+      ctx.lineTo(p.x + w * 0.3, p.y);
       ctx.stroke();
     }
     ctx.restore();
@@ -296,7 +358,7 @@
   function drawDetailedPortal(ctx, portal, unlocked, label, tick) {
     var color = portal.future ? "#7e95ad" : unlocked ? "#7df0cd" : "#d36c84";
     ctx.save();
-    drawAura(ctx, 0, -15, unlocked ? 58 : 46, color, tick);
+    drawAura(ctx, 0, -15, unlocked ? 52 + 6 * qualityScale : 42, color, tick);
     drawRuneCircle(ctx, 0, 0, 34 + Math.sin(tick * 2) * 2, color, tick);
     ctx.strokeStyle = color;
     ctx.lineWidth = 5;
@@ -317,13 +379,13 @@
         ctx.stroke();
       }
     }
-    var particleCount = Math.round(8 * qualityScale);
+    var particleCount = qualityCount(3, 8, 13);
     for (var i = 0; i < particleCount; i += 1) {
       var a = tick * 1.2 + i * 1.9;
       var px = Math.cos(a) * (18 + hash(i + 7) * 19);
       var py = -8 - ((tick * 20 + i * 13) % 42);
       ctx.fillStyle = color;
-      ctx.globalAlpha = 0.25 + hash(i + 2) * 0.45;
+      ctx.globalAlpha = (QUALITY === "low" ? 0.2 : 0.25) + hash(i + 2) * 0.45;
       ctx.beginPath();
       ctx.arc(px, py, 2.2, 0, Math.PI * 2);
       ctx.fill();
@@ -679,8 +741,15 @@
     ctx.restore();
   }
 
+  setQuality(QUALITY);
+
   window.GameArt = {
-    quality: QUALITY,
+    get quality() { return QUALITY; },
+    getQuality: getQuality,
+    setQuality: setQuality,
+    nextQuality: nextQuality,
+    getQualityLabel: getQualityLabel,
+    qualityCount: qualityCount,
     clamp01: clamp01,
     hash: hash,
     drawIsoShadow: drawIsoShadow,

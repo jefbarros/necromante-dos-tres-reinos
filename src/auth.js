@@ -109,6 +109,20 @@
       });
     },
 
+    signInWithMock: function () {
+      var deviceId = window.PlatformService ? window.PlatformService.getDeviceId() : "web";
+      this.currentUser = {
+        userId: "mock_" + String(deviceId).slice(0, 18),
+        email: "mock@necromante.local",
+        createdAt: Date.now(),
+        mock: true
+      };
+      this.state = AuthState.LOGGED_IN;
+      this.lastError = null;
+      this.saveAuthData();
+      return Promise.resolve({ success: true, user: this.currentUser });
+    },
+
     // Sign out
     signOut: function () {
       this.currentUser = null;

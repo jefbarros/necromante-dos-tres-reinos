@@ -42,6 +42,13 @@
         return Promise.resolve({ success: true, reason: "No user ID" });
       }
 
+      if (!localSave && window.SaveManager && window.SaveManager.getCurrentSave) {
+        localSave = window.SaveManager.getCurrentSave();
+      }
+      if (!localSave && window.LocalSaveService) {
+        localSave = window.LocalSaveService.loadLocal();
+      }
+
       this.status = SyncStatus.SYNCING;
 
       // Get cloud save for comparison
@@ -88,6 +95,11 @@
     // Upload local save to cloud
     uploadLocal: function (localSave, userId) {
       var self = this;
+      if (!localSave) {
+        self.status = SyncStatus.ERROR;
+        self.lastError = "Nenhum save local para enviar.";
+        return Promise.resolve({ success: false, error: self.lastError });
+      }
       var dataToUpload = JSON.parse(JSON.stringify(localSave));
 
       // Add revision
@@ -98,6 +110,8 @@
 
       return window.CloudSaveService.uploadSave(userId, dataToUpload).then(function (result) {
         if (result.success) {
+          if (window.LocalSaveService) window.LocalSaveService.saveLocal(dataToUpload);
+          if (window.SaveManager) window.SaveManager.currentSave = dataToUpload;
           self.status = SyncStatus.IDLE;
           self.lastSyncAt = Date.now();
           self.pendingSync = false;
@@ -163,8 +177,7 @@
         });
       } else {
         // Cancel
-        self.pendingConflict = null;
-        self.status = SyncStatus.IDLE;
+        self.status = SyncStatus.CONFLICT;
         return Promise.resolve({ success: true, cancelled: true });
       }
     },
@@ -187,6 +200,8 @@
       var cloudUpdated = cloudSave.updatedAt || cloudSave.cloudUploadedAt || 0;
       var localPlatform = localSave.platform;
       var cloudPlatform = cloudSave.platform;
+      var localDevice = localSave.deviceId;
+      var cloudDevice = cloudSave.deviceId;
 
       // Compare by revision first
       if (localRevision > cloudRevision) {
@@ -194,6 +209,16 @@
       }
       if (cloudRevision > localRevision) {
         return { cloudNewer: true };
+      }
+
+      var differentSource = (localDevice && cloudDevice && localDevice !== cloudDevice) ||
+        (localPlatform && cloudPlatform && localPlatform !== cloudPlatform);
+      if (differentSource) {
+        return {
+          conflict: true,
+          differentPlatform: localPlatform !== cloudPlatform,
+          differentDevice: localDevice !== cloudDevice
+        };
       }
 
       // Tie on revision, compare by timestamp
@@ -205,10 +230,6 @@
       }
 
       // Both same, check for potential device conflict
-      if (localPlatform && cloudPlatform && localPlatform !== cloudPlatform) {
-        return { tie: true, differentPlatform: true };
-      }
-
       return { tie: true };
     },
 
