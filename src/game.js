@@ -106,10 +106,14 @@ window.NecromancerGame = function NecromancerGame(canvas, input) {
     this.selectedActive = 0;
     this.selectedReserve = 0;
     this.reserveFilter = "all";
+    this.reserveSort = "power";
+    this.reserveScroll = 0;
     this.selectedSkill = 0;
     this.selectedMenu = 0;
+    this.pointer = { x: -9999, y: -9999 };
     this.inventoryTab = "equipment";
     this.selectedInventory = 0;
+    this.inventoryScroll = 0;
     this.selectedEquipment = 0;
     this.selectedLoadSave = 0;
     this.importCandidate = null;
@@ -293,6 +297,49 @@ this.respawnTimers = { common: 0, elite: 0 };
     window.forceReturnToGame = function () {
       return self.closeAllMenusAndReturnToGame();
     };
+  };
+
+  NecromancerGame.prototype.handleCanvasPointerMove = function (x, y) {
+    this.pointer.x = x;
+    this.pointer.y = y;
+    return this.screen !== "map";
+  };
+
+  NecromancerGame.prototype.handleCanvasPointerDown = function (x, y) {
+    this.handleCanvasPointerMove(x, y);
+    if (!this.ui || !this.ui.handleCanvasClick) return false;
+    return this.ui.handleCanvasClick(x, y);
+  };
+
+  NecromancerGame.prototype.handleCanvasWheel = function (x, y, deltaY) {
+    this.handleCanvasPointerMove(x, y);
+    if (!this.ui || !this.ui.handleCanvasWheel) return false;
+    return this.ui.handleCanvasWheel(x, y, deltaY);
+  };
+
+  NecromancerGame.prototype.activateClickArea = function (area) {
+    if (!area) return;
+    if (area.screen && area.screen !== this.screen) return;
+    if (typeof area.select === "function") area.select();
+    if (area.action === "quickScreen") this.openQuickScreen(area.target);
+    else if (area.action === "confirm") this.confirmMenuAction();
+    else if (area.action === "mainMenu") this.confirmMainMenu();
+    else if (area.action === "inventoryTab") this.cycleToInventoryTab(area.tab);
+    else if (area.action === "inventoryItem") this.confirmInventorySelection();
+    else if (area.action === "teamSlot") this.confirmTeamSelection();
+    else if (area.action === "teamSelect") {}
+    else if (area.action === "teamActivateReserve") this.activateReserveServant(this.filteredReserveServants()[this.selectedReserve]);
+    else if (area.action === "teamReplace") this.replaceActiveWithReserve();
+    else if (area.action === "teamRemove") this.sendActiveToReserve();
+    else if (area.action === "reserveFilter") this.setReserveFilter(area.filter);
+    else if (area.action === "reserveSort") this.setReserveSort(area.sort);
+    else if (area.action === "skillNode") this.unlockSelectedSkill();
+    else if (area.action === "skillSelect") {}
+    else if (area.action === "accountAction") this.confirmAccountAction();
+    else if (area.action === "loadSaveAction") this.confirmLoadSaveAction();
+    else if (area.action === "regionTravel") this.confirmRegionTravel();
+    else if (area.action === "regionSelect") {}
+    else if (area.action === "back") this.closeAllMenusAndReturnToGame();
   };
 
   NecromancerGame.prototype.saveSummaryText = function (save, title) {
@@ -1220,6 +1267,10 @@ if (this.screen !== "map") {
     this.activeMenu = screen === "map" ? null : screen;
     this.activeModal = null;
     this.inputLock = false;
+    if (screen === "worldMap" && window.WorldRegions) {
+      var currentIndex = window.WorldRegions.map(function (region) { return region.id; }).indexOf(this.currentMapId);
+      this.selectedMenu = currentIndex >= 0 ? currentIndex : 0;
+    }
     if (screen === "mainMenu") this.message("Menu: CMD alterna, CAP confirma.");
     if (screen === "team") this.message("Equipe: CMD coluna, 2 substitui, 3 reserva, 5 filtro.");
     if (screen === "inventory") this.message("Inventario: CMD aba, 2 item, CAP usa/equipa.");
@@ -1227,6 +1278,18 @@ if (this.screen !== "map") {
     if (screen === "loadSave") this.message("Carregar Save: CMD alterna, CAP confirma, I importa, P exporta.");
     if (screen === "account") this.message("Conta: CMD alterna, CAP confirma, 3 muda qualidade visual.");
     if (screen === "worldMap") this.message("Mapa do Mundo: CMD alterna regiao, CAP viaja.");
+  };
+
+  NecromancerGame.prototype.openQuickScreen = function (target) {
+    if (target === "map") {
+      this.openScreen("worldMap");
+      return;
+    }
+    if (target === "game") {
+      this.closeAllMenusAndReturnToGame();
+      return;
+    }
+    this.openScreen(target || "mainMenu");
   };
 
   NecromancerGame.prototype.toggleMockLogin = function () {
@@ -1288,13 +1351,7 @@ if (this.screen !== "map") {
       return;
     }
 
-    var unlocked = this.unlockedRegions[region.id];
-    
-    // Regra especifica para Fronteira baseada no Guardiao
-    if (region.requires === "tombGuardianDefeated" && this.isBossDefeatedForMap("cemiterio_neutro")) {
-      unlocked = true;
-    }
-
+    var unlocked = this.isRegionUnlocked(region);
     if (!unlocked) {
       this.message("Regiao bloqueada. Requisito: " + this.ui.getRegionRequirementText(region) + ".");
       return;
@@ -1573,7 +1630,7 @@ NecromancerGame.prototype.nextMenuSelection = function () {
   };
 
 NecromancerGame.prototype.getMainMenuOptions = function () {
-    var options = ["Continuar", "Equipe", "Inventario", "Talentos", "Mapa", "Salvar/Carregar", "Conta", "Controles", "Creditos"];
+    var options = [this.enteredMap ? "Voltar ao jogo" : "Continuar", "Equipe", "Inventario", "Talentos", "Mapa", "Salvar/Carregar", "Conta", "Controles", "Creditos"];
     if (!this.enteredMap) options.unshift("Novo Jogo");
     return options;
   };
@@ -1581,6 +1638,7 @@ NecromancerGame.prototype.getMainMenuOptions = function () {
 NecromancerGame.prototype.confirmMainMenu = function () {
     var option = this.getMainMenuOptions()[this.selectedMenu] || "Novo Jogo";
     if (option === "Novo Jogo") this.newGame();
+    else if (option === "Voltar ao jogo") this.closeAllMenusAndReturnToGame();
     else if (option === "Continuar") {
       if (!this.hasSave()) this.message("Nenhum save local encontrado.");
       else this.loadGame();
@@ -1588,7 +1646,7 @@ NecromancerGame.prototype.confirmMainMenu = function () {
     else if (option === "Equipe") this.openScreen("team");
     else if (option === "Inventario") this.openScreen("inventory");
     else if (option === "Talentos") this.openScreen("skills");
-    else if (option === "Mapa") this.closeAllMenusAndReturnToGame();
+    else if (option === "Mapa") this.openScreen("worldMap");
     else if (option === "Salvar/Carregar") this.openScreen("loadSave");
     else if (option === "Conta") this.openScreen("account");
     else if (option === "Controles") this.openScreen("controls");
@@ -1617,8 +1675,10 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
       if (filter === "support") return role === "Suporte/magico";
       return true;
     }.bind(this)).sort(function (a, b) {
-      if (filter === "power") return this.getServantPower(b) - this.getServantPower(a);
-      return 0;
+      var sort = this.reserveSort || (filter === "power" ? "power" : "power");
+      if (sort === "level") return b.level - a.level;
+      if (sort === "type") return String(a.kind).localeCompare(String(b.kind));
+      return this.getServantPower(b) - this.getServantPower(a);
     }.bind(this));
   };
 
@@ -1627,16 +1687,52 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
   };
 
   NecromancerGame.prototype.cycleReserveFilter = function () {
-    var keys = ["all", "tank", "damage", "fast", "support", "power"];
+    var keys = ["all", "tank", "damage", "fast", "support"];
     var index = keys.indexOf(this.reserveFilter || "all");
     this.reserveFilter = keys[(index + 1) % keys.length];
     this.selectedReserve = 0;
+    this.reserveScroll = 0;
     this.message("Filtro da reserva: " + this.getReserveFilterLabel() + ".");
   };
 
   NecromancerGame.prototype.getReserveFilterLabel = function () {
-    if (this.reserveFilter === "power") return "Poder";
     return cfg.reserveFilters[this.reserveFilter || "all"] || "Todos";
+  };
+
+  NecromancerGame.prototype.setReserveFilter = function (filter) {
+    this.reserveFilter = filter || "all";
+    this.selectedReserve = 0;
+    this.reserveScroll = 0;
+    this.message("Filtro da reserva: " + this.getReserveFilterLabel() + ".");
+  };
+
+  NecromancerGame.prototype.setReserveSort = function (sort) {
+    this.reserveSort = sort || "power";
+    this.selectedReserve = 0;
+    this.reserveScroll = 0;
+    this.message("Ordenacao da reserva: " + this.getReserveSortLabel() + ".");
+  };
+
+  NecromancerGame.prototype.getReserveSortLabel = function () {
+    if (this.reserveSort === "level") return "Nivel";
+    if (this.reserveSort === "type") return "Tipo";
+    return "Poder";
+  };
+
+  NecromancerGame.prototype.scrollReserve = function (delta, visibleRows) {
+    var total = this.filteredReserveServants().length;
+    var max = Math.max(0, total - Math.max(1, visibleRows || 1));
+    var step = delta > 0 ? 1 : -1;
+    this.reserveScroll = Math.max(0, Math.min(max, (this.reserveScroll || 0) + step));
+    this.selectedReserve = Math.max(0, Math.min(total - 1, this.selectedReserve || 0));
+  };
+
+  NecromancerGame.prototype.scrollInventory = function (delta, visibleRows) {
+    var total = this.getInventoryEntries(this.inventoryTab).length;
+    var max = Math.max(0, total - Math.max(1, visibleRows || 1));
+    var step = delta > 0 ? 1 : -1;
+    this.inventoryScroll = Math.max(0, Math.min(max, (this.inventoryScroll || 0) + step));
+    this.selectedInventory = Math.max(0, Math.min(total - 1, this.selectedInventory || 0));
   };
 
   NecromancerGame.prototype.activateReserveServant = function (servant) {
@@ -1808,6 +1904,60 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     return parts.length ? "Requer: " + parts.join(" | ") : "Pronto para desbloquear";
   };
 
+  NecromancerGame.prototype.isRegionUnlocked = function (region) {
+    if (!region || region.status === "future") return false;
+    if (this.player.level < (region.level || 1)) return false;
+    if (this.unlockedRegions[region.id]) return true;
+    if (this.getMapState(region.id).visited) return true;
+    if (region.requires === "tombGuardianDefeated") return this.isBossDefeatedForMap("cemiterio_neutro");
+    return region.status === "unlocked" && !region.requires;
+  };
+
+  NecromancerGame.prototype.cycleToInventoryTab = function (tab) {
+    if (!cfg.inventoryTabs[tab]) return;
+    this.inventoryTab = tab;
+    this.selectedInventory = 0;
+    this.inventoryScroll = 0;
+    this.message("Inventario: " + cfg.inventoryTabs[this.inventoryTab] + ".");
+  };
+
+  NecromancerGame.prototype.getEquipmentPower = function (key) {
+    var item = cfg.equipment[key];
+    return item ? item.power || 0 : 0;
+  };
+
+  NecromancerGame.prototype.getEquipmentComparison = function (key) {
+    var item = cfg.equipment[key];
+    if (!item) return { label: "-", detail: "", currentKey: "" };
+    var currentKey = this.equipment[item.slot] || "";
+    var current = cfg.equipment[currentKey];
+    if (currentKey === key) {
+      return { label: "Equipado", detail: "Item equipado neste slot.", currentKey: currentKey };
+    }
+    if (!current) {
+      return { label: "Melhora", detail: "Slot vazio. Ganha poder e bonus do item.", currentKey: "" };
+    }
+    var delta = this.getEquipmentPower(key) - this.getEquipmentPower(currentKey);
+    if (delta > 0) return { label: "Melhora", detail: "+" + delta + " poder sobre " + current.name + ".", currentKey: currentKey };
+    if (delta < 0) return { label: "Piora", detail: delta + " poder abaixo de " + current.name + ".", currentKey: currentKey };
+    return { label: "Muda estilo", detail: "Mesmo poder que " + current.name + ", foco em " + item.style + ".", currentKey: currentKey };
+  };
+
+  NecromancerGame.prototype.getBonusText = function (item) {
+    if (!item || !item.bonuses) return item && item.text || "";
+    var labels = [];
+    Object.keys(item.bonuses).forEach(function (key) {
+      var value = item.bonuses[key];
+      if (key === "magicDamage") labels.push("Dano magico +" + value);
+      else if (key === "attackDamage") labels.push("Ataque basico +" + value);
+      else if (key === "captureChance") labels.push("Captura +" + value + "%");
+      else if (key === "servantHp") labels.push("Vida dos servos +" + value);
+      else if (key === "necroDomain") labels.push("Dominio necrotico +" + value);
+      else labels.push(key + " +" + value);
+    });
+    return labels.join(" | ");
+  };
+
   NecromancerGame.prototype.getItemDisplayName = function (section, key) {
     if (section === "equipment" && cfg.equipment[key]) return cfg.equipment[key].name;
     if (section === "consumables" && cfg.consumables[key]) return cfg.consumables[key].name;
@@ -1940,6 +2090,7 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     var index = tabs.indexOf(this.inventoryTab || "equipment");
     this.inventoryTab = tabs[(index + 1) % tabs.length];
     this.selectedInventory = 0;
+    this.inventoryScroll = 0;
     this.message("Inventario: " + cfg.inventoryTabs[this.inventoryTab] + ".");
   };
 

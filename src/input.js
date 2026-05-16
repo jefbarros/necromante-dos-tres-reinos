@@ -153,14 +153,43 @@ function keyToAction(key) {
   };
 
   InputManager.prototype._setupCanvasPointer = function () {
+    this.canvas.addEventListener("pointermove", function (event) {
+      var game = window.NecromancerGameInstance;
+      if (!game || !game.handleCanvasPointerMove) return;
+      var rect = this.canvas.getBoundingClientRect();
+      game.handleCanvasPointerMove(
+        ((event.clientX - rect.left) / Math.max(1, rect.width)) * game.viewWidth,
+        ((event.clientY - rect.top) / Math.max(1, rect.height)) * game.viewHeight
+      );
+    }.bind(this));
+
+    this.canvas.addEventListener("pointerleave", function () {
+      var game = window.NecromancerGameInstance;
+      if (game && game.handleCanvasPointerMove) game.handleCanvasPointerMove(-9999, -9999);
+    });
+
     this.canvas.addEventListener("pointerdown", function (event) {
       var rect = this.canvas.getBoundingClientRect();
       var x = (event.clientX - rect.left) / Math.max(1, rect.width);
       var y = (event.clientY - rect.top) / Math.max(1, rect.height);
+      var game = window.NecromancerGameInstance;
+      if (game && game.handleCanvasPointerDown && game.handleCanvasPointerDown(x * game.viewWidth, y * game.viewHeight)) {
+        event.preventDefault();
+        return;
+      }
       if (x > 0.2 && x < 0.78 && y > 0.08 && y < 0.85) {
         this._queue("attack");
       }
     }.bind(this));
+
+    this.canvas.addEventListener("wheel", function (event) {
+      var rect = this.canvas.getBoundingClientRect();
+      var game = window.NecromancerGameInstance;
+      if (!game || !game.handleCanvasWheel) return;
+      var x = ((event.clientX - rect.left) / Math.max(1, rect.width)) * game.viewWidth;
+      var y = ((event.clientY - rect.top) / Math.max(1, rect.height)) * game.viewHeight;
+      if (game.handleCanvasWheel(x, y, event.deltaY)) event.preventDefault();
+    }.bind(this), { passive: false });
   };
 
   InputManager.prototype.getMoveVector = function () {
