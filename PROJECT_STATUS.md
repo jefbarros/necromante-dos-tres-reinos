@@ -2,11 +2,11 @@
 
 ## Versao Atual
 
-v0.2.9
+v0.2.9.1
 
 ## Estado Geral
 
-O projeto esta em uma branch com a base hibrida de v0.2.3/v0.2.4 e a direcao visual da v0.2.5 preservadas:
+O projeto esta em uma branch baseada na v0.2.9 para correcao de IA de boss:
 
 - HTML5/JavaScript/Canvas;
 - SaveManager;
@@ -18,13 +18,15 @@ O projeto esta em uma branch com a base hibrida de v0.2.3/v0.2.4 e a direcao vis
 - preparacao para Android e Windows;
 - arte dark fantasy/isometrica via `src/art.js`.
 
-A v0.2.9 melhora o balanceamento de combate para dispositivos moveis e adiciona telegraphs visuais para ataques perigosos, reduzindo mortes injustas no inicio do jogo. O fluxo preserva a correcao da v0.2.7 que impede abertura automatica da tela de Equipe e o objetivo no HUD da v0.2.8.
+A v0.2.9.1 refina a logica do Guardiao de Tumba, garantindo que o ataque AOE so ocorra sob condicoes especificas de proximidade, evitando gastos desnecessarios de recursos visuais e tornando o Boss mais reativo.
 
 ## Sistemas Alterados
 
-- `src/config.js`: versao atualizada para `0.2.9`, dano de inimigos basicos reduzido (rat: 7->5, wolf: 12->10, soldier: 15->12, warhound: 14->11, cultist: 10->8), guardiao melee 28->22, guardiao AOE 24->18.
-- `package.json`: versao atualizada para `0.2.9`.
-- `src/ai.js`: telegraph visual de 2 segundos antes do AOE do Guardiao de Tumba (efeito amarelo "cuidado!").
+- `src/config.js`: versao atualizada para `0.2.9.1`.
+- `package.json`: versao atualizada para `0.2.9.1`.
+- `src/ai.js`: Logica de proximidade adicionada ao telegraph/AOE do Guardiao (2+ servos ou jogador perto).
+- `src/ai.js`: Feedback visual de pulso azul espectral quando o AOE do Guardiao esta pronto mas sem alvos.
+- `src/ai.js`: Feedback sonoro, cor condicional e frequencia aumentada (se player < 20% HP) adicionados ao pulso de prontidao do Boss.
 - `README.md`: documentacao atualizada para v0.2.9.
 - `PROJECT_STATUS.md`: status atualizado para v0.2.9.
 - `docs/tests/REGRESSION_v0.2.9.md`: roteiro de regressao do balanceamento e telegraphs.
@@ -34,6 +36,8 @@ A v0.2.9 melhora o balanceamento de combate para dispositivos moveis e adiciona 
 - Dano de inimigos basicos reduzido para evitar mortes injustas no inicio do jogo.
 - Guardiao de Tumba melee e AOE com danos reduzidos.
 - Telegraph visual amarelo "cuidado!" 2 segundos antes do AOE do Guardiao.
+- **IA Fix**: AOE do Guardiao agora respeita condicao de ameaca proxima (v0.2.9.1).
+- **Visual/Audio Fix**: Pulso condicional (azul/vermelho) e som metalico indicam que o Guardiao esta carregado para o AOE.
 
 ## Arte e UI
 

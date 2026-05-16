@@ -102,11 +102,21 @@ function updateBoss(enemy, dt, game) {
     
     // Telegraph system - warn before AOE
     if (enemy.aoeTimer <= 0 && !enemy.telegraphActive) {
-      enemy.telegraphActive = true;
-      enemy.telegraphTimer = 2.0; // 2 second warning
-      // Show warning effect
-      game.effects.push(new window.AreaEffect(enemy.x, enemy.y, 2.65, "#f0c84d"));
-      game.floatText("cuidado!", enemy.x, enemy.y, "#ffd84d");
+      if (nearbyServants.length >= 2 || enemy.distanceTo(game.player) < 2.1) {
+        enemy.telegraphActive = true;
+        enemy.telegraphTimer = 2.0; // 2 second warning
+        // Show warning effect
+        game.effects.push(new window.AreaEffect(enemy.x, enemy.y, 2.65, "#f0c84d"));
+        game.floatText("cuidado!", enemy.x, enemy.y, "#ffd84d");
+      } else {
+        var isLowHp = game.player.hp < game.player.maxHp * 0.2;
+        if (Math.random() < (isLowHp ? 0.15 : 0.06)) {
+          // Spectral pulse while ready but no targets found (visual feedback for "charged" state)
+          var pulseColor = isLowHp ? "rgba(255, 80, 80, 0.45)" : "rgba(100, 180, 255, 0.35)";
+          game.effects.push(new window.AreaEffect(enemy.x, enemy.y, 1.2, pulseColor));
+          if (game.playSound) game.playSound("click", 0.15); // Feedback sonoro metálico sutil
+        }
+      }
     }
     
     // Execute AOE after telegraph

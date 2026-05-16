@@ -2,6 +2,16 @@
 
 Prototipo jogavel v0.2.9 em HTML5, JavaScript e Canvas. O jogo continua mobile-first e preparado para uso hibrido em Web, Android via Capacitor e Windows via Tauri, com save local, conta mock, save em nuvem mock e sincronizacao futura entre dispositivos.
 
+## v0.2.9.1 - Refinamento de IA de Chefe
+
+A v0.2.9.1 corrige a condicao de disparo do ataque em area do Guardiao de Tumba.
+
+Mudancas:
+- O AOE do Guardiao so inicia o telegraph se houver ameaca real (Jogador a menos de 2.1m ou 2+ servos proximos).
+- Preservado todo o balanceamento e telegraphs visuais da v0.2.9.
+- Adicionado efeito de pulso espectral (azul ou vermelho/frequente se HP < 20%) quando o AOE esta carregado mas fora de alcance.
+- Adicionado feedback sonoro metálico ao pulso espectral de prontidão.
+
 ## v0.2.9 - Balanceamento de Combate e Telegraphs
 
 A v0.2.9 melhora o balanceamento de combate para dispositivos moveis e adiciona telegraphs visuais para ataques perigosos, reduzindo mortes injustas no inicio do jogo.
