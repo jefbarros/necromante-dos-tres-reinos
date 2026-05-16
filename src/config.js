@@ -2,7 +2,7 @@
   "use strict";
 
   window.GameConfig = {
-    version: "0.3.2",
+    version: "0.3.3",
     title: "Necromante dos Tres Reinos",
     visualQuality: "medium",
     world: {
@@ -339,32 +339,68 @@
       crackedStaff: {
         name: "Cajado Rachado",
         text: "+5 dano magico.",
-        slot: "weapon"
+        desc: "Um foco inicial trincado, ainda capaz de conduzir necromancia bruta.",
+        slot: "weapon",
+        type: "Arma",
+        rarity: "Comum",
+        power: 12,
+        style: "Magia",
+        bonuses: { magicDamage: 5 }
       },
       rustyBlade: {
         name: "Lamina Enferrujada",
         text: "+3 dano do ataque basico.",
-        slot: "weapon"
+        desc: "Aproxima o necromante do combate direto e acelera execucoes simples.",
+        slot: "weapon",
+        type: "Arma",
+        rarity: "Comum",
+        power: 10,
+        style: "Ataque basico",
+        bonuses: { attackDamage: 3 }
       },
       boneGrimoire: {
         name: "Grimorio de Ossos",
         text: "+10% chance de captura.",
-        slot: "tome"
+        desc: "Registra pactos funerarios que tornam almas fracas mais obedientes.",
+        slot: "tome",
+        type: "Tomo",
+        rarity: "Incomum",
+        power: 14,
+        style: "Captura",
+        bonuses: { captureChance: 10 }
       },
       boneAmulet: {
         name: "Amuleto de Ossos",
         text: "+12 vida maxima para servos.",
-        slot: "amulet"
+        desc: "Costelas gravadas reforcam corpos reerguidos sob seu comando.",
+        slot: "amulet",
+        type: "Amuleto",
+        rarity: "Incomum",
+        power: 16,
+        style: "Servos",
+        bonuses: { servantHp: 12 }
       },
       cryptRing: {
         name: "Anel da Cripta",
         text: "+10 vida maxima para servos.",
-        slot: "ring"
+        desc: "Um elo frio que ancora servos menores ao mundo fisico.",
+        slot: "ring",
+        type: "Anel",
+        rarity: "Comum",
+        power: 11,
+        style: "Servos",
+        bonuses: { servantHp: 10 }
       },
       shadowRing: {
         name: "Anel Sombrio",
         text: "+0.1 dominio necrotico.",
-        slot: "ring"
+        desc: "Sussurra dominio ao portador, favorecendo rituais e capturas.",
+        slot: "ring",
+        type: "Anel",
+        rarity: "Raro",
+        power: 18,
+        style: "Dominio",
+        bonuses: { necroDomain: 0.1 }
       }
     },
     consumables: {

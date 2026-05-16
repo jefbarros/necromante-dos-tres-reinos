@@ -1,6 +1,23 @@
 # Necromante dos Tres Reinos
 
-Prototipo jogavel v0.3.2 em HTML5, JavaScript e Canvas. O jogo evolui para uma estrutura de Mundo Aberto por Regioes, com lore e identidade propria baseada nos Tres Reinos: Humanos, Demonios e Dragoes.
+Prototipo jogavel v0.3.3 em HTML5, JavaScript e Canvas. O jogo evolui para uma estrutura de Mundo Aberto por Regioes, com lore e identidade propria baseada nos Tres Reinos: Humanos, Demonios e Dragoes.
+
+## v0.3.3 - UX/UI Overhaul: mouse, menus ricos, equipamentos e mapa
+
+A v0.3.3 amplia a navegacao por mouse nos menus em Canvas, adiciona uma barra rapida fora do Menu, reformula Equipe/Inventario/Talentos e torna o Mapa do Mundo mais visual e interativo sem copiar nomes, assets, lore ou layout de outras obras.
+
+Mudancas principais:
+- Barra rapida visivel no HUD com Menu, Equipe, Inventario, Talentos e Mapa, mantendo os atalhos de teclado.
+- Base de UI clicavel consolidada com hit areas, hover, botoes, cards, abas e indicador de scroll.
+- Menus principais e internos aceitam clique com hover visual, mantendo teclado/controle.
+- Equipe usa cards para ativos e reserva, filtros por papel, ordenacao por poder/nivel/tipo, scroll da reserva e painel de detalhes.
+- Inventario usa abas e cards com raridade, quantidade, scroll, detalhes, acoes e comparacao com o item equipado.
+- Equipar/desequipar continua usando a logica da v0.3.2.
+- Talentos aparecem em quatro caminhos clicaveis, com estados desbloqueado/disponivel/bloqueado e painel de detalhes.
+- Mapa do Mundo permite selecionar lista/nos visuais e viajar por botao, com bloqueios por nivel, Guardiao e conteudo futuro.
+- Save/Carregar e Conta agora tambem usam botoes clicaveis no Canvas.
+- Favicon simples embutido evita 404 de favicon.
+- `.gitattributes` padroniza arquivos texto para reduzir avisos LF/CRLF no Windows.
 
 ## v0.3.2 - Revisao de Sistemas Centrais e UX
 

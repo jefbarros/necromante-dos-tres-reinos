@@ -6,8 +6,8 @@
   // Handles save, load, delete, export, import, sync
   // Uses versioned save format with migration support
 
-  var SCHEMA_VERSION = "0.3.2";
-  var GAME_VERSION = "0.3.2";
+  var SCHEMA_VERSION = "0.3.3";
+  var GAME_VERSION = "0.3.3";
   var RUNTIME_UI_FIELDS = [
     "screen",
     "currentScreen",

@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   "use strict";
 
   function bar(ctx, x, y, w, h, ratio, fill, label) {
@@ -25,6 +25,136 @@
 
   window.GameUI = function GameUI(game) {
     this.game = game;
+    this.clickAreas = [];
+    this.hoveredArea = null;
+  };
+
+  GameUI.prototype.resetHitAreas = function () {
+    this.clickAreas = [];
+    this.hoveredArea = null;
+  };
+
+  GameUI.prototype.beginInteractiveFrame = function () {
+    this.resetHitAreas();
+  };
+
+  GameUI.prototype.addHitArea = function (id, x, y, w, h, onClick, options) {
+    var area = Object.assign({}, options || {}, {
+      id: id,
+      x: x,
+      y: y,
+      w: w,
+      h: h,
+      onClick: onClick
+    });
+    return this.addClickArea(area);
+  };
+
+  GameUI.prototype.addClickArea = function (area) {
+    if (!area) return false;
+    this.clickAreas.push(area);
+    if (this.pointInArea(this.game.pointer, area)) {
+      this.hoveredArea = area;
+      return true;
+    }
+    return false;
+  };
+
+  GameUI.prototype.pointInArea = function (point, area) {
+    return point && point.x >= area.x && point.x <= area.x + area.w && point.y >= area.y && point.y <= area.y + area.h;
+  };
+
+  GameUI.prototype.hitTest = function (x, y) {
+    for (var i = this.clickAreas.length - 1; i >= 0; i -= 1) {
+      if (this.pointInArea({ x: x, y: y }, this.clickAreas[i])) return this.clickAreas[i];
+    }
+    return null;
+  };
+
+  GameUI.prototype.getHoveredHitArea = function () {
+    return this.hoveredArea;
+  };
+
+  GameUI.prototype.handleCanvasClick = function (x, y) {
+    var area = this.hitTest(x, y);
+    if (!area) return false;
+    if (area.disabled) return true;
+    if (typeof area.onClick === "function") area.onClick(area);
+    else if (this.game && this.game.activateClickArea) this.game.activateClickArea(area);
+    return true;
+  };
+
+  GameUI.prototype.handleCanvasWheel = function (x, y, deltaY) {
+    var point = { x: x, y: y };
+    for (var i = this.clickAreas.length - 1; i >= 0; i -= 1) {
+      var area = this.clickAreas[i];
+      if (this.pointInArea(point, area) && typeof area.onWheel === "function") {
+        area.onWheel(deltaY, area);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  GameUI.prototype.drawButtonBox = function (ctx, x, y, w, h, selected, hovered, disabled) {
+    ctx.fillStyle = disabled ? "rgba(255,255,255,0.035)" : hovered ? "rgba(159, 243, 216, 0.24)" : selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = disabled ? "rgba(255,255,255,0.08)" : hovered || selected ? "#9ff3d8" : "rgba(255,255,255,0.12)";
+    ctx.lineWidth = hovered ? 2 : 1;
+    ctx.strokeRect(x, y, w, h);
+    ctx.lineWidth = 1;
+  };
+
+  GameUI.prototype.drawButton = function (ctx, label, x, y, w, h, options) {
+    var opts = options || {};
+    var hovered = opts.hovered || false;
+    if (opts.id) {
+      var areaOptions = Object.assign({}, opts.area || {}, { disabled: opts.disabled });
+      hovered = this.addHitArea(opts.id, x, y, w, h, opts.onClick, areaOptions);
+    }
+    this.drawButtonBox(ctx, x, y, w, h, opts.selected, hovered, opts.disabled);
+    ctx.fillStyle = opts.disabled ? "#78827c" : (opts.selected || hovered ? "#9ff3d8" : "#edf5ea");
+    ctx.font = opts.font || "900 12px system-ui, sans-serif";
+    ctx.textAlign = opts.align || "center";
+    ctx.fillText(label, opts.align === "left" ? x + 12 : x + w * 0.5, y + Math.floor(h * 0.62));
+    ctx.textAlign = "left";
+    return hovered;
+  };
+
+  GameUI.prototype.drawCard = function (ctx, x, y, w, h, options) {
+    var opts = options || {};
+    ctx.fillStyle = opts.disabled ? "rgba(255,255,255,0.035)" : opts.selected ? "rgba(117, 212, 183, 0.17)" : opts.hovered ? "rgba(159, 243, 216, 0.14)" : "rgba(255,255,255,0.055)";
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = opts.rarityColor || (opts.disabled ? "rgba(255,255,255,0.08)" : opts.selected || opts.hovered ? "#9ff3d8" : "rgba(255,255,255,0.13)");
+    ctx.lineWidth = opts.selected || opts.hovered ? 2 : 1;
+    ctx.strokeRect(x, y, w, h);
+    ctx.lineWidth = 1;
+  };
+
+  GameUI.prototype.drawTabs = function (ctx, tabs, activeKey, x, y, w, h, onSelect) {
+    var gap = 8;
+    var tabW = Math.max(82, (w - gap * (tabs.length - 1)) / Math.max(1, tabs.length));
+    tabs.forEach(function (tab, index) {
+      var tx = x + index * (tabW + gap);
+      this.drawButton(ctx, tab.label, tx, y, tabW, h, {
+        id: "tab-" + tab.key,
+        selected: tab.key === activeKey,
+        onClick: function () { onSelect(tab.key); },
+        area: { screen: this.game.screen, action: tab.action || "tab", tab: tab.key }
+      });
+    }.bind(this));
+  };
+
+  GameUI.prototype.drawScrollIndicator = function (ctx, x, y, w, h, offset, total, visible) {
+    if (total <= visible) return;
+    var trackH = Math.max(24, h);
+    var thumbH = Math.max(20, trackH * (visible / total));
+    var maxOffset = Math.max(1, total - visible);
+    var thumbY = y + (trackH - thumbH) * Math.max(0, Math.min(1, offset / maxOffset));
+    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    ctx.fillRect(x, y, w, trackH);
+    ctx.fillStyle = "#9ff3d8";
+    ctx.fillRect(x, thumbY, w, thumbH);
   };
 
   GameUI.prototype.drawPanel = function (ctx, x, y, w, h) {
@@ -42,6 +172,7 @@
     var game = this.game;
     var player = game.player;
     var width = canvas.width;
+    this.beginInteractiveFrame();
     var compact = width < 760 || canvas.height < 520;
 
     var hudW = compact ? Math.min(292, width - 24) : Math.min(430, width - 24);
@@ -68,6 +199,7 @@ ctx.fillStyle = "#ecf4dc";
     // Draw sync/platform status indicator
     this.drawSyncStatus(ctx, 12, compact ? 108 : 130, width);
     this.drawObjectiveStatus(ctx, 12, compact ? 136 : 158, compact ? Math.min(292, width - 24) : Math.min(430, width - 24), compact);
+    this.drawQuickBar(ctx, canvas, compact);
 
     var zone = game.map.current.name;
     this.drawPanel(ctx, Math.max(12, width - (compact ? 214 : 312)), 12, compact ? 202 : 300, 58);
@@ -126,6 +258,36 @@ ctx.fillStyle = "#ecf4dc";
     this.drawAreaTitle(ctx, canvas);
     this.drawSkillStrip(ctx, canvas);
     if (game.screen !== "map") this.drawMenuOverlay(ctx, canvas);
+    if (game.canvas && game.canvas.style) game.canvas.style.cursor = this.hoveredArea ? "pointer" : "default";
+  };
+
+  GameUI.prototype.drawQuickBar = function (ctx, canvas, compact) {
+    var game = this.game;
+    var buttons = [
+      { label: "Menu", target: "mainMenu", screens: ["mainMenu", "controls", "credits", "loadSave", "account"] },
+      { label: "Equipe", target: "team", screens: ["team"] },
+      { label: "Invent.", target: "inventory", screens: ["inventory"] },
+      { label: "Talentos", target: "skills", screens: ["skills"] },
+      { label: "Mapa", target: "map", screens: ["worldMap"] }
+    ];
+    var bw = compact ? 42 : 76;
+    var bh = compact ? 28 : 30;
+    var gap = compact ? 5 : 8;
+    var totalW = buttons.length * bw + (buttons.length - 1) * gap;
+    var x = compact ? Math.max(8, canvas.width - bw - 10) : Math.max(12, canvas.width * 0.5 - totalW * 0.5);
+    var y = compact ? 142 : 12;
+    buttons.forEach(function (button, index) {
+      var bx = compact ? x : x + index * (bw + gap);
+      var by = compact ? y + index * (bh + gap) : y;
+      var active = button.screens.indexOf(game.screen) >= 0;
+      this.drawButton(ctx, compact ? button.label.slice(0, 4) : button.label, bx, by, bw, bh, {
+        id: "quick-" + button.target,
+        selected: active,
+        font: compact ? "900 10px system-ui, sans-serif" : "900 12px system-ui, sans-serif",
+        onClick: function () { game.openQuickScreen(button.target); },
+        area: { action: "quickScreen", target: button.target }
+      });
+    }.bind(this));
   };
 
   GameUI.prototype.drawAreaTitle = function (ctx, canvas) {
@@ -322,14 +484,23 @@ if (game.screen === "skills") this.drawSkillTreeScreen(ctx, x, y, panelW, panelH
 ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar/Carregar; 1 ataca, R alterna auto-ataque.", x + 24, y + 68);
     options.forEach(function (option, index) {
       var selected = index === game.selectedMenu;
-      ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
-      ctx.fillRect(x + 42, y + 105 + index * 48, Math.min(360, w - 84), 36);
-      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.12)";
-      ctx.strokeRect(x + 42, y + 105 + index * 48, Math.min(360, w - 84), 36);
-      ctx.fillStyle = selected ? "#9ff3d8" : "#edf5ea";
+      var bx = x + 42;
+      var by = y + 105 + index * 48;
+      var bw = Math.min(360, w - 84);
+      var hovered = this.addClickArea({
+        screen: "mainMenu",
+        x: bx,
+        y: by,
+        w: bw,
+        h: 36,
+        action: "mainMenu",
+        select: function () { game.selectedMenu = index; }
+      });
+      this.drawButtonBox(ctx, bx, by, bw, 36, selected, hovered, false);
+      ctx.fillStyle = selected || hovered ? "#9ff3d8" : "#edf5ea";
       ctx.font = "900 16px system-ui, sans-serif";
-      ctx.fillText(option, x + 62, y + 129 + index * 48);
-    });
+      ctx.fillText(option, bx + 20, by + 24);
+    }.bind(this));
     this.drawReputation(ctx, x + 430, y + 118, Math.max(270, w - 460));
     ctx.fillStyle = "#dbe9e1";
     ctx.font = "700 13px system-ui, sans-serif";
@@ -361,73 +532,158 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     ctx.fillText("Creditos", x + 24, y + 42);
     ctx.font = "800 14px system-ui, sans-serif";
     ctx.fillStyle = "#dbe9e1";
-    this.wrapText(ctx, "Protótipo original criado em HTML5, JavaScript e Canvas. Visual simbólico feito apenas com formas, texto e particulas simples, sem assets externos obrigatorios.", x + 32, y + 92, w - 64, 22);
+    this.wrapText(ctx, "ProtÃ³tipo original criado em HTML5, JavaScript e Canvas. Visual simbÃ³lico feito apenas com formas, texto e particulas simples, sem assets externos obrigatorios.", x + 32, y + 92, w - 64, 22);
     ctx.fillText("CAP/ATK volta ao menu principal.", x + 32, y + 190);
   };
 
   GameUI.prototype.drawTeamScreen = function (ctx, x, y, w, h) {
     var game = this.game;
+    var compact = w < 650 || h < 390;
     ctx.fillText("Gerenciamento de Servos", x + 22, y + 34);
-    ctx.font = "700 13px system-ui, sans-serif";
-    ctx.fillStyle = "#b9cbc0";
-    ctx.fillText("CMD troca coluna, 2 substitui, 3 move ativo para reserva, 5 filtro, CAP confirma.", x + 22, y + 58);
-
-    ctx.font = "900 16px system-ui, sans-serif";
-    ctx.fillStyle = game.teamColumn === "active" ? "#9ff3d8" : "#e7f0df";
-    var activeLimit = Math.min(3, game.player.soulControl);
-    ctx.fillText("Equipe ativa (" + game.servants.length + "/" + activeLimit + ")", x + 24, y + 94);
-    ctx.fillStyle = game.teamColumn === "reserve" ? "#9ff3d8" : "#e7f0df";
-    ctx.fillText("Reserva (" + game.reserveServants.length + ")", x + w * 0.52, y + 94);
-    ctx.fillStyle = "#c9d7ce";
     ctx.font = "700 12px system-ui, sans-serif";
-    ctx.fillText("Filtro: " + game.getReserveFilterLabel(), x + w * 0.52, y + 112);
+    ctx.fillStyle = "#b9cbc0";
+    ctx.fillText("M abre equipe, clique seleciona, roda move a reserva. CMD troca coluna, 2 substitui, 3 remove.", x + 22, y + 58);
 
-    ctx.font = "700 13px system-ui, sans-serif";
+    var activeLimit = Math.min(3, game.player.soulControl);
+    var leftW = compact ? w - 48 : Math.floor(w * 0.45);
+    var rightX = compact ? x + 24 : x + leftW + 42;
+    var rightW = compact ? w - 48 : w - leftW - 66;
+    var topY = y + 86;
+    ctx.font = "900 15px system-ui, sans-serif";
+    ctx.fillStyle = game.teamColumn === "active" ? "#9ff3d8" : "#e7f0df";
+    ctx.fillText("Equipe ativa (" + game.servants.length + "/" + activeLimit + ")", x + 24, topY);
+
     for (var i = 0; i < activeLimit; i += 1) {
       var servant = game.servants[i];
-      var rowY = y + 122 + i * 48;
+      var rowY = topY + 18 + i * 62;
       var selectedActive = game.teamColumn === "active" && i === game.selectedActive;
-      ctx.fillStyle = selectedActive ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.055)";
-      ctx.fillRect(x + 24, rowY - 22, w * 0.43, 36);
-      ctx.strokeStyle = selectedActive ? "#9ff3d8" : "rgba(255,255,255,0.12)";
-      ctx.strokeRect(x + 24, rowY - 22, w * 0.43, 36);
+      var hoveredActive = this.addClickArea({
+        screen: "team",
+        x: x + 24,
+        y: rowY,
+        w: leftW,
+        h: 52,
+        action: "teamSelect",
+        select: function (slot) { return function () { game.teamColumn = "active"; game.selectedActive = slot; }; }(i)
+      });
+      this.drawCard(ctx, x + 24, rowY, leftW, 52, { selected: selectedActive, hovered: hoveredActive });
       ctx.fillStyle = servant ? servant.color : "#6f7a76";
-      ctx.fillRect(x + 34, rowY - 14, 16, 16);
+      ctx.fillRect(x + 36, rowY + 12, 22, 22);
       ctx.fillStyle = "#edf5ea";
-      ctx.fillText(servant ? this.servantSummary(servant) : "Espaco vazio", x + 58, rowY);
-    }
-
-    var reserve = game.filteredReserveServants();
-    var maxRows = Math.min(5, Math.max(1, reserve.length));
-    for (var r = 0; r < maxRows; r += 1) {
-      var res = reserve[r];
-      var ry = y + 122 + r * 48;
-      var selected = game.teamColumn === "reserve" && r === game.selectedReserve;
-      ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.18)" : "rgba(255,255,255,0.055)";
-      ctx.fillRect(x + w * 0.52, ry - 22, w * 0.42, 36);
-      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.12)";
-      ctx.strokeRect(x + w * 0.52, ry - 22, w * 0.42, 36);
-      if (res) {
-        ctx.fillStyle = res.color;
-        ctx.fillRect(x + w * 0.52 + 10, ry - 14, 16, 16);
-        ctx.fillStyle = selected ? "#9ff3d8" : "#edf5ea";
-        ctx.fillText(this.servantSummary(res), x + w * 0.52 + 34, ry);
-      } else {
-        ctx.fillStyle = "#8d9990";
-        ctx.fillText("Reserva vazia", x + w * 0.52 + 14, ry);
+      ctx.font = "900 13px system-ui, sans-serif";
+      ctx.fillText(servant ? servant.name : "Espaco vazio", x + 68, rowY + 20);
+      ctx.fillStyle = "#b9cbc0";
+      ctx.font = "700 11px system-ui, sans-serif";
+      ctx.fillText(servant ? "Nv " + servant.level + " | " + game.getServantRole(servant) + " | Pwr " + game.getServantPower(servant) : "Selecione uma reserva para ocupar.", x + 68, rowY + 38);
+      if (servant) {
+        this.drawButton(ctx, "Remover", x + leftW - 64, rowY + 13, 74, 26, {
+          id: "team-remove-" + i,
+          font: "800 11px system-ui, sans-serif",
+          onClick: function (slot) { return function () { game.teamColumn = "active"; game.selectedActive = slot; game.sendActiveToReserve(slot); }; }(i),
+          area: { screen: "team", action: "teamRemove" }
+        });
       }
     }
 
-    var selected = game.teamColumn === "active" ? game.servants[game.selectedActive] : reserve[game.selectedReserve];
-    if (selected) {
-      ctx.fillStyle = "rgba(255,255,255,0.055)";
-      ctx.fillRect(x + 24, y + h - 154, w - 48, 58);
-      ctx.fillStyle = "#dbe9e1";
-      ctx.font = "800 12px system-ui, sans-serif";
-      this.wrapText(ctx, this.servantDetails(selected), x + 36, y + h - 132, w - 72, 16);
-    }
+    var reserve = game.filteredReserveServants();
+    ctx.fillStyle = game.teamColumn === "reserve" ? "#9ff3d8" : "#e7f0df";
+    ctx.font = "900 15px system-ui, sans-serif";
+    ctx.fillText("Reserva (" + game.reserveServants.length + ")", rightX, topY);
+    var filters = [
+      ["all", "Todos"], ["tank", "Tanque"], ["damage", "Dano"], ["fast", "Rapido"], ["support", "Magico"]
+    ];
+    filters.forEach(function (filter, index) {
+      var fx = rightX + index * Math.min(72, rightW / 5);
+      this.drawButton(ctx, filter[1], fx, topY + 10, Math.min(66, rightW / 5 - 4), 24, {
+        id: "reserve-filter-" + filter[0],
+        selected: game.reserveFilter === filter[0],
+        font: "800 10px system-ui, sans-serif",
+        onClick: function () { game.setReserveFilter(filter[0]); },
+        area: { screen: "team", action: "reserveFilter", filter: filter[0] }
+      });
+    }.bind(this));
+    var sorts = [["power", "Poder"], ["level", "Nivel"], ["type", "Tipo"]];
+    sorts.forEach(function (sort, index) {
+      this.drawButton(ctx, sort[1], rightX + index * 64, topY + 40, 58, 24, {
+        id: "reserve-sort-" + sort[0],
+        selected: game.reserveSort === sort[0],
+        font: "800 10px system-ui, sans-serif",
+        onClick: function () { game.setReserveSort(sort[0]); },
+        area: { screen: "team", action: "reserveSort", sort: sort[0] }
+      });
+    }.bind(this));
 
-    this.drawReputation(ctx, x + 24, y + h - 82, w - 48);
+    var reserveY = topY + 72;
+    var rowH = 46;
+    var visibleRows = Math.max(1, Math.floor((y + h - 142 - reserveY) / rowH));
+    var maxScroll = Math.max(0, reserve.length - visibleRows);
+    game.reserveScroll = Math.max(0, Math.min(maxScroll, game.reserveScroll || 0));
+    this.addClickArea({
+      screen: "team",
+      x: rightX,
+      y: reserveY,
+      w: rightW,
+      h: visibleRows * rowH,
+      action: "teamSelect",
+      onWheel: function (delta) { game.scrollReserve(delta, visibleRows); }
+    });
+    for (var r = 0; r < visibleRows; r += 1) {
+      var reserveIndex = (game.reserveScroll || 0) + r;
+      var res = reserve[reserveIndex];
+      var ry = reserveY + r * rowH;
+      var selected = game.teamColumn === "reserve" && reserveIndex === game.selectedReserve;
+      var hoveredReserve = this.addClickArea({
+        screen: "team",
+        x: rightX,
+        y: ry,
+        w: rightW - 12,
+        h: 38,
+        action: "teamSelect",
+        select: function (slot) { return function () { game.teamColumn = "reserve"; game.selectedReserve = slot; }; }(reserveIndex)
+      });
+      this.drawCard(ctx, rightX, ry, rightW - 12, 38, { selected: selected, hovered: hoveredReserve, disabled: !res });
+      if (res) {
+        ctx.fillStyle = res.color;
+        ctx.fillRect(rightX + 10, ry + 10, 16, 16);
+        ctx.fillStyle = selected ? "#9ff3d8" : "#edf5ea";
+        ctx.font = "800 12px system-ui, sans-serif";
+        ctx.fillText(res.name + " | " + game.getServantRole(res), rightX + 34, ry + 15);
+        ctx.fillStyle = "#b9cbc0";
+        ctx.font = "700 11px system-ui, sans-serif";
+        ctx.fillText("Nv " + res.level + " | HP " + Math.ceil(res.hp) + "/" + res.maxHp + " | Pwr " + game.getServantPower(res), rightX + 34, ry + 30);
+      } else {
+        ctx.fillStyle = "#8d9990";
+        ctx.fillText("Reserva vazia", rightX + 14, ry + 22);
+      }
+    }
+    this.drawScrollIndicator(ctx, rightX + rightW - 8, reserveY, 5, visibleRows * rowH - 8, game.reserveScroll || 0, reserve.length, visibleRows);
+
+    var selected = game.teamColumn === "active" ? game.servants[game.selectedActive] : reserve[game.selectedReserve];
+    var detailY = y + h - 108;
+    this.drawPanel(ctx, x + 24, detailY, w - 48, 72);
+    if (selected) {
+      ctx.fillStyle = "#dbe9e1";
+      ctx.font = "900 14px system-ui, sans-serif";
+      ctx.fillText(selected.name + " | " + game.getServantRole(selected), x + 38, detailY + 22);
+      ctx.font = "800 11px system-ui, sans-serif";
+      this.wrapText(ctx, this.servantDetails(selected), x + 38, detailY + 42, w - 230, 14);
+      if (game.teamColumn === "reserve") {
+        this.drawButton(ctx, "Ativar", x + w - 188, detailY + 18, 70, 28, {
+          id: "team-activate-reserve",
+          onClick: function () { game.activateReserveServant(reserve[game.selectedReserve]); },
+          area: { screen: "team", action: "teamActivateReserve" }
+        });
+        this.drawButton(ctx, "Substituir", x + w - 112, detailY + 18, 86, 28, {
+          id: "team-replace",
+          onClick: function () { game.replaceActiveWithReserve(); },
+          area: { screen: "team", action: "teamReplace" }
+        });
+      }
+    } else {
+      ctx.fillStyle = "#8d9990";
+      ctx.font = "800 13px system-ui, sans-serif";
+      ctx.fillText("Selecione um servo para ver detalhes e acoes.", x + 38, detailY + 34);
+    }
   };
 
   GameUI.prototype.servantSummary = function (servant) {
@@ -440,49 +696,124 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     return "Tipo " + servant.kind + " | Nivel " + servant.level + " | Vida " + Math.ceil(servant.hp) + "/" + servant.maxHp + " | Dano " + servant.damage + " | Defesa " + servant.defense + " | Poder " + this.game.getServantPower(servant) + " | Comportamento " + this.game.getServantRole(servant) + "/" + behavior + " | Estado " + servant.state + " |" + canEvolve;
   };
 
+  GameUI.prototype.rarityColor = function (rarity) {
+    if (rarity === "Raro") return "#9fc5ff";
+    if (rarity === "Incomum") return "#9ff3d8";
+    return "#c9d7ce";
+  };
+
   GameUI.prototype.drawInventoryScreen = function (ctx, x, y, w, h) {
     var game = this.game;
-    ctx.fillText("Inventario e Reputacao", x + 22, y + 34);
-    ctx.font = "700 13px system-ui, sans-serif";
+    var compact = w < 650 || h < 390;
+    ctx.fillText("Inventario", x + 22, y + 34);
+    ctx.font = "700 12px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-    ctx.fillText("CMD troca aba, CAP usa/equipa/desequipa, materiais mostram quantidade.", x + 22, y + 58);
-    var tabs = ["equipment", "consumables", "materials"];
-    tabs.forEach(function (tab, index) {
-      var tx = x + 28 + index * 150;
-      var active = tab === game.inventoryTab;
-      ctx.fillStyle = active ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.055)";
-      ctx.fillRect(tx, y + 76, 136, 28);
-      ctx.strokeStyle = active ? "#9ff3d8" : "rgba(255,255,255,0.12)";
-      ctx.strokeRect(tx, y + 76, 136, 28);
-      ctx.fillStyle = active ? "#9ff3d8" : "#dbe9e1";
-      ctx.font = "900 12px system-ui, sans-serif";
-      ctx.fillText(window.GameConfig.inventoryTabs[tab], tx + 10, y + 95);
-    });
+    ctx.fillText("Clique em abas e cards. CAP usa/equipa/desequipa; roda rola a lista quando houver muitos itens.", x + 22, y + 58);
+    this.drawTabs(ctx, [
+      { key: "equipment", label: "Equipamentos", action: "inventoryTab" },
+      { key: "consumables", label: "Consumiveis", action: "inventoryTab" },
+      { key: "materials", label: "Materiais", action: "inventoryTab" }
+    ], game.inventoryTab, x + 24, y + 76, Math.min(440, w - 48), 30, function (tab) { game.cycleToInventoryTab(tab); });
+
     var entries = game.getInventoryEntries(game.inventoryTab);
+    var listX = x + 24;
+    var listY = y + 122;
+    var listW = compact ? w - 48 : Math.floor(w * 0.48);
+    var detailX = compact ? x + 24 : listX + listW + 24;
+    var detailY = compact ? y + h - 168 : listY;
+    var detailW = compact ? w - 48 : w - listW - 72;
+    var cardH = 58;
+    var cols = compact ? 1 : 2;
+    var cardW = (listW - 12 - (cols - 1) * 10) / cols;
+    var rowsVisible = Math.max(1, Math.floor(((compact ? detailY - 12 : y + h - 118) - listY) / cardH));
+    var maxScroll = Math.max(0, Math.ceil(entries.length / cols) - rowsVisible);
+    game.inventoryScroll = Math.max(0, Math.min(maxScroll, game.inventoryScroll || 0));
+    this.addClickArea({
+      screen: "inventory",
+      x: listX,
+      y: listY,
+      w: listW,
+      h: rowsVisible * cardH,
+      action: "inventoryItem",
+      onWheel: function (delta) { game.scrollInventory(delta, rowsVisible); }
+    });
     entries.forEach(function (entry, index) {
-      var col = index % 2;
-      var row = Math.floor(index / 2);
-      var ix = x + 28 + col * (w * 0.45);
-      var iy = y + 138 + row * 48;
+      var row = Math.floor(index / cols) - (game.inventoryScroll || 0);
+      if (row < 0 || row >= rowsVisible) return;
+      var col = index % cols;
+      var ix = listX + col * (cardW + 10);
+      var iy = listY + row * cardH;
       var selected = index === game.selectedInventory;
       var equipped = entry.section === "equipment" && window.GameConfig.equipment[entry.key] && game.equipment[window.GameConfig.equipment[entry.key].slot] === entry.key;
-      ctx.fillStyle = equipped ? "rgba(105, 178, 130, 0.22)" : selected ? "rgba(117, 212, 183, 0.16)" : "rgba(255,255,255,0.06)";
-      ctx.fillRect(ix, iy - 22, w * 0.38, 38);
-      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.12)";
-      ctx.strokeRect(ix, iy - 22, w * 0.38, 38);
+      var rarity = entry.section === "equipment" ? window.GameConfig.equipment[entry.key].rarity : "";
+      var hovered = this.addClickArea({
+        screen: "inventory",
+        x: ix,
+        y: iy,
+        w: cardW,
+        h: cardH - 8,
+        action: "inventoryItem",
+        select: function (slot) { return function () { game.selectedInventory = slot; }; }(index)
+      });
+      this.drawCard(ctx, ix, iy, cardW, cardH - 8, { selected: selected || equipped, hovered: hovered, rarityColor: this.rarityColor(rarity) });
       ctx.fillStyle = "#f1ead1";
       ctx.font = "800 13px system-ui, sans-serif";
-      ctx.fillText(entry.name + (entry.section === "equipment" ? "" : ": " + entry.amount), ix + 12, iy);
+      this.wrapText(ctx, entry.name, ix + 12, iy + 17, cardW - 24, 14);
       ctx.fillStyle = "#c9d7ce";
       ctx.font = "700 11px system-ui, sans-serif";
-      if (entry.section === "equipment") ctx.fillText(equipped ? "Equipado" : "Equipar", ix + 12, iy + 14);
-      if (entry.section === "consumables") ctx.fillText(window.GameConfig.consumables[entry.key].text, ix + 12, iy + 14);
-      if (entry.section === "materials") ctx.fillText("Material armazenado", ix + 12, iy + 14);
+      if (entry.section === "equipment") ctx.fillText(rarity + " | Pwr " + window.GameConfig.equipment[entry.key].power + (equipped ? " | Equipado" : ""), ix + 12, iy + 42);
+      if (entry.section === "consumables") ctx.fillText("Qtd " + entry.amount + " | Usar", ix + 12, iy + 42);
+      if (entry.section === "materials") ctx.fillText("Qtd " + entry.amount + " | Material", ix + 12, iy + 42);
+    }.bind(this));
+    this.drawScrollIndicator(ctx, listX + listW - 6, listY, 5, rowsVisible * cardH - 10, game.inventoryScroll || 0, Math.ceil(entries.length / cols), rowsVisible);
+    this.drawInventoryDetails(ctx, detailX, detailY, detailW, compact ? 154 : h - 206, entries[game.selectedInventory]);
+  };
+
+  GameUI.prototype.drawInventoryDetails = function (ctx, x, y, w, h, entry) {
+    var game = this.game;
+    if (!entry || w < 190) return;
+    var boxH = Math.max(132, Math.min(190, h));
+    this.drawPanel(ctx, x, y, w, boxH);
+    ctx.fillStyle = "#edf5ea";
+    ctx.font = "900 15px system-ui, sans-serif";
+    ctx.fillText(entry.name, x + 14, y + 24);
+    ctx.font = "700 12px system-ui, sans-serif";
+    if (entry.section !== "equipment") {
+      ctx.fillStyle = "#c9d7ce";
+      var text = entry.section === "consumables" ? window.GameConfig.consumables[entry.key].text : "Quantidade: " + entry.amount;
+      this.wrapText(ctx, text, x + 14, y + 48, w - 28, 16);
+      if (entry.section === "consumables") {
+        this.drawButton(ctx, "Usar", x + 14, y + boxH - 42, 78, 28, {
+          id: "inventory-use",
+          onClick: function () { game.confirmInventorySelection(); },
+          area: { screen: "inventory", action: "inventoryItem" }
+        });
+      }
+      return;
+    }
+    var item = window.GameConfig.equipment[entry.key];
+    var equipped = game.equipment[item.slot] === entry.key;
+    var comparison = game.getEquipmentComparison(entry.key);
+    var current = window.GameConfig.equipment[comparison.currentKey];
+    var lines = [
+      "Slot: " + item.type + " (" + item.slot + ") | " + item.rarity + " | Poder " + item.power,
+      "Bonus: " + game.getBonusText(item),
+      "Estado: " + (equipped ? "Equipado" : "Nao equipado"),
+      "Comparacao: " + comparison.label + (current ? " vs " + current.name : "") + " | " + comparison.detail
+    ];
+    lines.forEach(function (line, index) {
+      ctx.fillStyle = index === 3 ? (comparison.label === "Melhora" ? "#9ff3d8" : comparison.label === "Piora" ? "#f1b2bf" : "#f3d478") : "#dbe9e1";
+      ctx.font = index === 3 ? "900 12px system-ui, sans-serif" : "700 12px system-ui, sans-serif";
+      this.wrapText(ctx, line, x + 14, y + 48 + index * 18, w - 28, 14);
+    }.bind(this));
+    ctx.fillStyle = "#b9cbc0";
+    ctx.font = "700 12px system-ui, sans-serif";
+    this.wrapText(ctx, item.desc || item.text, x + 14, y + boxH - 56, w - 28, 15);
+    this.drawButton(ctx, equipped ? "Desequipar" : "Equipar", x + 14, y + boxH - 36, 104, 28, {
+      id: "inventory-equip",
+      onClick: function () { game.confirmInventorySelection(); },
+      area: { screen: "inventory", action: "inventoryItem" }
     });
-    this.drawReputation(ctx, x + 24, y + h - 110, w - 48);
-    ctx.fillStyle = "#dbe9e1";
-    ctx.font = "700 13px system-ui, sans-serif";
-    ctx.fillText("Reputacao muda por capturas, chefes, demonios e sinais draconicos.", x + 24, y + h - 24);
   };
 
   GameUI.prototype.drawSkillTreeScreen = function (ctx, x, y, w, h) {
@@ -490,34 +821,78 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     ctx.fillText("Arvore Inicial do Necromante", x + 22, y + 34);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-    ctx.fillText("CMD seleciona talento, CAP desbloqueia. Pontos: " + game.skillPoints, x + 22, y + 58);
+    ctx.fillText("Pontos: " + game.skillPoints + " | Nivel " + game.player.level + " | clique escolhe, Desbloquear confirma.", x + 22, y + 58);
 
-    window.GameConfig.skillTree.forEach(function (node, index) {
-      var col = index % 4;
-      var row = Math.floor(index / 4);
-      var nx = x + 24 + col * ((w - 54) / 4);
-      var ny = y + 118 + row * 112;
-      var selected = index === game.selectedSkill;
-      var unlocked = game.unlockedSkills[node.id];
-      var locked = !unlocked && game.getTalentRequirementText(node).indexOf("Requer:") === 0;
-      ctx.fillStyle = unlocked ? "rgba(105, 178, 130, 0.24)" : selected ? "rgba(117, 212, 183, 0.18)" : "rgba(255,255,255,0.06)";
-      ctx.fillRect(nx, ny - 34, (w - 86) / 4, 96);
-      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.15)";
-      ctx.strokeRect(nx, ny - 34, (w - 86) / 4, 96);
-      ctx.fillStyle = unlocked ? "#a7f2bf" : "#f0ead8";
-      ctx.font = "900 11px system-ui, sans-serif";
-      ctx.fillText(node.path, nx + 8, ny - 14);
-      ctx.font = "800 12px system-ui, sans-serif";
-      ctx.fillText(node.name, nx + 8, ny + 4);
-      ctx.font = "800 11px system-ui, sans-serif";
-      ctx.fillStyle = unlocked ? "#a7f2bf" : locked ? "#f1b2bf" : "#f3d478";
-      ctx.fillText(unlocked ? "Desbloqueado" : game.getTalentRequirementText(node), nx + 8, ny + 22);
-      ctx.font = "700 12px system-ui, sans-serif";
-      ctx.fillStyle = "#c9d7ce";
-      this.wrapText(ctx, node.text, nx + 8, ny + 42, (w - 130) / 4, 15);
+    var paths = ["Invocador", "Ceifador", "Senhor das Almas", "Estrategista Sombrio"];
+    var treeX = x + 22;
+    var treeY = y + 88;
+    var detailH = 92;
+    var nodeGap = 10;
+    var colW = (w - 56) / 4;
+    var nodeH = Math.max(54, Math.min(72, (h - 190) / 3 - nodeGap));
+    paths.forEach(function (path, pathIndex) {
+      var px = treeX + pathIndex * colW;
+      ctx.fillStyle = "#e7f0df";
+      ctx.font = "900 13px system-ui, sans-serif";
+      ctx.fillText(path, px + 4, treeY);
+      var nodes = window.GameConfig.skillTree.filter(function (node) { return node.path === path; });
+      nodes.forEach(function (node, row) {
+        var index = window.GameConfig.skillTree.indexOf(node);
+        var nx = px + 4;
+        var ny = treeY + 18 + row * (nodeH + nodeGap);
+        var selected = index === game.selectedSkill;
+        var unlocked = game.unlockedSkills[node.id];
+        var ready = !unlocked && game.getTalentRequirementText(node).indexOf("Requer:") !== 0;
+        var locked = !unlocked && !ready;
+        var hovered = this.addClickArea({
+          screen: "skills",
+          x: nx,
+          y: ny,
+          w: colW - 12,
+          h: nodeH,
+          action: "skillSelect",
+          select: function (slot) { return function () { game.selectedSkill = slot; }; }(index)
+        });
+        this.drawCard(ctx, nx, ny, colW - 12, nodeH, {
+          selected: selected,
+          hovered: hovered,
+          disabled: locked,
+          rarityColor: unlocked ? "#9ff3d8" : ready ? "#f3d478" : "#8e4653"
+        });
+        ctx.fillStyle = unlocked ? "#9ff3d8" : ready ? "#f3d478" : "#c99aa2";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.fillText(unlocked ? "Desbloqueado" : ready ? "Disponivel" : "Bloqueado", nx + 8, ny + 16);
+        ctx.fillStyle = "#edf5ea";
+        ctx.font = "800 12px system-ui, sans-serif";
+        this.wrapText(ctx, node.name, nx + 8, ny + 34, colW - 28, 13);
+        ctx.fillStyle = "#b9cbc0";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.fillText("Custo " + node.cost + " | Nv " + node.levelRequired, nx + 8, ny + nodeH - 8);
+      }.bind(this));
     }.bind(this));
 
-    this.drawReputation(ctx, x + 24, y + h - 82, w - 48);
+    var selectedNode = window.GameConfig.skillTree[game.selectedSkill] || window.GameConfig.skillTree[0];
+    var detailY = y + h - detailH - 18;
+    this.drawPanel(ctx, x + 24, detailY, w - 48, detailH);
+    if (selectedNode) {
+      var unlockedSelected = game.unlockedSkills[selectedNode.id];
+      var reqText = game.getTalentRequirementText(selectedNode);
+      ctx.fillStyle = "#edf5ea";
+      ctx.font = "900 16px system-ui, sans-serif";
+      ctx.fillText(selectedNode.name + " - " + selectedNode.path, x + 40, detailY + 24);
+      ctx.fillStyle = unlockedSelected ? "#9ff3d8" : (reqText.indexOf("Requer:") === 0 ? "#f1b2bf" : "#f3d478");
+      ctx.font = "900 12px system-ui, sans-serif";
+      ctx.fillText(unlockedSelected ? "Desbloqueado" : reqText, x + 40, detailY + 44);
+      ctx.fillStyle = "#dbe9e1";
+      ctx.font = "700 12px system-ui, sans-serif";
+      this.wrapText(ctx, "Efeito: " + selectedNode.text, x + 40, detailY + 64, w - 210, 15);
+      this.drawButton(ctx, unlockedSelected ? "Ativo" : "Desbloquear", x + w - 160, detailY + 28, 118, 32, {
+        id: "skill-unlock",
+        disabled: unlockedSelected,
+        onClick: function () { if (!unlockedSelected) game.unlockSelectedSkill(); },
+        area: { screen: "skills", action: "skillNode" }
+      });
+    }
   };
 
   GameUI.prototype.drawReputation = function (ctx, x, y, w) {
@@ -606,6 +981,7 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
 
   // Account screen
   GameUI.prototype.drawAccountScreen = function (ctx, x, y, w, h) {
+    var game = this.game;
     var authState = window.AuthService ? window.AuthService.getStateLabel() : "Convidado";
     var platform = window.PlatformService ? window.PlatformService.getPlatform() : "web";
     var deviceShort = window.PlatformService ? window.PlatformService.getShortDeviceId() : "N/A";
@@ -643,12 +1019,18 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
       var row = Math.floor(index / 3);
       var bx = x + 24 + col * (btnW + 8);
       var by = y + 240 + row * 42;
-      var selected = index === this.game.selectedEquipment;
-      ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
-      ctx.fillRect(bx, by, btnW, btnH);
-      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.13)";
-      ctx.strokeRect(bx, by, btnW, btnH);
-      ctx.fillStyle = selected ? "#9ff3d8" : "#edf5ea";
+      var selected = index === game.selectedEquipment;
+      var hovered = this.addClickArea({
+        screen: "account",
+        x: bx,
+        y: by,
+        w: btnW,
+        h: btnH,
+        action: "accountAction",
+        select: function (slot) { return function () { game.selectedEquipment = slot; }; }(index)
+      });
+      this.drawButtonBox(ctx, bx, by, btnW, btnH, selected, hovered, false);
+      ctx.fillStyle = selected || hovered ? "#9ff3d8" : "#edf5ea";
       ctx.font = "800 13px system-ui, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText(label, bx + btnW / 2, by + 20);
@@ -663,7 +1045,7 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
   GameUI.prototype.drawWorldMap = function (ctx, x, y, w, h) {
     var game = this.game;
     var compact = w < 600;
-    var listW = compact ? w - 48 : Math.floor(w * 0.45);
+    var listW = compact ? w - 48 : Math.floor(w * 0.38);
     
     ctx.fillStyle = "#f3f7ef";
     ctx.font = "900 24px system-ui, sans-serif";
@@ -674,14 +1056,19 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
 
     window.WorldRegions.forEach(function (reg, index) {
       var selected = index === game.selectedMenu;
-      var unlocked = game.unlockedRegions[reg.id] || (reg.requires === "tombGuardianDefeated" && game.isBossDefeatedForMap("cemiterio_neutro"));
+      var unlocked = game.isRegionUnlocked ? game.isRegionUnlocked(reg) : Boolean(game.unlockedRegions[reg.id]);
       var rx = x + 24;
       var ry = y + 92 + index * 52;
-      
-      ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
-      ctx.fillRect(rx, ry, listW, 44);
-      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.12)";
-      ctx.strokeRect(rx, ry, listW, 44);
+      var hovered = this.addClickArea({
+        screen: "worldMap",
+        x: rx,
+        y: ry,
+        w: listW,
+        h: 44,
+        action: "regionSelect",
+        select: function (slot) { return function () { game.selectedMenu = slot; }; }(index)
+      });
+      this.drawButtonBox(ctx, rx, ry, listW, 44, selected, hovered, reg.status === "future");
 
       ctx.fillStyle = reg.status === "future" ? "#8d9990" : unlocked ? "#edf5ea" : "#e36d6d";
       ctx.font = "900 15px system-ui, sans-serif";
@@ -689,17 +1076,77 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
       ctx.fillText(reg.name, rx + 12, ry + 18);
       
       ctx.font = "700 12px system-ui, sans-serif";
-      ctx.fillStyle = selected ? "#9ff3d8" : "#b9cbc0";
+      ctx.fillStyle = selected || hovered ? "#9ff3d8" : "#b9cbc0";
       ctx.fillText(statusLabel + " | Nvl " + reg.level + " | " + reg.type.toUpperCase(), rx + 12, ry + 36);
       
-      if (selected) {
+      if (selected || hovered) {
         ctx.fillStyle = "#9ff3d8";
         ctx.fillRect(rx + 2, ry + 2, 4, 40);
-        if (!compact) {
-          this.drawSelectedRegionDetails(ctx, x + listW + 48, y + 92, w - listW - 72, reg, unlocked);
-        }
       }
     }.bind(this));
+    var selectedRegion = window.WorldRegions[game.selectedMenu] || window.WorldRegions[0];
+    if (!compact) {
+      this.drawRegionNodeMap(ctx, x + listW + 48, y + 92, w - listW - 72, 128);
+    }
+    this.drawSelectedRegionDetails(
+      ctx,
+      compact ? x + 24 : x + listW + 48,
+      compact ? y + 92 + window.WorldRegions.length * 52 + 8 : y + 238,
+      compact ? w - 48 : w - listW - 72,
+      selectedRegion,
+      game.isRegionUnlocked ? game.isRegionUnlocked(selectedRegion) : Boolean(game.unlockedRegions[selectedRegion.id])
+    );
+  };
+
+  GameUI.prototype.drawRegionNodeMap = function (ctx, x, y, w, h) {
+    var game = this.game;
+    var positions = [
+      { x: 0.18, y: 0.5 },
+      { x: 0.38, y: 0.44 },
+      { x: 0.58, y: 0.58 },
+      { x: 0.76, y: 0.38 },
+      { x: 0.88, y: 0.68 }
+    ];
+    this.drawPanel(ctx, x, y, w, h);
+    ctx.strokeStyle = "rgba(159,243,216,0.22)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    positions.forEach(function (pos, index) {
+      var px = x + pos.x * w;
+      var py = y + pos.y * h;
+      if (index === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    });
+    ctx.stroke();
+    window.WorldRegions.forEach(function (region, index) {
+      var pos = positions[index] || positions[positions.length - 1];
+      var px = x + pos.x * w;
+      var py = y + pos.y * h;
+      var unlocked = game.isRegionUnlocked ? game.isRegionUnlocked(region) : Boolean(game.unlockedRegions[region.id]);
+      var selected = index === game.selectedMenu;
+      var hovered = this.addClickArea({
+        screen: "worldMap",
+        x: px - 16,
+        y: py - 16,
+        w: 32,
+        h: 32,
+        action: "regionSelect",
+        select: function (slot) { return function () { game.selectedMenu = slot; }; }(index)
+      });
+      ctx.fillStyle = region.status === "future" ? "#555e61" : unlocked ? "#7df0cd" : "#8e4653";
+      ctx.globalAlpha = selected || hovered ? 1 : 0.78;
+      ctx.beginPath();
+      ctx.arc(px, py, selected || hovered ? 14 : 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = selected || hovered ? "#f1ead1" : "rgba(255,255,255,0.22)";
+      ctx.stroke();
+      ctx.fillStyle = "#dbe9e1";
+      ctx.font = "800 10px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(region.type.toUpperCase(), px, py + 28);
+    }.bind(this));
+    ctx.textAlign = "left";
   };
 
   GameUI.prototype.getRegionStatusLabel = function (region, unlocked) {
@@ -708,41 +1155,52 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
   };
 
   GameUI.prototype.getRegionRequirementText = function (region) {
+    if (this.game && this.game.player && this.game.player.level < (region.level || 1)) return "Nivel " + region.level;
     if (region.requires === "tombGuardianDefeated") return "Derrotar Guardiao de Tumba";
     if (region.requires === "futureContent") return "Expansao Futura";
     return region.requires || "Nivel insuficiente";
   };
 
   GameUI.prototype.drawSelectedRegionDetails = function (ctx, x, y, w, region, unlocked) {
+    this.drawPanel(ctx, x, y - 18, w, 178);
     ctx.fillStyle = "#edf5ea";
     ctx.font = "900 18px system-ui, sans-serif";
-    ctx.fillText(region.name, x, y + 10);
-    
+    ctx.fillText(region.name, x + 14, y + 10);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-    this.wrapText(ctx, region.desc, x, y + 36, w, 18);
-
+    this.wrapText(ctx, region.desc, x + 14, y + 36, w - 28, 18);
     if (!unlocked && region.status !== "future") {
       ctx.fillStyle = "#e36d6d";
       ctx.font = "900 14px system-ui, sans-serif";
-      ctx.fillText("Requisito: " + this.getRegionRequirementText(region), x, y + 80);
+      ctx.fillText("Requisito: " + this.getRegionRequirementText(region), x + 14, y + 80);
+    } else if (region.status === "future") {
+      ctx.fillStyle = "#8d9990";
+      ctx.font = "900 14px system-ui, sans-serif";
+      ctx.fillText("Conteudo futuro", x + 14, y + 80);
+    } else {
+      ctx.fillStyle = "#9ff3d8";
+      ctx.font = "900 14px system-ui, sans-serif";
+      ctx.fillText((this.game.getMapState(region.id).visited ? "Visitado" : "Liberado") + " | Nivel recomendado " + region.level, x + 14, y + 80);
     }
-
     ctx.fillStyle = "#e7f0df";
     ctx.font = "900 14px system-ui, sans-serif";
-    ctx.fillText("Pontos de Interesse:", x, y + 115);
-
+    ctx.fillText("Pontos de Interesse:", x + 14, y + 108);
     (region.pointsOfInterest || []).forEach(function (poi, i) {
+      if (i >= 3) return;
       ctx.fillStyle = "#edf5ea";
-      ctx.font = "800 13px system-ui, sans-serif";
-      ctx.fillText("• " + poi.name, x + 8, y + 140 + i * 42);
-      ctx.fillStyle = "#b9cbc0";
       ctx.font = "700 11px system-ui, sans-serif";
-      this.wrapText(ctx, poi.desc, x + 18, y + 156 + i * 42, w - 20, 14);
-    }.bind(this));
+      ctx.fillText("- " + poi.name + ": " + poi.desc, x + 18, y + 130 + i * 17);
+    });
+    this.drawButton(ctx, region.status === "future" ? "Futuro" : unlocked ? "Viajar" : "Bloqueado", x + w - 122, y + 100, 94, 30, {
+      id: "region-travel",
+      disabled: region.status === "future" || !unlocked,
+      onClick: function () { if (unlocked && region.status !== "future") this.game.confirmRegionTravel(); }.bind(this),
+      area: { screen: "worldMap", action: "regionTravel" }
+    });
   };
 
   GameUI.prototype.drawLoadSaveScreen = function (ctx, x, y, w, h) {
+    var game = this.game;
     var hasSave = window.SaveManager ? window.SaveManager.hasLocalSave() : this.game.hasSave();
     var save = window.LocalSaveService ? window.LocalSaveService.loadLocal() : null;
     var cloudMeta = this.game.getCloudMetadata ? this.game.getCloudMetadata() : null;
@@ -774,11 +1232,17 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
       var bx = x + 24 + col * (btnW + 8);
       var by = y + 264 + row * 42;
       var selected = index === this.game.selectedLoadSave;
-      ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
-      ctx.fillRect(bx, by, btnW, 32);
-      ctx.strokeStyle = selected ? "#9ff3d8" : "rgba(255,255,255,0.13)";
-      ctx.strokeRect(bx, by, btnW, 32);
-      ctx.fillStyle = selected ? "#9ff3d8" : "#edf5ea";
+      var hovered = this.addClickArea({
+        screen: "loadSave",
+        x: bx,
+        y: by,
+        w: btnW,
+        h: 32,
+        action: "loadSaveAction",
+        select: function (slot) { return function () { game.selectedLoadSave = slot; }; }(index)
+      });
+      this.drawButtonBox(ctx, bx, by, btnW, 32, selected, hovered, false);
+      ctx.fillStyle = selected || hovered ? "#9ff3d8" : "#edf5ea";
       ctx.font = "800 12px system-ui, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText(option, bx + btnW / 2, by + 20);
