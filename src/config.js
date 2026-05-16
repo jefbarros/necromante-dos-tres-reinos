@@ -2,7 +2,7 @@
   "use strict";
 
   window.GameConfig = {
-    version: "0.3.0",
+    version: "0.3.1",
     title: "Necromante dos Tres Reinos",
     visualQuality: "medium",
     world: {

@@ -2,11 +2,11 @@
 
 ## Versao Atual
 
-v0.3.0
+v0.3.1
 
 ## Estado Geral
 
-O projeto inicia a fundacao de mundo aberto, estruturando o gameplay por regioes desbloqueaveis.
+Padronizacao de metadados do mapa-mundi e refinamento da interface de exploracao global.
 
 - HTML5/JavaScript/Canvas;
 - SaveManager;
@@ -22,14 +22,12 @@ A v0.2.9.1 refina a logica do Guardiao de Tumba, garantindo que o ataque AOE so 
 
 ## Sistemas Alterados
 
-- `src/config.js` & `package.json`: v0.3.0.
-- `src/map.js`: Definicao de `WorldRegions`.
-- `src/game.js`: Sistema de viagem e desbloqueio de regioes.
-- `src/ui.js`: Tela de Mapa do Mundo funcional.
-- `src/saveManager.js`: Novo schema v0.3.0 com suporte a regioes.
-- `README.md`: documentacao atualizada para v0.2.9.
-- `PROJECT_STATUS.md`: status atualizado para v0.2.9.
-- `docs/tests/REGRESSION_v0.2.9.md`: roteiro de regressao do balanceamento e telegraphs.
+- `src/config.js` & `package.json`: v0.3.1.
+- `src/map.js`: Padronizacao de `WorldRegions` com POIs e schema estrito.
+- `src/game.js`: Melhoria na leitura de requisitos para viagem rapida.
+- `src/ui.js`: Novo painel de detalhes de regiao no Mapa do Mundo.
+- `README.md`: Atualizado para v0.3.1.
+- `docs/tests/REGRESSION_v0.3.1.md`: Novo roteiro de testes focado em metadados.
 
 ## Bugs Corrigidos
 

@@ -377,10 +377,15 @@
     {
       id: "cripta_inicial",
       name: "Dominio da Cripta Inicial",
-      desc: "Onde o folego da morte se recusa a partir. Uma zona de seguranca para necromantes despertos.",
+      desc: "Onde o folego da morte se recusa a partir. Zona de seguranca para necromantes despertos.",
       type: "safe",
       level: 1,
-      status: "unlocked"
+      status: "unlocked",
+      requires: null,
+      pointsOfInterest: [
+        { id: "trono", name: "Trono Funerário", kind: "lore", desc: "Assento de poder da linhagem esquecida." },
+        { id: "altar", name: "Altar de Renascimento", kind: "service", desc: "Ponto de ancoragem para almas caídas." }
+      ]
     },
     {
       id: "cemiterio_neutro",
@@ -388,15 +393,27 @@
       desc: "Um campo de ossos esquecidos sob a vigia de um Guardiao antigo.",
       type: "field",
       level: 1,
-      status: "unlocked"
+      status: "unlocked",
+      requires: null,
+      pointsOfInterest: [
+        { id: "arena", name: "Arena do Guardião", kind: "boss", desc: "Local onde reside o sentinela da tumba." },
+        { id: "selo", name: "Selo da Área Secreta", kind: "quest", desc: "Passagem selada por magia ancestral." },
+        { id: "treino", name: "Campo de Treinamento", kind: "service", desc: "Espaço para fortalecer a vontade dos servos." }
+      ]
     },
     {
       id: "estrada_dos_enforcados",
       name: "Estrada dos Enforcados",
-      desc: "Caminho perigoso onde a justiça humana deixou cicatrizes profundas na terra.",
+      desc: "Caminho onde a justiça humana deixou cicatrizes profundas na terra.",
       type: "danger",
       level: 5,
-      status: "unlocked"
+      status: "unlocked",
+      requires: null,
+      pointsOfInterest: [
+        { id: "forca", name: "Forca Quebrada", kind: "lore", desc: "Resquícios de execuções do Reino Humano." },
+        { id: "placa", name: "Placa dos Caçadores", kind: "lore", desc: "Aviso de fronteira vigiada." },
+        { id: "carroca", name: "Restos de Carroça", kind: "loot", desc: "Espólios de viajantes desafortunados." }
+      ]
     },
     {
       id: "fronteira_tres_reinos",
@@ -404,14 +421,27 @@
       desc: "A divisao entre os dominios de Humanos, Demonios e o rastro dos Dragoes.",
       type: "boss",
       level: 10,
-      requires: "tombGuardianDefeated"
+      status: "locked",
+      requires: "tombGuardianDefeated",
+      pointsOfInterest: [
+        { id: "marco", name: "Marco dos Humanos", kind: "lore", desc: "Monumento à resistência da humanidade." },
+        { id: "fenda", name: "Fenda Demoníaca", kind: "danger", desc: "Ponto de instabilidade entre dimensões." },
+        { id: "cinzas", name: "Cinzas Dracônicas", kind: "lore", desc: "Vestígios do voo dos soberanos antigos." }
+      ]
     },
     {
       id: "vale_cinzas",
       name: "Vale das Cinzas Draconicas",
       desc: "Territorio sagrado e calcinado. Conteudo para futuras expansões.",
       type: "future",
-      status: "future"
+      status: "future",
+      level: 20,
+      requires: "futureContent",
+      pointsOfInterest: [
+        { id: "ossario", name: "Ossário Dracônico", kind: "lore", desc: "Cemitério de gigantes alados." },
+        { id: "ruinas", name: "Ruínas Calcinadas", kind: "lore", desc: "Cidades devoradas pelo fogo primordial." },
+        { id: "sinal", name: "Sinal dos Dragões", kind: "quest", desc: "Um chamado que ecoa através das eras." }
+      ]
     }
   ];
 
