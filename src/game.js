@@ -9,7 +9,15 @@
     return { x: x / len, y: y / len };
   }
 
-  window.NecromancerGame = function NecromancerGame(canvas, input) {
+window.NecromancerGame = function NecromancerGame(canvas, input) {
+    // Initialize services
+    if (window.SaveManager) {
+      window.SaveManager.init();
+    }
+
+    // Store reference for autosave
+    window.NecromancerGameInstance = this;
+
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.input = input;
@@ -290,7 +298,11 @@
     this.messages = this.messages.slice(0, 6);
   };
 
-  NecromancerGame.prototype.hasSave = function () {
+NecromancerGame.prototype.hasSave = function () {
+    // Check new save format first, then legacy
+    if (window.SaveManager && window.SaveManager.hasLocalSave) {
+      return window.SaveManager.hasLocalSave();
+    }
     try {
       return Boolean(localStorage.getItem(this.saveKey));
     } catch (error) {
@@ -323,7 +335,16 @@
     return servant;
   };
 
-  NecromancerGame.prototype.saveGame = function (silent) {
+NecromancerGame.prototype.saveGame = function (silent) {
+    // Use SaveManager if available
+    if (window.SaveManager) {
+      var result = window.SaveManager.saveGame(this, silent);
+      if (result) {
+        this.lastSaveStatus = "Salvo";
+        return true;
+      }
+    }
+    // Fallback to legacy save
     var data = {
       version: cfg.version,
       player: {
@@ -363,7 +384,16 @@
     }
   };
 
-  NecromancerGame.prototype.loadGame = function () {
+NecromancerGame.prototype.loadGame = function () {
+    // Try SaveManager first
+    if (window.SaveManager) {
+      var data = window.SaveManager.loadGame();
+      if (data) {
+        return this.applyLoadedData(data);
+      }
+    }
+
+    // Fallback to legacy load
     var raw;
     try {
       raw = localStorage.getItem(this.saveKey);
@@ -382,6 +412,11 @@
       return false;
     }
 
+    return this.applyLoadedData(data);
+  };
+
+  // Helper to apply loaded save data (shared by new and legacy)
+  NecromancerGame.prototype.applyLoadedData = function (data) {
     this.map = new window.GameMap();
     this.map.load(data.currentMapId || "cripta_inicial");
     this.currentMapId = this.map.currentId;
@@ -433,7 +468,17 @@
     return true;
   };
 
-  NecromancerGame.prototype.deleteSave = function () {
+NecromancerGame.prototype.deleteSave = function () {
+    // Use SaveManager if available
+    if (window.SaveManager) {
+      var result = window.SaveManager.deleteLocalSave();
+      if (result) {
+        this.lastSaveStatus = "Save apagado";
+        this.message("Save local apagado.", true);
+        return;
+      }
+    }
+    // Fallback to legacy delete
     try {
       localStorage.removeItem(this.saveKey);
       this.lastSaveStatus = "Save apagado";
@@ -521,7 +566,7 @@
     }
     if (this.input.consume("fusion")) this.fuseSelectedKind();
 
-    if (this.screen !== "map") {
+if (this.screen !== "map") {
       if (this.input.consume("command")) this.nextMenuSelection();
       if (this.input.consume("capture") || this.input.consume("attack")) this.confirmMenuAction();
       if (this.input.consume("skill1")) this.selectedSkill = 0;
@@ -531,6 +576,37 @@
         else this.selectedSkill = 2;
       }
       if (this.input.consume("skill4")) this.fuseSelectedKind();
+      if (this.screen === "account") {
+        if (this.input.consume("start") || this.input.consume("inventory")) this.openScreen("mainMenu");
+        if (window.AuthService && (this.input.consume("skill1") || this.input.consume("menu"))) {
+          if (window.AuthService.isLoggedIn()) {
+            window.AuthService.signOut();
+            this.message("Deslogado.");
+          } else {
+            window.AuthService.signInWithMock();
+            this.message("Logado como Convidado.");
+          }
+        }
+        if (window.SyncManager && this.input.consume("skill2")) {
+          window.SyncManager.syncNow();
+          this.message("Sincronizando...");
+        }
+        if ((this.input.consume("save")) && window.SaveManager) {
+          var exported = window.SaveManager.exportSave();
+          if (exported) {
+            this.message("Save exportado para console.");
+            console.log("=== EXPORTED SAVE ===");
+            console.log(exported);
+            console.log("====================");
+          }
+        }
+        if ((this.input.consume("inventory")) && window.SaveManager) {
+          // Import handled via paste in console for now
+          this.message("Para importar, use SaveManager.importSave(JSON) no console.");
+        }
+        if (this.input.consume("deleteSave")) this.deleteSave();
+        return;
+      }
       return;
     }
 
@@ -754,7 +830,7 @@
     }.bind(this));
   };
 
-  NecromancerGame.prototype.nextMenuSelection = function () {
+NecromancerGame.prototype.nextMenuSelection = function () {
     if (this.screen === "mainMenu") {
       this.selectedMenu = (this.selectedMenu + 1) % this.getMainMenuOptions().length;
     } else if (this.screen === "team") {
@@ -764,6 +840,9 @@
     } else if (this.screen === "inventory") {
       var equipmentKeys = Object.keys(cfg.equipment);
       this.selectedEquipment = (this.selectedEquipment + 1) % equipmentKeys.length;
+    } else if (this.screen === "account") {
+      // Cycle through action buttons using selection state
+      this.selectedEquipment = (this.selectedEquipment + 1) % 4;
     }
   };
 
@@ -775,17 +854,18 @@
     else if (this.screen === "controls" || this.screen === "credits") this.screen = "mainMenu";
   };
 
-  NecromancerGame.prototype.getMainMenuOptions = function () {
+NecromancerGame.prototype.getMainMenuOptions = function () {
     var options = ["Novo Jogo"];
     if (this.hasSave()) options.push("Continuar");
-    options.push("Controles", "Creditos", "Apagar Save");
+    options.push("Conta", "Controles", "Creditos", "Apagar Save");
     return options;
   };
 
-  NecromancerGame.prototype.confirmMainMenu = function () {
+NecromancerGame.prototype.confirmMainMenu = function () {
     var option = this.getMainMenuOptions()[this.selectedMenu] || "Novo Jogo";
     if (option === "Novo Jogo") this.newGame();
     else if (option === "Continuar") this.loadGame();
+    else if (option === "Conta") this.openScreen("account");
     else if (option === "Controles") this.screen = "controls";
     else if (option === "Creditos") this.screen = "credits";
     else if (option === "Apagar Save") this.deleteSave();

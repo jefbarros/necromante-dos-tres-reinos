@@ -1,0 +1,22 @@
+{
+  "name": "necromante-dos tres-reinos",
+  "version": "0.2.3",
+  "description": "Necromante dos Três Reinos - RPG HTML5 mobile-first",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "start": "python -m http.server 8000",
+    "build:web": "echo 'Web build not needed - open index.html directly'",
+    "check": "node --check"
+  },
+  "keywords": [
+    "game",
+    "html5",
+    "canvas",
+    "rpg",
+    "necromancer"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {}
+}

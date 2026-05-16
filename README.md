@@ -1,247 +1,329 @@
-# Necromante dos Tres Reinos
+# Necromante dos Três Reinos
 
-Prototipo jogavel v0.2.2 em HTML5, JavaScript e Canvas. O foco e validar um RPG de acao semi-automatico mobile-first com necromancia, captura, servos autonomos, gerenciamento de equipe, save local, progressao inicial, mapas independentes conectados por portais e uma base melhor para expansao futura do mundo.
+Protótipo jogável v0.2.3 em HTML5, JavaScript e Canvas. O foco é validar um RPG de ação semi-automático mobile-first com necromancia, captura, servos autônomos, gerenciamento de equipe, save local, save em nuvem, sincronização entre dispositivos e suporte híbrido Web/Android/Windows.
 
 ## Como Rodar
 
 Abra `index.html` diretamente no navegador.
 
-Tambem pode usar um servidor estatico:
+Também pode usar um servidor estático:
 
 ```bash
 python -m http.server 8000
 ```
 
-Depois acesse `http://localhost:8000`.
+Depois accesses `http://localhost:8000`.
 
 ## Controles
 
 PC:
 
 - WASD ou setas: mover.
-- J ou Espaco: ataque basico.
+- J ou Espaço: ataque básico.
 - 1: Dreno de Alma.
-- 2: Lanca Ossea.
-- 3: Marca da Submissao.
-- 4: Explosao Cadaverica.
+- 2: Lança Osséa.
+- 3: Marca da Submissão.
+- 4: Explosão Cadavérica.
 - C: Capturar Alma ou confirmar em menus.
-- Q: alternar comando dos servos ou opcao selecionada em menus.
+- Q: alternar comando dos servos ou opção selecionada em menus.
 - M: gerenciamento de servos.
-- I: inventario/equipamentos/reputacao.
-- K: arvore de habilidades.
+- I: inventário/equipamentos/reputação.
+- K: árvore de habilidades.
 - P: salvar.
 - Esc: menu principal.
-- E: entrar em portal ou interagir com objeto proximo.
+- E: entrar em portal ou interagir com objeto próximo.
 - Enter: confirmar no menu principal ou entrar no mapa.
-- F: fusao na tela de servos.
+- F: fusão na tela de servos.
 - X: apagar save local.
 
 Mobile:
 
-- Joystick virtual a esquerda.
-- Botoes de ataque, habilidades, captura e comando a direita.
-- Botoes superiores: Menu, Equipe, Inventario, Talentos, Salvar e Mapa.
-- Botao contextual Entrar aparece perto de portais.
-- Botao contextual Interagir aparece perto de objetos.
-- Em menus, use CMD para alternar selecao e CAP/ATK para confirmar.
+- Joystick virtual à esquerda.
+- Botões de ataque, habilidades, captura e comando à direita.
+- Botões superiores: Menu, Equipe, Inventário, Talentos, Salvar e Mapa.
+- Botão contextual Entrar aparece perto de portais.
+- Botão contextual Interagir aparece perto de objetos.
+- Em menus, use CMD para alternar seleção e CAP/ATK para confirmar.
 
-Se o necromante estiver perto de um portal e de um objeto ao mesmo tempo, o alvo mais proximo e priorizado.
+Se o necromante estiver perto de um portal e de um objeto ao mesmo tempo, o alvo mais próximo é priorizado.
 
 ## Sistemas Mantidos
 
-- Movimentacao do necromante.
-- Combate com projeteis e habilidades.
+- Movimentação do necromante.
+- Combate com projéteis e habilidades.
 - Captura com primeira captura garantida.
-- Ate 3 servos ativos.
+- Até 3 servos ativos.
 - Comandos gerais dos servos.
-- IA autonoma de servos.
-- Aprendizado contra agrupamento apos dano em area.
-- Chefe Guardiao de Tumba.
-- Evolucao de Esqueleto Guerreiro para Esqueleto Veterano.
-- Area secreta desbloqueavel.
+- IA autônoma de servos.
+- Aprendizado contra agrupamento após dano em área.
+- Chefe Guardião de Tumba.
+- Evolução de Esqueleto Guerreiro para Esqueleto Veterano.
+- Área secreta desbloqueável.
 - Morte e renascimento na Cripta Inicial.
 - HUD funcional.
-- Menu, equipe, inventario, talentos, reputacao, save/load e fusao.
-- Mapas independentes com portais, spawn por origem, fade de transicao e camera por mapa.
+- Menu, equipe, inventário, talentos, reputação, save/load e fusão.
+- Mapas independentes com portais, spawn por origem, fade de transição e câmera por mapa.
+- Minimap.
+- Pontos de interesse interativos.
+- Respawn de inimigos.
+- Estado por mapa persistido.
 
-## Sistemas Adicionados na v0.2.2
+## Sistemas Adicionados na v0.2.3
 
-- Minimap simples no canto da tela.
-- Rota visual dos portais com nome flutuante.
-- Portais bloqueados exibem "Selado" ou "Disponivel em versao futura".
-- Feedback de portal bloqueado com mensagem clara e efeito visual de selo.
-- Pontos de interesse interativos por mapa.
-- Tecla E e botao mobile contextual para objetos.
-- Respawn simples por mapa para inimigos comuns e elites.
-- Chefes derrotados nao reaparecem.
-- Estado por mapa salvo em `localStorage`.
-- Eventos unicos coletados salvos por mapa.
-- Portais/desbloqueios persistidos no estado do mapa.
-- Mensagens especiais de primeira visita.
-- Transicao de mapas com fade-out, troca, reposicionamento, limpeza de projeteis/almas e fade-in.
-- Cooldown apos chegada para evitar retorno imediato pelo mesmo portal.
+- **Tela de Conta**: Menu de gerenciamento de conta, login, logout, sincronização.
+- **Detecção de Plataforma**: Identifica web, android ou windows automaticamente.
+- **Device ID**: Identificador único persistente por dispositivo.
+- **Save em Nuvem (Mock)**: Simulação de save em nuvem para testes sem Firebase.
+- **Sincronização**: Syncnow para enviar/receber saves entre local e nuvem.
+- **Exportar/Importar Save**: JSON para backup externo.
+- **Indicador de Sync na HUD**: Mostra status local/nuvem/sincronizando/pendente/offline.
+- **Autosave com Debounce**: Salva automaticamente após mudanças importantes.
+- **Preparação para Capacitor**: Estrutura pronta para build Android.
+- **Preparação para Tauri**: Estrutura pronta para build Windows.
 
-## Minimap
+## Arquitetura Híbrida
 
-O minimap mostra:
+### Save Local (localStorage)
 
-- posicao do jogador;
-- portais proximos;
-- area geral do mapa por zonas simbolicas;
-- chefe vivo;
-- ponto de renascimento ou spawn padrao;
-- acesso da area secreta no Cemiterio Neutro quando desbloqueado.
+O save local funciona sem internet ou conta:
 
-Ele e desenhado no Canvas e funciona em desktop e mobile.
+- `SaveManager.saveGame()` - Salva localmente.
+- `SaveManager.loadGame()` - Carrega save local.
+- `SaveManager.deleteLocalSave()` - Apaga save local.
+- `SaveManager.hasLocalSave()` - Verifica existência.
 
-## Pontos de Interesse
+### Save em Nuvem (Cloud)
 
-Cripta Inicial:
+Dois modos disponíveis:
 
-- Trono Funerario;
-- Altar de Renascimento.
+1. **mockCloud** (padrão): Simula save em nuvem usando localStorage separado. Usa para desenvolvimento sem Firebase configurado.
 
-Cemiterio Neutro:
+2. **Firebase**: Integre com Firebase Firestore quando `firebaseConfig.local.js` existir.
 
-- Tumulo Rachado;
-- Campo de Treinamento;
-- Selo da Area Secreta.
+### Conta de Jogador
 
-Estrada dos Enforcados:
+Estados:
 
-- Forca Quebrada;
-- Placa dos Cacadores;
-- Restos de Carroca.
+- **guest**: Não logado, usa save local apenas.
+- **loggedIn**: Logado, pode sincronizar com nuvem.
+- **offline**: Sem conexão, salva local e marca pendente.
+- **error**: Erro de conexão/auth.
 
-Area Secreta da Cripta:
-
-- Escama Draconica Rachada;
-- Bau Antigo;
-- Mural Apagado.
-
-Interagir com esses objetos mostra lore curta, cura ou recompensa simples. Objetos unicos como tumulo, carroca, escama e bau ficam salvos apos coleta.
-
-## Respawn de Inimigos
-
-Cada mapa tem uma configuracao propria de respawn:
-
-- Cripta Inicial: sem respawn hostil.
-- Cemiterio Neutro: Rato de Cripta, Lobo Cadaverico Selvagem, Soldado Humano Caido, Imp Abissal raro e Elite Profanado mais lento.
-- Estrada dos Enforcados: Cacador Humano, Cao de Guerra Cadaverico, Cultista Fraco e Imp Abissal raro.
-- Area Secreta da Cripta: poucos inimigos, respawn lento e foco em lore/recompensa.
-
-Regras:
-
-- inimigos comuns podem reaparecer apos o intervalo do mapa;
-- elites reaparecem mais lentamente;
-- chefes nao reaparecem apos derrotados;
-- inimigos nao reaparecem perto demais do jogador;
-- cada mapa respeita limite maximo de inimigos vivos.
-
-## Estado por Mapa
-
-O save inclui `mapState`, por exemplo:
+Mock login disponível para testes:
 
 ```js
-mapState = {
-  cemiterio_neutro: {
-    bossDefeated: true,
-    secretUnlocked: true,
-    visited: true,
-    events: {},
-    portalsUnlocked: {
-      cemiterio_para_secreta: true
-    }
-  },
-  area_secreta_cripta: {
-    dragonScaleCollected: true,
-    chestOpened: true,
-    visited: true,
-    events: {
-      escama_draconica_rachada: true,
-      bau_antigo: true
-    }
+// Mock sign in
+AuthService.signInWithMock();
+
+// Check status
+AuthService.isLoggedIn();
+AuthService.getCurrentUser();
+```
+
+### Sincronização
+
+Regras de sync:
+
+- Se não logado: salva apenas local.
+- Se logado e online: salva local e envia para nuvem.
+- Se offline: salva local e marca sync pendente.
+- Quando voltar online: sincroniza automaticamente.
+- Conflito: abre tela de resolução.
+
+## Detecção de Plataforma
+
+O jogo detecta automaticamente:
+
+- **web**: Navegador padrão.
+- **android**: Mobile Android ou iOS.
+- **windows**: Desktop Windows/Mac/Linux.
+
+Também detecta wrappers nativos:
+
+- Capacitor (window.Capacitor)
+- Tauri (window.__TAURI__)
+
+Display na HUD: `web | guest` ou `android | Logado`.
+
+## Como Testar Conta e Sync
+
+1. Inicie Novo Jogo.
+2. Vá ao menu principal e selecione "Conta".
+3. Shows show informações de estado, plataforma e device ID.
+4. Pressione **1** ou **Menu** para fazer mock login (Convidado → Logado).
+5. Pressione **2** para sincronizar (Syncnow).
+6. Pressione **P** para exportar save para console.
+7. Pressione **Mapa/Enter** para voltar ao menu.
+
+## Como Testar Export/Import
+
+1. Na tela de Conta, pressione **P**.
+2. O save JSON será logged no console do navegador.
+3. Copie o JSON inteiro.
+4. Para importar, no console:
+
+```js
+var json = "COLE_AQUI_O_JSON";
+SaveManager.importSave(json);
+```
+
+5. O jogo recarregará com o save importado.
+
+## Como Testar Conflito de Save
+
+1. Faça login mock.
+2. Salve localmente.
+3. Altere o save na nuvem (simule outro dispositivo).
+4. Execute Syncnow.
+5. Se houver conflito, escolha:
+
+- **Usar save local**: Mantém o save do dispositivo atual.
+- **Usar save nuvem**: Baixa o save da nuvem.
+- **Cancelar**: Aborta a sincronização.
+
+## Preparação para Capacitor (Android)
+
+Para criar build Android com Capacitor:
+
+```bash
+# Instalar dependências
+npm install
+npm install @capacitor/core @capacitor/android
+
+# Inicializar Capacitor (uma vez)
+npx cap init "Necromante dos Três Reinos" "com.necromante.tresreinos"
+
+# Adicionar Android
+npx cap add android
+
+# Sincronizar
+npx cap sync android
+
+# Abrir Android Studio
+npx cap open android
+```
+
+Nota: A pasta `android/` não é criada nesta versão. Execute os comandos acima quando o ambiente estiver pronto.
+
+## Preparação para Tauri (Windows)
+
+Para criar build Windows com Tauri:
+
+```bash
+# Criar package.json
+npm init -y
+
+# Instalar Tauri CLI
+npm install -D @tauri-apps/cli
+
+# Inicializar Tauri (uma vez)
+npm run tauri init
+
+# Build
+npm run tauri build
+```
+
+Nota: A pasta `src-tauri/` não é criada nesta versão. Execute os comandos acima quando Rust/Tauri estiver instalado.
+
+## Segurança - Nunca Commite Segredos
+
+Arquivos que NÃO devem ser commitados:
+
+- `src/firebaseConfig.local.js` - Credenciais reais do Firebase.
+- `.env` / `.env.local` - Variáveis de ambiente.
+- `node_modules/` - Dependências npm.
+- `dist/` - Build de produção.
+- `android/` - Build Android.
+- `src-tauri/target/` - Build Tauri.
+
+O `.gitignore` já está configurado para ignorar esses arquivos.
+
+## Estrutura de Arquivos
+
+```
+src/
+├── config.js        - Configurações do jogo.
+├── platform.js    - Detecção de plataforma e device ID.
+├── localSave.js   - Save local (localStorage).
+├── cloudSave.js   - Save em nuvem (mock/Firebase).
+├── auth.js       - Autenticação (mock/Firebase).
+├── syncManager.js - Sincronização entre local e nuvem.
+├── saveManager.js - Camada unificada de save.
+├��─ input.js     - Entrada de usuário.
+├── map.js       - Mapas e portais.
+├── entities.js  - Entidades do jogo.
+├── ai.js       - IA de servos e inimigos.
+├── ui.js       - Interface Visual.
+├── game.js     - Lógica principal.
+├── main.js     - Inicialização.
+├── firebaseConfig.example.js  - Exemplo de config Firebase.
+└── firebaseConfig.local.js  - (NÃO COMMITTED) Sua config Firebase.
+
+index.html     - HTML principal.
+styles.css    - Estilos.
+README.md    - Este arquivo.
+package.json  - Scripts npm.
+```
+
+## Scripts do package.json
+
+```json
+{
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "start": "python -m http.server 8000"
   }
 }
 ```
 
-Saves antigos sao migrados a partir de `bossDefeated`, `secretUnlocked` e `dragonSignalSeen`.
+Para desenvolvimento: `npm run dev`
 
-## Mensagens de Primeira Visita
+Para verificar JavaScript: `node --check src/*.js`
 
-- Cripta Inicial: "Voce desperta onde a morte recusou sua alma."
-- Cemiterio Neutro: "Entre tumulos esquecidos, almas fracas ainda vagam."
-- Estrada dos Enforcados: "Aqui, humanos executavam aqueles que temiam."
-- Area Secreta da Cripta: "Algo antigo repousa abaixo da cripta."
+## Migração de Saves Antigos
 
-Cada mensagem aparece apenas uma vez por save.
+O SaveManager detecta automaticamente saves da v0.2.2 e earlier e migra para o novo schema:
 
-## Como Usar Portais
+- `schemaVersion`: "0.2.3"
+- `player`, `servants`, `inventory`, etc: mantidos.
 
-1. Aproxime o necromante de um portal brilhante.
-2. A HUD mostra `Portal: [nome da area]`.
-3. No PC, pressione E.
-4. No mobile, toque no botao contextual Entrar.
+Saves antigos funcionam normalmente com "Continuar".
 
-Portais bloqueados mostram uma mensagem de bloqueio, exibem selo visual e nao iniciam transicao. O portal da Area Secreta libera apos derrotar o Guardiao de Tumba. O portal para Posto dos Cacadores permanece marcado como conteudo futuro.
+## Checklist de Validação
 
-## Como Testar Objetos Interativos
+- [ ] Jogo abre no navegador sem erros.
+- [ ] node --check passa em todos os arquivos JS.
+- [ ] Save local funciona.
+- [ ] Saves antigos da v0.2.2 são migrados.
+- [ ] Plataforma detectada e mostrada.
+- [ ] Device ID persistente gerado.
+- [ ] Tela de Conta acessível.
+- [ ] Modo convidado funciona.
+- [ ] Mock login funciona.
+- [ ] Mock cloud save funciona.
+- [ ] Syncnow envia/baixa save.
+- [ ] HUD mostra status de sync.
+- [ ] Autosave funciona com debounce.
+- [ ] Export save gera JSON válido.
+- [ ] Import save substitui após confirmação.
+- [ ] Conflito de save mostra escolha.
+- [ ] Nenhum sistema anterior removido.
+- [ ] README atualizado com híbrida, conta, sync.
 
-1. Inicie Novo Jogo.
-2. Monte a equipe e entre no mapa.
-3. Aproxime-se do Trono Funerario ou Altar de Renascimento na Cripta Inicial.
-4. Pressione E no PC ou toque em Interagir no mobile.
-5. Va para o Cemiterio Neutro e teste Tumulo Rachado, Campo de Treinamento e Selo da Area Secreta.
-6. Va para Estrada dos Enforcados e teste Forca Quebrada, Placa dos Cacadores e Restos de Carroca.
-7. Derrote o Guardiao, entre na Area Secreta e teste Escama Draconica Rachada, Bau Antigo e Mural Apagado.
-8. Salve, recarregue e confirme que recompensas unicas nao reaparecem.
+## Suporte a múltiplas plataformas
 
-## Como Testar Respawn
+O jogo detecta automaticamente onde está rodando:
 
-1. Entre no Cemiterio Neutro.
-2. Derrote inimigos comuns ate reduzir a populacao viva.
-3. Afaste o jogador dos pontos de combate.
-4. Aguarde alguns segundos para novos inimigos surgirem.
-5. Derrote o Elite Profanado e aguarde mais tempo para validar respawn lento.
-6. Derrote o Guardiao de Tumba, salve e recarregue.
-7. Confirme que o Guardiao nao reaparece.
+- **Web**: Abra `index.html` no navegador.
+- **Android**: Build com Capacitor (futuro).
+- **Windows**: Build com Tauri (futuro).
 
-## Como Testar Mapas e Portais
+O save local funciona em qualquer plataforma. O save em nuvem permitirá sincronização entre dispositivos.
 
-1. Inicie Novo Jogo.
-2. Monte uma equipe e entre no mapa.
-3. Voce comeca na Cripta Inicial.
-4. Use o portal para Cemiterio Neutro com E ou Entrar.
-5. No Cemiterio, use o portal de volta para a Cripta.
-6. No Cemiterio, use o portal sul para Estrada dos Enforcados.
-7. Na Estrada, use o portal de volta para o Cemiterio.
-8. Na Estrada, tente o portal para Posto dos Cacadores e veja a mensagem de area futura.
-9. Antes de derrotar o Guardiao, tente o portal da Area Secreta no Cemiterio e veja o selo bloqueado.
-10. Derrote o Guardiao de Tumba.
-11. Volte ao portal da Area Secreta e entre.
-12. Observe fade, nome da nova area, servos reposicionados e projeteis/almas limpos.
-13. Salve dentro de qualquer mapa, recarregue e use Continuar para validar mapa atual e posicao.
+## Autores
 
-## Como Testar Salvamento
+Protótipo original criado em HTML5, JavaScript e Canvas. Visual simbólico feito apenas com formas, texto e partículas simples, sem assets externos obrigatória.
 
-1. Inicie um Novo Jogo.
-2. Ative pelo menos um servo na tela Equipe.
-3. Entre no mapa, derrote inimigos, interaja com um objeto unico ou desbloqueie a Area Secreta.
-4. Pressione P ou o botao Salvar.
-5. Recarregue a pagina.
-6. No menu inicial, escolha Continuar.
+---
 
-O save deve restaurar nivel, EXP, fragmentos, servos ativos, reserva, inventario, habilidades, reputacao, boss derrotado, area secreta, mapa atual, posicao do necromante, `mapState`, eventos unicos e mensagens de primeira visita ja vistas.
-
-## Melhorias Futuras
-
-- Tela de pausa dedicada.
-- Save em multiplos slots.
-- Mais equipamentos e slots reais.
-- Evolucoes especificas por especie capturada.
-- Fusao com preview antes de confirmar.
-- Reputacao com efeitos de faccao mais fortes.
-- Missoes curtas por area.
-- Melhor colisao com obstaculos.
-- Balanceamento fino de captura, dano, EXP e respawn.
-- Sons e sprites originais.
+Para dúvidas ou contribuições, abra uma issue no repositório.

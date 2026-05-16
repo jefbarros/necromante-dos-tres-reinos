@@ -40,7 +40,7 @@
     bar(ctx, 24, 51, 190, 16, player.mana / player.maxMana, "#68a9ff", "Mana " + Math.floor(player.mana) + "/" + player.maxMana);
     bar(ctx, 24, 75, 190, 14, player.exp / player.expToNext, "#d6bf61", "Nv " + player.level + " EXP " + player.exp + "/" + player.expToNext);
 
-    ctx.fillStyle = "#ecf4dc";
+ctx.fillStyle = "#ecf4dc";
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.textAlign = "left";
     ctx.fillText("Fragmentos: " + player.fragments, 232, 34);
@@ -49,6 +49,9 @@
     ctx.fillText("Ordem: " + game.servantCommand, 232, 101);
     ctx.fillStyle = game.skillPoints > 0 ? "#ffe58a" : "#b9cbc0";
     ctx.fillText("Pontos: " + game.skillPoints, 330, 101);
+
+    // Draw sync/platform status indicator
+    this.drawSyncStatus(ctx, x, 130, width);
 
     var zone = game.map.current.name;
     this.drawPanel(ctx, Math.max(12, width - 312), 12, 300, 58);
@@ -278,12 +281,13 @@
     ctx.font = "900 22px system-ui, sans-serif";
     ctx.textAlign = "left";
 
-    if (game.screen === "mainMenu") this.drawMainMenu(ctx, x, y, panelW, panelH);
+if (game.screen === "mainMenu") this.drawMainMenu(ctx, x, y, panelW, panelH);
     if (game.screen === "controls") this.drawControls(ctx, x, y, panelW, panelH);
     if (game.screen === "credits") this.drawCredits(ctx, x, y, panelW, panelH);
     if (game.screen === "team") this.drawTeamScreen(ctx, x, y, panelW, panelH);
     if (game.screen === "inventory") this.drawInventoryScreen(ctx, x, y, panelW, panelH);
     if (game.screen === "skills") this.drawSkillTreeScreen(ctx, x, y, panelW, panelH);
+    if (game.screen === "account") this.drawAccountScreen(ctx, x, y, panelW, panelH);
   };
 
   GameUI.prototype.drawMainMenu = function (ctx, x, y, w, h) {
@@ -294,7 +298,7 @@
     ctx.fillText("Necromante dos Tres Reinos", x + 24, y + 42);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-    ctx.fillText("v0.2.2 - CMD/Q alterna, CAP/C ou ATK/J confirma. X apaga save.", x + 24, y + 68);
+ctx.fillText("v0.2.3 - CMD/Q alterna, CAP/C ou ATK/J confirma. X apaga save.", x + 24, y + 68);
     options.forEach(function (option, index) {
       var selected = index === game.selectedMenu;
       ctx.fillStyle = selected ? "rgba(117, 212, 183, 0.2)" : "rgba(255,255,255,0.06)";
@@ -502,7 +506,7 @@
     });
   };
 
-  GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
+GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
     var words = text.split(" ");
     var line = "";
     for (var i = 0; i < words.length; i += 1) {
@@ -516,5 +520,98 @@
       }
     }
     ctx.fillText(line, x, y);
+  };
+
+// Draw sync status indicator in HUD
+  GameUI.prototype.drawSyncStatus = function (ctx, x, y, width) {
+    var platform = window.PlatformService ? window.PlatformService.getPlatform() : "web";
+    var deviceShort = window.PlatformService ? window.PlatformService.getShortDeviceId() : "N/A";
+    var authState = window.AuthService ? window.AuthService.getStateLabel() : "Local";
+    var syncStatus = window.SyncManager ? window.SyncManager.getSyncStatus() : { status: "idle", label: "Local" };
+
+    var statusText = platform + " | " + authState;
+    var syncText = syncStatus.label;
+
+    // Colors based on status
+    var syncColor = "#b9cbc0";
+    if (syncStatus.status === "syncing") syncColor = "#ffe58a";
+    else if (syncStatus.status === "pending") syncColor = "#f1d57a";
+    else if (syncStatus.status === "conflict") syncColor = "#e36d6d";
+    else if (syncStatus.status === "offline") syncColor = "#8d9990";
+    else if (syncStatus.status === "idle" && window.AuthService && window.AuthService.isLoggedIn()) syncColor = "#7bd79a";
+
+    ctx.fillStyle = "#727c76";
+    ctx.font = "700 10px system-ui, sans-serif";
+    ctx.fillText(statusText, x + 190, y + 10);
+    ctx.fillStyle = syncColor;
+    ctx.fillText(syncText, x + 190, y + 24);
+  };
+
+  // Account screen
+  GameUI.prototype.drawAccountScreen = function (ctx, x, y, w, h) {
+    var authState = window.AuthService ? window.AuthService.getStateLabel() : "Convidado";
+    var platform = window.PlatformService ? window.PlatformService.getPlatform() : "web";
+    var deviceShort = window.PlatformService ? window.PlatformService.getShortDeviceId() : "N/A";
+    var syncStatus = window.SyncManager ? window.SyncManager.getSyncStatus() : { status: "idle", label: "Local" };
+    var isLoggedIn = window.AuthService ? window.AuthService.isLoggedIn() : false;
+
+    ctx.fillStyle = "#f3f7ef";
+    ctx.font = "900 24px system-ui, sans-serif";
+    ctx.fillText("Conta", x + 24, y + 42);
+    ctx.font = "700 13px system-ui, sans-serif";
+    ctx.fillStyle = "#b9cbc0";
+    ctx.fillText("CAP/ATK/Mapa/Enter retorna ao menu.", x + 24, y + 68);
+
+    ctx.fillStyle = "#e7f0df";
+    ctx.font = "800 15px system-ui, sans-serif";
+    ctx.fillText("Status:", x + 24, y + 108);
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fillRect(x + 24, y + 116, w - 48, 80);
+    ctx.fillStyle = "#edf5ea";
+    ctx.fillText("Estado: " + authState, x + 40, y + 140);
+    ctx.fillText("Plataforma: " + platform, x + 40, y + 164);
+    ctx.fillText("Device: " + deviceShort, x + 40, y + 188);
+
+    ctx.fillStyle = "#e7f0df";
+    ctx.font = "800 15px system-ui, sans-serif";
+    ctx.fillText("Acoes:", x + 24, y + 220);
+    var btnW = Math.min(180, (w - 60) / 2);
+    var btnH = 32;
+
+    // Sign In / Sign Out button
+    ctx.fillStyle = isLoggedIn ? "rgba(200,200,200,0.1)" : "rgba(117, 212, 183, 0.16)";
+    ctx.fillRect(x + 24, y + 240, btnW, btnH);
+    ctx.strokeStyle = isLoggedIn ? "#666" : "#9ff3d8";
+    ctx.strokeRect(x + 24, y + 240, btnW, btnH);
+    ctx.fillStyle = isLoggedIn ? "#999" : "#edf5ea";
+    ctx.font = "700 13px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(isLoggedIn ? "Sair" : "Entrar", x + 24 + btnW / 2, y + 260);
+
+    // Sync button
+    ctx.fillStyle = "rgba(214, 191, 97, 0.16)";
+    ctx.fillRect(x + 30 + btnW, y + 240, btnW, btnH);
+    ctx.strokeStyle = "#d6bf61";
+    ctx.strokeRect(x + 30 + btnW, y + 240, btnW, btnH);
+    ctx.fillStyle = "#f3d478";
+    ctx.fillText("Sincronizar", x + 30 + btnW + btnW / 2, y + 260);
+
+    // Export button
+    ctx.fillStyle = "rgba(105, 169, 255, 0.16)";
+    ctx.fillRect(x + 24, y + 280, btnW, btnH);
+    ctx.strokeStyle = "#68a9ff";
+    ctx.strokeRect(x + 24, y + 280, btnW, btnH);
+    ctx.fillStyle = "#9fc5ff";
+    ctx.fillText("Export", x + 24 + btnW / 2, y + 300);
+
+    // Import button
+    ctx.fillStyle = "rgba(143, 241, 220, 0.16)";
+    ctx.fillRect(x + 30 + btnW, y + 280, btnW, btnH);
+    ctx.strokeStyle = "#8ff1dc";
+    ctx.strokeRect(x + 30 + btnW, y + 280, btnW, btnH);
+    ctx.fillStyle = "#8ff1dc";
+    ctx.fillText("Importar", x + 30 + btnW + btnW / 2, y + 300);
+
+    ctx.textAlign = "left";
   };
 })();
