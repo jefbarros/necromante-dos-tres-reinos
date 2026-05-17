@@ -4,10 +4,12 @@ extends CharacterBody3D
 @export var patrol_radius: float = 0.75
 @export var patrol_speed: float = 0.75
 @export var gravity: float = 24.0
+@export var corpse_scene: PackedScene = preload("res://scenes/necromancy/Corpse3D.tscn")
 
 var _spawn_position: Vector3
 var _time: float = 0.0
 var _dead: bool = false
+var _corpse_spawned: bool = false
 var _alive_material: Material
 
 @onready var _health_component: Node = $HealthComponent
@@ -54,6 +56,10 @@ func receive_damage(amount: float) -> void:
 		_health_component.call("take_damage", amount)
 
 
+func is_dead() -> bool:
+	return _dead
+
+
 func _on_damaged(amount: float, source: Node) -> void:
 	print("EnemyDummy3D received %.1f damage. Health: %.1f/%.1f" % [
 		amount,
@@ -68,7 +74,11 @@ func _on_died(source: Node) -> void:
 
 
 func _die() -> void:
+	if _dead:
+		return
+
 	_dead = true
+	remove_from_group("enemy")
 	set_physics_process(false)
 	velocity = Vector3.ZERO
 	collision_layer = 0
@@ -82,8 +92,26 @@ func _die() -> void:
 	corpse_material.roughness = 0.95
 	_body.set_surface_override_material(0, corpse_material)
 
-	# TODO G3: permitir que cadaver seja usado para primeira invocacao real.
 	print("EnemyDummy died")
+	_spawn_corpse()
+	hide()
+
+
+func _spawn_corpse() -> void:
+	if _corpse_spawned or corpse_scene == null:
+		return
+
+	_corpse_spawned = true
+	var corpse := corpse_scene.instantiate() as Node3D
+	if corpse == null:
+		return
+
+	var spawn_parent := get_parent()
+	if spawn_parent == null:
+		spawn_parent = get_tree().current_scene
+	spawn_parent.add_child(corpse)
+	corpse.global_position = global_position
+	print("Corpse spawned")
 
 
 func _flash_damage() -> void:

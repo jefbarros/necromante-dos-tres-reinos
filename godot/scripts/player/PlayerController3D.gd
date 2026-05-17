@@ -22,6 +22,7 @@ var _attack_timer: float = 0.0
 var _attack_cooldown_timer: float = 0.0
 
 @onready var _attack_hitbox: Node3D = get_node_or_null("BasicAttackHitbox") as Node3D
+@onready var _raise_skeleton_skill: Node = get_node_or_null("RaiseSkeletonSkill")
 
 
 func _ready() -> void:
@@ -69,6 +70,9 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("attack_primary"):
 		_start_basic_attack()
+
+	if Input.is_action_just_pressed("raise_skeleton"):
+		_try_raise_skeleton()
 
 	if _dodge_timer > 0.0:
 		_dodge_timer -= delta
@@ -118,6 +122,21 @@ func _update_attack_timer(delta: float) -> void:
 		_attack_hitbox.call("set_active", false)
 
 
+func _try_raise_skeleton() -> void:
+	if _raise_skeleton_skill == null or not _raise_skeleton_skill.has_method("try_raise_skeleton"):
+		print("No corpse nearby")
+		return
+
+	var result := String(_raise_skeleton_skill.call("try_raise_skeleton"))
+	match result:
+		"raised":
+			print("Skeleton raised")
+		"limit_reached":
+			print("Summon limit reached")
+		_:
+			print("No corpse nearby")
+
+
 func _get_camera_relative_direction(input_vector: Vector2) -> Vector3:
 	if input_vector == Vector2.ZERO:
 		return Vector3.ZERO
@@ -145,6 +164,7 @@ func _ensure_input_actions() -> void:
 	_add_key_action("move_right", KEY_D)
 	_add_key_action("sprint", KEY_SHIFT)
 	_add_key_action("dodge", KEY_SPACE)
+	_add_key_action("raise_skeleton", KEY_R)
 	_add_mouse_button_action("attack_primary", MOUSE_BUTTON_LEFT)
 
 

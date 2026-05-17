@@ -31,6 +31,15 @@ G2 combate basico concluido na branch `godot/g2-basic-combat`.
 - Validacao manual esperada: abrir `godot/` no Godot 4.6.x, executar `res://scenes/world/PrototypeArena3D.tscn`, testar WASD, camera com mouse, Shift, Espaco, clique esquerdo, dano/morte do dummy e servo seguindo o player.
 - Fora do escopo: primeira invocacao real, reanimacao, essencia da morte, comando de servos, loot, XP, dungeon, boss, inventario, skill tree, UI complexa e save system.
 
+## Godot G3 First Real Summon
+
+G3 primeira invocacao real implementada na branch `godot/g3-first-real-summon`.
+
+- Ciclo minimo: matar `EnemyDummy3D`, gerar `Corpse3D`, pressionar `R` perto do cadaver, criar `SkeletonServant3D`, consumir o cadaver, seguir o player e atacar outro inimigo.
+- Arquivos principais: `godot/scripts/necromancy/Corpse3D.gd`, `godot/scripts/necromancy/RaiseSkeletonSkill.gd`, `godot/scenes/necromancy/Corpse3D.tscn`, `godot/scripts/summons/SkeletonServant3D.gd`, `godot/scenes/summons/SkeletonServant3D.tscn`, `godot/scenes/ui/PrototypeHUD.tscn`, `godot/scripts/ui/PrototypeHUD.gd` e `godot/scenes/world/PrototypeArena3D.tscn`.
+- Validacao manual esperada: abrir `godot/` no Godot 4.6.x, executar `res://scenes/world/PrototypeArena3D.tscn`, testar movimento/camera/sprint/dodge/ataque, matar um dummy, reanimar um esqueleto com `R` e observar o servo atacar outro dummy.
+- Fora do escopo: essencia da morte, custo, comando manual, roda tatica, dano transferido, evolucao de servos, raridade, inventario, loot, XP, dungeon, boss, save e UI complexa.
+
 ## Plataforma Principal
 
 **Godot 4.x**

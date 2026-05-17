@@ -1,12 +1,23 @@
 # Necromante dos Tres Reinos - Godot
 
-## Cena 3D de prototipo combatível
+## Cena 3D de prototipo
 
 A fundacao 3D jogavel fica em:
 
 `res://scenes/world/PrototypeArena3D.tscn`
 
 Para testar, abra o projeto em `godot/` com Godot 4.6.x, abra essa cena e execute com **Run Current Scene**.
+
+## G3 - primeira invocacao real
+
+Esta etapa prova a fantasia central em forma minima:
+
+1. matar um `EnemyDummy3D`;
+2. gerar um `Corpse3D` simples no local da morte;
+3. aproximar o player do cadaver;
+4. pressionar `R`;
+5. consumir o cadaver e criar um `SkeletonServant3D`;
+6. observar o servo seguir o player e atacar outros inimigos proximos.
 
 ## Controles atuais
 
@@ -15,44 +26,44 @@ Para testar, abra o projeto em `godot/` com Godot 4.6.x, abra essa cena e execut
 - Shift: sprint
 - Espaco: esquiva/roll placeholder
 - Clique esquerdo: ataque basico frontal
+- R: reanimar esqueleto a partir de cadaver proximo
 - Esc: liberar ou capturar o mouse
 
 ## Implementado nesta etapa
 
-- G2 combate basico 3D.
-- `Player3D.tscn` com `CharacterBody3D`, colisao, gravidade, sprint e dodge placeholder.
-- Ataque basico do player com `Area3D` frontal, curta janela ativa e cooldown simples.
-- `HealthComponent.gd` reutilizavel com dano, cura e morte.
-- `Hitbox3D.gd` e `Hurtbox3D.gd` para aplicar dano entre areas.
-- `ThirdPersonCameraRig.tscn` com camera orbital suave e pitch limitado.
-- `PrototypeArena3D.tscn` com chao, paredes, obstaculos, luz direcional, player, servo e dummy em distancia facil para teste.
-- `EnemyDummy3D.tscn` com grupo `enemy`, `HealthComponent`, hurtbox, log de dano e morte/desativacao como placeholder de cadaver.
-- `SkeletonServant3D.tscn` com grupo `summon` e seguimento basico do player.
-- Materiais placeholder gerados com `StandardMaterial3D`.
-- InputMap 3D preparado com `move_forward`, `move_back`, `move_left`, `move_right`, `sprint`, `dodge` e `attack_primary`.
+- `Corpse3D.tscn` com grupo `corpse`, visual placeholder e consumo unico.
+- `RaiseSkeletonSkill.gd` como habilidade simples no `Player3D`.
+- Limite inicial de 2 servos ativos.
+- `SkeletonServant3D` com `HealthComponent`, estados minimos, follow, chase, attack e morte.
+- Ataque basico do servo contra inimigos no grupo `enemy`.
+- HUD minimo em `PrototypeHUD.tscn` com `Servos: X/Y` e dica de reanimacao.
+- `PrototypeArena3D.tscn` com multiplos `EnemyDummy3D` para validar matar, reanimar e atacar outro alvo.
 
-## Como testar dano no EnemyDummy
+## Fluxo de teste manual
 
 1. Abra `res://scenes/world/PrototypeArena3D.tscn`.
 2. Execute com **Run Current Scene**.
-3. Aproxime-se do `EnemyDummy3D`.
-4. Mire/posicione o player de frente para o dummy.
-5. Clique com o botao esquerdo do mouse.
-6. Confirme no console os logs `Player basic attack`, dano recebido e `EnemyDummy died` ao zerar a vida.
-
-O dummy permanece na cena escurecido e com hurtbox/colisao desativadas. A reanimacao real fica para G3.
+3. Teste WASD, mouse, Shift, Espaco e clique esquerdo.
+4. Mate um `EnemyDummy3D` com o ataque basico.
+5. Confirme no console `EnemyDummy died` e `Corpse spawned`.
+6. Aproxime-se do cadaver.
+7. Pressione `R`.
+8. Confirme `Skeleton raised` e a atualizacao do HUD.
+9. Observe o servo seguir o player.
+10. Aproxime o servo de outro `EnemyDummy3D` e confirme o log `Skeleton attacked EnemyDummy for X damage`.
 
 ## Fora do escopo
 
-- Primeira invocacao real.
-- Reanimacao de cadaver.
-- Essencia da morte, comando de servos e dano transferido.
-- Loot, XP, inventario, arvore de habilidades e save system.
-- Dungeons, bosses, mundo aberto e UI complexa.
+- Essencia da morte completa e custo de essencia.
+- Comando manual de servos, roda tatica e modos seguir/atacar/recuar.
+- Dano transferido ao servo.
+- Evolucao, raridade, inventario, loot e XP.
+- Dungeon, boss, mundo aberto, faccoes completas, save system e UI complexa.
 - Assets finais, efeitos finais e networking.
 
 ## Proximos passos sugeridos
 
-1. G3 primeira invocacao real.
-2. G4 necromancia jogavel.
-3. G5 primeira arena com spawns, loot simples e XP.
+1. G4 necromancia jogavel.
+2. Essencia da morte.
+3. Comandos seguir/atacar/recuar.
+4. Dano transferido.

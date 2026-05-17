@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/PlayerController3D.gd" id="1_controller"]
 [ext_resource type="Material" path="res://assets/materials/player_placeholder.tres" id="2_material"]
 [ext_resource type="Script" path="res://scripts/combat/Hitbox3D.gd" id="3_hitbox"]
+[ext_resource type="Script" path="res://scripts/necromancy/RaiseSkeletonSkill.gd" id="4_raise_skill"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.35
@@ -71,3 +72,6 @@ shape = SubResource("BoxShape3D_attack")
 [node name="AttackPreview" type="MeshInstance3D" parent="BasicAttackHitbox"]
 mesh = SubResource("BoxMesh_attack")
 surface_material_override/0 = SubResource("StandardMaterial3D_attack")
+
+[node name="RaiseSkeletonSkill" type="Node" parent="."]
+script = ExtResource("4_raise_skill")
