@@ -1,3 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
+godot/.godot/
+godot/.import/
+godot/export_presets.cfg.bak
+godot/*.tmp
 /android/

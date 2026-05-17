@@ -23,24 +23,34 @@ Criterios de conclusao:
 
 ## G1 Movimento/combate minimo
 
+Status: concluido em `godot/g1-minimum-prototype` e integrado na `main` como prototipo fonte Godot.
+
 Objetivo: criar uma primeira base jogavel em Godot com o menor conjunto possivel.
 
-Entregas futuras:
+Entregas:
 
 - `Main.tscn`.
 - `Player.tscn`.
 - `Enemy.tscn`.
+- `HUD.tscn`.
 - Movimento basico.
 - Colisao basica.
 - Ataque/dano minimo.
 - HUD temporario para vida e feedback.
+- Mapa de teste com chao e limites placeholder.
+- Checklist de regressao em `docs/tests/REGRESSION_GODOT_G1.md`.
+- Input Map com `move_up`, `move_down`, `move_left`, `move_right` e `basic_attack`.
 
 Criterios de conclusao:
 
+- Projeto abre pela cena `godot/scenes/Main.tscn`.
 - Player se move.
 - Inimigo pode receber dano.
-- Player pode receber dano.
-- Combate minimo validado contra o comportamento esperado do prototipo.
+- Inimigo morre/desaparece ao chegar a 0 HP.
+- Camera acompanha o Player.
+- HUD minimo mostra vida, mana placeholder, versao/prototipo e controles.
+- HTML5 continua passando em `npm.cmd run check`.
+- Nenhum arquivo `src/*.js` e alterado pela fase G1.
 
 ## G2 Servos/equipe
 
