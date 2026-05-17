@@ -2,78 +2,101 @@
 
 ## Versao Atual
 
-v0.3.4
+Godot G2 em preparacao
 
 ## Estado Geral
 
-Polimento visual/mobile da UX/UI v0.3.3 e regressao dos sistemas centrais antes de expansoes maiores.
+Migração oficial para Godot como plataforma principal de producao em andamento.
 
-- HTML5/JavaScript/Canvas;
-- SaveManager;
-- save local;
-- mock cloud;
-- auth mock;
-- sync manager;
-- platform/deviceId;
-- preparacao futura para Android e Windows;
-- arte dark fantasy/isometrica via `src/art.js`.
+- **Plataforma Principal**: Godot (G2+)
+- **Plataforma Legada**: HTML5/Canvas v0.3.4 (congelado)
+- Godot G1 mínimo validado
+- G1.1 export Web validado
+- G1.2 Pages configurado
+- G1.2.1 smoke test manual pendente
 
-A v0.3.4 estabiliza hover/clique/scroll nos menus de Canvas, melhora a responsividade de Equipe, Inventario, Talentos e Mapa, limita textos que estouravam em cards/botoes e preserva compatibilidade com saves v0.3.2/v0.3.3. Neblina de Guerra, mapas completos de todas as racas, builds nativos, 3D real e faccoes avancadas seguem fora desta versao.
+## Plataforma Principal
 
-## Sistemas Alterados
+**Godot 4.x**
 
-- `src/config.js` & `package.json`: v0.3.4.
-- `src/game.js`: compatibilidade de selecao em reserva filtrada/ordenada, comparacao "Diferente" e schema 0.3.4 via saves.
-- `src/ui.js`: truncamento de texto, barra rapida compacta, layout mobile de Equipe, Talentos compactos por caminho, Inventario/Mapa mais defensivos.
-- `src/input.js`: ponte de ponteiro e roda do Canvas mantida sem quebrar ataque no gameplay.
-- `src/saveManager.js` & `src/localSave.js`: schema 0.3.4 mantendo migracao de saves antigos.
-- `index.html`: favicon embutido simples.
-- `.gitattributes`: padronizacao LF/CRLF.
-- `README.md`: atualizado para v0.3.4.
-- `docs/tests/REGRESSION_v0.3.4.md`: novo roteiro de regressao.
+- Cenas e scripts em `godot/`
+- Build Web em `docs/play-godot/`
+- Roadmap G2 define fases de evolucao
 
-## Bugs Corrigidos
+## Plataforma Legada
 
-- Favicon deixa de gerar 404 comum no navegador.
-- Cliques no Canvas em menus deixam de disparar ataque quando uma area de UI foi acionada.
+**HTML5/Canvas v0.3.4**
 
-## Arte e UI
+- Prototipo congelado em v0.3.4
+- Nao recebera novas features
+- Mantido como referencia/laboratorio
+- Codigo fonte permanece intocado em tarefas Godot
 
-- Mantida a identidade dark fantasy/isometrica da v0.2.5/v0.2.6/v0.2.8.
-- HUD mostra Auto-ataque ON/OFF.
-- Barra rapida no HUD abre Menu, Equipe, Inventario, Talentos e Mapa por mouse.
-- Barra rapida compacta usa linha horizontal para reduzir conflito com controles mobile.
-- Telas de Equipe, Inventario, Talentos, Menu, Save/Carregar, Conta e Mapa respondem a mouse com hover.
-- Equipe mostra ativos e reserva em cards, filtros, ordenacao, scroll e painel de detalhes/acoes, com empilhamento no mobile.
-- Inventario mostra abas, cards por item, raridade, quantidade, scroll, acoes e comparacao de equipamento com textos limitados.
-- Talentos mostram quatro caminhos no desktop e seletor de caminho no compact/mobile.
-- Mapa do Mundo mostra lista, nos visuais, painel da regiao e botao Viajar com layout compacto defensivo.
-- Save/export continua sem persistir estado runtime de UI.
-- Objetivo inicial continua no HUD.
+## Marcos Concluidos
 
-## Mapas Testados
+| Marco | Descricao | Status |
+|-------|----------|--------|
+| G1 | Build Godot minimo | Completo |
+| G1.1 Web | Export Web | Completo |
+| G1.2 Pages | GitHub Pages | Completo |
+| v0.3.4 | HTML5 estavel | Congelado |
 
-- Cripta Inicial: combate com dano reduzido.
-- Cemiterio Neutro: boss com telegraph e danos ajustados.
-- Estrada dos Enforcados:portal futuro/bloqueado.
-- Area Secreta da Cripta: recompensas e pontos de lore.
+## Tags
 
-## Testes Realizados
+| Tag | Descricao |
+|-----|------------|
+| godot-g1 | Build Godot minimo |
+| godot-g1.1-web | Export Web validado |
+| godot-g1.2-pages | GitHub Pages configurado |
+| v0.3.4 | HTML5 estavel |
 
-- `npm.cmd run check`.
-- Regressao manual prevista em `docs/tests/REGRESSION_v0.3.4.md`.
+## Proximas Etapas
 
-## Bugs Conhecidos
+1. Validar smoke test manual G1.2.1
+2. Implementar G2.1 - Base de personagem e combate
+3. Implementar G2.2 - Inimigos e spawn
+4. Implementar G2.3 - Necromancia minima
+5. Implementar G2.4 - Progressao minima
+6. Implementar G2.5 - Inventario minimo
+7. Implementar G2.6 - Export e publicacao continua
 
-- Firebase real segue como estrutura preparada; sem `src/firebaseConfig.local.js`, o jogo usa mockCloud.
-- Builds Android/Windows nativos seguem fora da v0.3.4.
-- Algumas strings do codigo seguem em ASCII para manter consistencia com arquivos existentes.
-- MockCloud exige login mock e dados em `localStorage`.
+Ver `docs/godot/ROADMAP_G2.md` para detalhes.
 
-## Proxima Etapa Recomendada
+## Regras de Desenvolvimento
 
-Validar manualmente a regressao v0.3.4 em desktop e mobile. Depois, priorizar expansao de conteudo apenas se a navegacao por mouse/toque e saves antigos estiverem estaveis.
+- Novas features devem ser implementadas primeiro em Godot.
+- **Não alterar `src/*.js` em tarefas Godot**, exceto correções emergenciais documentadas.
+- Não reimplementar tudo de uma vez - evoluir por marcos.
+- Cada marco deve ter validação e documentação.
+- Arquivos exportados de `docs/play-godot/` não devem ser alterados desnecessariamente.
+- O único preset Godot válido continua sendo `godot/export_presets.cfg`.
 
-## Regra Permanente
+## Validacoes
 
-Toda versao que alterar visual, mapa, personagem, UI ou efeito deve atualizar `ART_BIBLE.md` quando necessario, alem de `README.md` e `PROJECT_STATUS.md`.
+```bash
+# Validar JS legado
+npm.cmd run check
+
+# Verificar src intacto
+git diff --name-only -- src
+
+# Verificar whitespace
+git diff --check
+
+# Verificar preset
+git ls-files | findstr /i "export_presets.cfg"
+# Resultado esperado: godot/export_presets.cfg
+```
+
+## Pendencias
+
+- Smoke test manual G1.2.1 precisa ser validado no navegador
+- Validar build Web em https://jefbarros.github.io/necromante-dos-tres-reinos/play-godot/index.html
+
+## Documentacao
+
+- `docs/godot/MIGRATION_TO_GODOT.md`
+- `docs/godot/ROADMAP_G2.md`
+- `docs/godot/DEVELOPMENT_GUIDE.md`
+- `docs/play-godot/README.md`
+- `docs/legacy-html5/README.md`
