@@ -63,9 +63,63 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			# Toggle pause menu instead of just releasing mouse
+			_toggle_pause_menu()
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			_close_pause_menu_if_open()
+
+
+func _toggle_pause_menu() -> void:
+	# Check if pause menu already exists
+	var existing_pause := get_tree().get_first_node_in_group("pause_menu")
+	if existing_pause != null:
+		# Close existing pause menu
+		existing_pause.queue_free()
+		get_tree().paused = false
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		return
+	
+	# Open pause menu
+	var pause_scene := load("res://scenes/ui/PauseMenu.tscn")
+	if pause_scene == null:
+		print("PauseMenu.tscn not found")
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		return
+	
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	
+	var pause_menu := pause_scene.instantiate()
+	pause_menu.add_to_group("pause_menu")
+	get_tree().current_scene.add_child(pause_menu)
+	
+	# Connect signals
+	pause_menu.requested_continue.connect(_on_pause_continue)
+	pause_menu.requested_save.connect(_on_pause_save)
+	pause_menu.requested_load.connect(_on_pause_load)
+
+
+func _close_pause_menu_if_open() -> void:
+	var existing_pause := get_tree().get_first_node_in_group("pause_menu")
+	if existing_pause != null:
+		existing_pause.queue_free()
+		get_tree().paused = false
+
+
+func _on_pause_continue() -> void:
+	get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _on_pause_save() -> void:
+	print("Save requested from pause menu")
+	# Save is handled by PauseMenu
+
+
+func _on_pause_load() -> void:
+	print("Load requested from pause menu")
+	# Load is handled by PauseMenu
 
 
 func _physics_process(delta: float) -> void:

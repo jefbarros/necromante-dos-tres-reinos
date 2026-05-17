@@ -1,10 +1,66 @@
 # Necromante dos Tres Reinos - Godot
 
-## Cena 3D de prototipo
+## G8 - MVP PC Foundation
 
-A fundacao 3D jogavel fica em:
+Esta fase transforma a vertical slice em uma base executável, testável e empacotável para PC Windows.
 
-`res://scenes/world/PrototypeArena3D.tscn`
+**Fluxo do MVP PC**:
+1. Menu inicial → novo jogo / continuar / configurações / sair
+2. Hub_VeyrholdOutskirts (início)
+3. Quest vertical slice (Mara → Cripta → Boss → Recompensa)
+4. Save/Load
+5. Pause menu
+6. Configurações
+7. Export Windows
+
+**Cena inicial**: `res://scenes/ui/MainMenu.tscn`
+
+**Menu**:
+- Novo Jogo: inicia no hub com estado limpo
+- Continuar: carrega save existente (se houver)
+- Configurações: sensibilidade, volume, qualidade, tela cheia
+- Sair: fecha o jogo
+
+**Pause (durante gameplay)**:
+- Esc abre/fecha menu de pausa
+- Salvar, Carregar, Voltar ao Menu, Sair
+
+**Save**:
+- Localização: `user://n3r_prototype_save.json`
+- Inclui: versão, timestamp, última cena, level, XP, essência, estado da quest
+
+**Controles** (inalterados desde G7):
+- W, A, S, D: mover
+- Mouse: câmera
+- Shift: sprint
+- Espaço: dodge
+- Clique esquerdo: ataque
+- R: reanimar cadáver
+- 1/2/3: comandos de servo (FOLLOW/ATTACK/RECALL)
+- E: interagir
+- Esc: pause menu
+
+**Cenas principais**:
+- `res://scenes/ui/MainMenu.tscn` (início)
+- `res::scenes/hub/Hub_VeyrholdOutskirts.tscn` (hub)
+- `res::scenes/dungeons/MiniDungeon_CryptOfVeyrfall.tscn` (dungeon)
+- `res::scenes/enemies/BossRavanPrototype3D.tscn` (boss)
+- `res::scenes/ui/PauseMenu.tscn` (pausa)
+- `res::scenes/ui/SettingsMenu.tscn` (configurações)
+
+**Scripts adicionados**:
+- `res::scripts/ui/MainMenu.gd`
+- `res::scripts/ui/PauseMenu.gd`
+- `res::scripts/ui/SettingsMenu.gd`
+
+**Export Windows**:
+- Ver `docs/godot/BUILD_WINDOWS.md`
+
+## Cena 3D de prototipo (laboratório)
+
+A fundação 3D jogavel original ainda disponível em:
+
+`res::scenes/world/PrototypeArena3D.tscn`
 
 Para testar, abra o projeto em `godot/` com Godot 4.6.x, abra essa cena e execute com **Run Current Scene**.
 

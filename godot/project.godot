@@ -6,8 +6,12 @@ config_version=5
 [application]
 
 config/name="Necromante dos Tres Reinos - Godot G4.0"
-run/main_scene="res://scenes/Main.tscn"
+run/main_scene="res://scenes/ui/MainMenu.tscn"
 config/features=PackedStringArray("4.2")
+
+[autoload]
+
+SimpleSaveManager="*res://scripts/save/SimpleSaveManager.gd"
 
 [display]
 
