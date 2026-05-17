@@ -1815,7 +1815,7 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
 
   NecromancerGame.prototype.fuseSelectedKind = function () {
     if (this.screen !== "team") return;
-    var selected = this.reserveServants[this.selectedReserve] || this.servants[0];
+    var selected = this.filteredReserveServants()[this.selectedReserve] || this.servants[0];
     if (!selected) {
       this.message("Nenhum servo disponivel para fusao.");
       return;
@@ -1940,7 +1940,7 @@ NecromancerGame.prototype.toggleSelectedReserve = function () {
     var delta = this.getEquipmentPower(key) - this.getEquipmentPower(currentKey);
     if (delta > 0) return { label: "Melhora", detail: "+" + delta + " poder sobre " + current.name + ".", currentKey: currentKey };
     if (delta < 0) return { label: "Piora", detail: delta + " poder abaixo de " + current.name + ".", currentKey: currentKey };
-    return { label: "Muda estilo", detail: "Mesmo poder que " + current.name + ", foco em " + item.style + ".", currentKey: currentKey };
+    return { label: "Diferente", detail: "Mesmo poder que " + current.name + ", foco em " + item.style + ".", currentKey: currentKey };
   };
 
   NecromancerGame.prototype.getBonusText = function (item) {

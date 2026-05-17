@@ -23,6 +23,15 @@
     return key + " " + name;
   }
 
+  function ellipsize(ctx, text, maxWidth) {
+    var value = String(text || "");
+    if (maxWidth <= 8 || ctx.measureText(value).width <= maxWidth) return value;
+    var suffix = "...";
+    var end = value.length;
+    while (end > 0 && ctx.measureText(value.slice(0, end) + suffix).width > maxWidth) end -= 1;
+    return end > 0 ? value.slice(0, end) + suffix : suffix;
+  }
+
   window.GameUI = function GameUI(game) {
     this.game = game;
     this.clickAreas = [];
@@ -116,7 +125,7 @@
     ctx.fillStyle = opts.disabled ? "#78827c" : (opts.selected || hovered ? "#9ff3d8" : "#edf5ea");
     ctx.font = opts.font || "900 12px system-ui, sans-serif";
     ctx.textAlign = opts.align || "center";
-    ctx.fillText(label, opts.align === "left" ? x + 12 : x + w * 0.5, y + Math.floor(h * 0.62));
+    ctx.fillText(ellipsize(ctx, label, w - 14), opts.align === "left" ? x + 12 : x + w * 0.5, y + Math.floor(h * 0.62));
     ctx.textAlign = "left";
     return hovered;
   };
@@ -270,17 +279,17 @@ ctx.fillStyle = "#ecf4dc";
       { label: "Talentos", target: "skills", screens: ["skills"] },
       { label: "Mapa", target: "map", screens: ["worldMap"] }
     ];
-    var bw = compact ? 42 : 76;
-    var bh = compact ? 28 : 30;
-    var gap = compact ? 5 : 8;
+    var bw = compact ? 52 : 76;
+    var bh = compact ? 26 : 30;
+    var gap = compact ? 4 : 8;
     var totalW = buttons.length * bw + (buttons.length - 1) * gap;
-    var x = compact ? Math.max(8, canvas.width - bw - 10) : Math.max(12, canvas.width * 0.5 - totalW * 0.5);
-    var y = compact ? 142 : 12;
+    var x = Math.max(8, compact ? canvas.width * 0.5 - totalW * 0.5 : canvas.width * 0.5 - totalW * 0.5);
+    var y = compact ? Math.max(102, Math.min(150, canvas.height - 178)) : 12;
     buttons.forEach(function (button, index) {
-      var bx = compact ? x : x + index * (bw + gap);
-      var by = compact ? y + index * (bh + gap) : y;
+      var bx = x + index * (bw + gap);
+      var by = y;
       var active = button.screens.indexOf(game.screen) >= 0;
-      this.drawButton(ctx, compact ? button.label.slice(0, 4) : button.label, bx, by, bw, bh, {
+      this.drawButton(ctx, compact ? button.label.replace("Invent.", "Inv.") : button.label, bx, by, bw, bh, {
         id: "quick-" + button.target,
         selected: active,
         font: compact ? "900 10px system-ui, sans-serif" : "900 12px system-ui, sans-serif",
@@ -548,35 +557,40 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     var leftW = compact ? w - 48 : Math.floor(w * 0.45);
     var rightX = compact ? x + 24 : x + leftW + 42;
     var rightW = compact ? w - 48 : w - leftW - 66;
-    var topY = y + 86;
+    var topY = compact ? y + 72 : y + 86;
+    var activeRowH = compact ? Math.max(36, Math.min(48, (h - 184) / Math.max(1, activeLimit))) : 62;
+    var activeCardH = compact ? Math.max(32, activeRowH - 6) : 52;
+    var reserveTopY = compact ? topY + 18 + activeLimit * activeRowH + 14 : topY;
+    var detailY = y + h - (compact ? 76 : 108);
+    var detailH = compact ? 52 : 72;
     ctx.font = "900 15px system-ui, sans-serif";
     ctx.fillStyle = game.teamColumn === "active" ? "#9ff3d8" : "#e7f0df";
     ctx.fillText("Equipe ativa (" + game.servants.length + "/" + activeLimit + ")", x + 24, topY);
 
     for (var i = 0; i < activeLimit; i += 1) {
       var servant = game.servants[i];
-      var rowY = topY + 18 + i * 62;
+      var rowY = topY + 18 + i * activeRowH;
       var selectedActive = game.teamColumn === "active" && i === game.selectedActive;
       var hoveredActive = this.addClickArea({
         screen: "team",
         x: x + 24,
         y: rowY,
         w: leftW,
-        h: 52,
+        h: activeCardH,
         action: "teamSelect",
         select: function (slot) { return function () { game.teamColumn = "active"; game.selectedActive = slot; }; }(i)
       });
-      this.drawCard(ctx, x + 24, rowY, leftW, 52, { selected: selectedActive, hovered: hoveredActive });
+      this.drawCard(ctx, x + 24, rowY, leftW, activeCardH, { selected: selectedActive, hovered: hoveredActive });
       ctx.fillStyle = servant ? servant.color : "#6f7a76";
-      ctx.fillRect(x + 36, rowY + 12, 22, 22);
+      ctx.fillRect(x + 36, rowY + 9, compact ? 16 : 22, compact ? 16 : 22);
       ctx.fillStyle = "#edf5ea";
       ctx.font = "900 13px system-ui, sans-serif";
-      ctx.fillText(servant ? servant.name : "Espaco vazio", x + 68, rowY + 20);
+      ctx.fillText(ellipsize(ctx, servant ? servant.name : "Espaco vazio", leftW - 150), x + 68, rowY + 18);
       ctx.fillStyle = "#b9cbc0";
       ctx.font = "700 11px system-ui, sans-serif";
-      ctx.fillText(servant ? "Nv " + servant.level + " | " + game.getServantRole(servant) + " | Pwr " + game.getServantPower(servant) : "Selecione uma reserva para ocupar.", x + 68, rowY + 38);
+      ctx.fillText(ellipsize(ctx, servant ? "Nv " + servant.level + " | " + game.getServantRole(servant) + " | Pwr " + game.getServantPower(servant) : "Selecione uma reserva para ocupar.", leftW - 150), x + 68, rowY + Math.min(activeCardH - 8, 34));
       if (servant) {
-        this.drawButton(ctx, "Remover", x + leftW - 64, rowY + 13, 74, 26, {
+        this.drawButton(ctx, "Remover", x + leftW - 64, rowY + Math.max(4, activeCardH * 0.5 - 13), 74, 26, {
           id: "team-remove-" + i,
           font: "800 11px system-ui, sans-serif",
           onClick: function (slot) { return function () { game.teamColumn = "active"; game.selectedActive = slot; game.sendActiveToReserve(slot); }; }(i),
@@ -588,13 +602,13 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     var reserve = game.filteredReserveServants();
     ctx.fillStyle = game.teamColumn === "reserve" ? "#9ff3d8" : "#e7f0df";
     ctx.font = "900 15px system-ui, sans-serif";
-    ctx.fillText("Reserva (" + game.reserveServants.length + ")", rightX, topY);
+    ctx.fillText("Reserva (" + game.reserveServants.length + ")", rightX, reserveTopY);
     var filters = [
       ["all", "Todos"], ["tank", "Tanque"], ["damage", "Dano"], ["fast", "Rapido"], ["support", "Magico"]
     ];
     filters.forEach(function (filter, index) {
       var fx = rightX + index * Math.min(72, rightW / 5);
-      this.drawButton(ctx, filter[1], fx, topY + 10, Math.min(66, rightW / 5 - 4), 24, {
+      this.drawButton(ctx, filter[1], fx, reserveTopY + 10, Math.min(66, rightW / 5 - 4), 24, {
         id: "reserve-filter-" + filter[0],
         selected: game.reserveFilter === filter[0],
         font: "800 10px system-ui, sans-serif",
@@ -604,7 +618,7 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     }.bind(this));
     var sorts = [["power", "Poder"], ["level", "Nivel"], ["type", "Tipo"]];
     sorts.forEach(function (sort, index) {
-      this.drawButton(ctx, sort[1], rightX + index * 64, topY + 40, 58, 24, {
+      this.drawButton(ctx, sort[1], rightX + index * 64, reserveTopY + 40, 58, 24, {
         id: "reserve-sort-" + sort[0],
         selected: game.reserveSort === sort[0],
         font: "800 10px system-ui, sans-serif",
@@ -613,9 +627,9 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
       });
     }.bind(this));
 
-    var reserveY = topY + 72;
-    var rowH = 46;
-    var visibleRows = Math.max(1, Math.floor((y + h - 142 - reserveY) / rowH));
+    var reserveY = reserveTopY + (compact ? 66 : 72);
+    var rowH = compact ? 40 : 46;
+    var visibleRows = Math.max(1, Math.floor((detailY - 10 - reserveY) / rowH));
     var maxScroll = Math.max(0, reserve.length - visibleRows);
     game.reserveScroll = Math.max(0, Math.min(maxScroll, game.reserveScroll || 0));
     this.addClickArea({
@@ -637,11 +651,11 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
         x: rightX,
         y: ry,
         w: rightW - 12,
-        h: 38,
+        h: rowH - 8,
         action: "teamSelect",
         select: function (slot) { return function () { game.teamColumn = "reserve"; game.selectedReserve = slot; }; }(reserveIndex)
       });
-      this.drawCard(ctx, rightX, ry, rightW - 12, 38, { selected: selected, hovered: hoveredReserve, disabled: !res });
+      this.drawCard(ctx, rightX, ry, rightW - 12, rowH - 8, { selected: selected, hovered: hoveredReserve, disabled: !res });
       if (res) {
         ctx.fillStyle = res.color;
         ctx.fillRect(rightX + 10, ry + 10, 16, 16);
@@ -659,21 +673,22 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     this.drawScrollIndicator(ctx, rightX + rightW - 8, reserveY, 5, visibleRows * rowH - 8, game.reserveScroll || 0, reserve.length, visibleRows);
 
     var selected = game.teamColumn === "active" ? game.servants[game.selectedActive] : reserve[game.selectedReserve];
-    var detailY = y + h - 108;
-    this.drawPanel(ctx, x + 24, detailY, w - 48, 72);
+    this.drawPanel(ctx, x + 24, detailY, w - 48, detailH);
     if (selected) {
       ctx.fillStyle = "#dbe9e1";
       ctx.font = "900 14px system-ui, sans-serif";
-      ctx.fillText(selected.name + " | " + game.getServantRole(selected), x + 38, detailY + 22);
+      var hasReserveActions = game.teamColumn === "reserve";
+      var detailTextW = compact && hasReserveActions ? w - 230 : compact ? w - 76 : w - 230;
+      ctx.fillText(ellipsize(ctx, selected.name + " | " + game.getServantRole(selected), detailTextW), x + 38, detailY + 22);
       ctx.font = "800 11px system-ui, sans-serif";
-      this.wrapText(ctx, this.servantDetails(selected), x + 38, detailY + 42, w - 230, 14);
-      if (game.teamColumn === "reserve") {
+      this.wrapText(ctx, this.servantDetails(selected), x + 38, detailY + 42, detailTextW, 14, compact ? 1 : 2);
+      if (hasReserveActions) {
         this.drawButton(ctx, "Ativar", x + w - 188, detailY + 18, 70, 28, {
           id: "team-activate-reserve",
           onClick: function () { game.activateReserveServant(reserve[game.selectedReserve]); },
           area: { screen: "team", action: "teamActivateReserve" }
         });
-        this.drawButton(ctx, "Substituir", x + w - 112, detailY + 18, 86, 28, {
+        this.drawButton(ctx, compact ? "Trocar" : "Substituir", x + w - 112, detailY + 18, 86, 28, {
           id: "team-replace",
           onClick: function () { game.replaceActiveWithReserve(); },
           area: { screen: "team", action: "teamReplace" }
@@ -716,13 +731,14 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     ], game.inventoryTab, x + 24, y + 76, Math.min(440, w - 48), 30, function (tab) { game.cycleToInventoryTab(tab); });
 
     var entries = game.getInventoryEntries(game.inventoryTab);
+    game.selectedInventory = Math.max(0, Math.min(Math.max(0, entries.length - 1), game.selectedInventory || 0));
     var listX = x + 24;
     var listY = y + 122;
     var listW = compact ? w - 48 : Math.floor(w * 0.48);
     var detailX = compact ? x + 24 : listX + listW + 24;
     var detailY = compact ? y + h - 168 : listY;
     var detailW = compact ? w - 48 : w - listW - 72;
-    var cardH = 58;
+    var cardH = compact ? 52 : 58;
     var cols = compact ? 1 : 2;
     var cardW = (listW - 12 - (cols - 1) * 10) / cols;
     var rowsVisible = Math.max(1, Math.floor(((compact ? detailY - 12 : y + h - 118) - listY) / cardH));
@@ -758,7 +774,7 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
       this.drawCard(ctx, ix, iy, cardW, cardH - 8, { selected: selected || equipped, hovered: hovered, rarityColor: this.rarityColor(rarity) });
       ctx.fillStyle = "#f1ead1";
       ctx.font = "800 13px system-ui, sans-serif";
-      this.wrapText(ctx, entry.name, ix + 12, iy + 17, cardW - 24, 14);
+      this.wrapText(ctx, entry.name, ix + 12, iy + 17, cardW - 24, 14, 1);
       ctx.fillStyle = "#c9d7ce";
       ctx.font = "700 11px system-ui, sans-serif";
       if (entry.section === "equipment") ctx.fillText(rarity + " | Pwr " + window.GameConfig.equipment[entry.key].power + (equipped ? " | Equipado" : ""), ix + 12, iy + 42);
@@ -771,17 +787,23 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
 
   GameUI.prototype.drawInventoryDetails = function (ctx, x, y, w, h, entry) {
     var game = this.game;
-    if (!entry || w < 190) return;
+    if (w < 190) return;
     var boxH = Math.max(132, Math.min(190, h));
     this.drawPanel(ctx, x, y, w, boxH);
+    if (!entry) {
+      ctx.fillStyle = "#8d9990";
+      ctx.font = "800 13px system-ui, sans-serif";
+      this.wrapText(ctx, "Nenhum item nesta aba.", x + 14, y + 30, w - 28, 16, 2);
+      return;
+    }
     ctx.fillStyle = "#edf5ea";
     ctx.font = "900 15px system-ui, sans-serif";
-    ctx.fillText(entry.name, x + 14, y + 24);
+    ctx.fillText(ellipsize(ctx, entry.name, w - 28), x + 14, y + 24);
     ctx.font = "700 12px system-ui, sans-serif";
     if (entry.section !== "equipment") {
       ctx.fillStyle = "#c9d7ce";
       var text = entry.section === "consumables" ? window.GameConfig.consumables[entry.key].text : "Quantidade: " + entry.amount;
-      this.wrapText(ctx, text, x + 14, y + 48, w - 28, 16);
+      this.wrapText(ctx, text, x + 14, y + 48, w - 28, 16, 3);
       if (entry.section === "consumables") {
         this.drawButton(ctx, "Usar", x + 14, y + boxH - 42, 78, 28, {
           id: "inventory-use",
@@ -804,11 +826,11 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     lines.forEach(function (line, index) {
       ctx.fillStyle = index === 3 ? (comparison.label === "Melhora" ? "#9ff3d8" : comparison.label === "Piora" ? "#f1b2bf" : "#f3d478") : "#dbe9e1";
       ctx.font = index === 3 ? "900 12px system-ui, sans-serif" : "700 12px system-ui, sans-serif";
-      this.wrapText(ctx, line, x + 14, y + 48 + index * 18, w - 28, 14);
+      this.wrapText(ctx, line, x + 14, y + 48 + index * 18, w - 28, 14, 1);
     }.bind(this));
     ctx.fillStyle = "#b9cbc0";
     ctx.font = "700 12px system-ui, sans-serif";
-    this.wrapText(ctx, item.desc || item.text, x + 14, y + boxH - 56, w - 28, 15);
+    this.wrapText(ctx, item.desc || item.text, x + 14, y + boxH - 56, w - 28, 15, 2);
     this.drawButton(ctx, equipped ? "Desequipar" : "Equipar", x + 14, y + boxH - 36, 104, 28, {
       id: "inventory-equip",
       onClick: function () { game.confirmInventorySelection(); },
@@ -818,12 +840,17 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
 
   GameUI.prototype.drawSkillTreeScreen = function (ctx, x, y, w, h) {
     var game = this.game;
+    var compact = w < 650 || h < 390;
     ctx.fillText("Arvore Inicial do Necromante", x + 22, y + 34);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
     ctx.fillText("Pontos: " + game.skillPoints + " | Nivel " + game.player.level + " | clique escolhe, Desbloquear confirma.", x + 22, y + 58);
 
     var paths = ["Invocador", "Ceifador", "Senhor das Almas", "Estrategista Sombrio"];
+    if (compact) {
+      this.drawCompactSkillTree(ctx, x, y, w, h, paths);
+      return;
+    }
     var treeX = x + 22;
     var treeY = y + 88;
     var detailH = 92;
@@ -895,6 +922,82 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     }
   };
 
+  GameUI.prototype.drawCompactSkillTree = function (ctx, x, y, w, h, paths) {
+    var game = this.game;
+    var selectedNode = window.GameConfig.skillTree[game.selectedSkill] || window.GameConfig.skillTree[0];
+    var selectedPath = selectedNode ? selectedNode.path : paths[0];
+    var tabW = (w - 56) / 2;
+    paths.forEach(function (path, index) {
+      var bx = x + 24 + (index % 2) * (tabW + 8);
+      var by = y + 76 + Math.floor(index / 2) * 28;
+      this.drawButton(ctx, path, bx, by, tabW, 24, {
+        id: "skill-path-" + index,
+        selected: path === selectedPath,
+        font: "800 10px system-ui, sans-serif",
+        onClick: function () {
+          var first = window.GameConfig.skillTree.filter(function (node) { return node.path === path; })[0];
+          if (first) game.selectedSkill = window.GameConfig.skillTree.indexOf(first);
+        },
+        area: { screen: "skills", action: "skillSelect" }
+      });
+    }.bind(this));
+
+    var nodes = window.GameConfig.skillTree.filter(function (node) { return node.path === selectedPath; });
+    var nodeY = y + 140;
+    var detailY = y + h - 92;
+    var nodeH = Math.max(30, Math.min(54, (detailY - nodeY - 18) / Math.max(1, nodes.length)));
+    nodes.forEach(function (node, row) {
+      var index = window.GameConfig.skillTree.indexOf(node);
+      var ny = nodeY + row * (nodeH + 8);
+      var selected = index === game.selectedSkill;
+      var unlocked = game.unlockedSkills[node.id];
+      var ready = !unlocked && game.getTalentRequirementText(node).indexOf("Requer:") !== 0;
+      var hovered = this.addClickArea({
+        screen: "skills",
+        x: x + 24,
+        y: ny,
+        w: w - 48,
+        h: nodeH,
+        action: "skillSelect",
+        select: function (slot) { return function () { game.selectedSkill = slot; }; }(index)
+      });
+      this.drawCard(ctx, x + 24, ny, w - 48, nodeH, {
+        selected: selected,
+        hovered: hovered,
+        disabled: !unlocked && !ready,
+        rarityColor: unlocked ? "#9ff3d8" : ready ? "#f3d478" : "#8e4653"
+      });
+      ctx.fillStyle = unlocked ? "#9ff3d8" : ready ? "#f3d478" : "#c99aa2";
+      ctx.font = "900 11px system-ui, sans-serif";
+      ctx.fillText(unlocked ? "Desbloqueado" : ready ? "Disponivel" : "Bloqueado", x + 36, ny + 16);
+      ctx.fillStyle = "#edf5ea";
+      ctx.font = "800 12px system-ui, sans-serif";
+      ctx.fillText(ellipsize(ctx, node.name, w - 160), x + 132, ny + 16);
+      ctx.fillStyle = "#b9cbc0";
+      ctx.font = "700 10px system-ui, sans-serif";
+      ctx.fillText("Custo " + node.cost + " | Nv " + node.levelRequired, x + 36, ny + nodeH - 8);
+    }.bind(this));
+
+    selectedNode = window.GameConfig.skillTree[game.selectedSkill] || selectedNode;
+    var reqText = game.getTalentRequirementText(selectedNode);
+    var unlockedSelected = game.unlockedSkills[selectedNode.id];
+    this.drawPanel(ctx, x + 24, detailY, w - 48, 72);
+    ctx.fillStyle = "#edf5ea";
+    ctx.font = "900 13px system-ui, sans-serif";
+    ctx.fillText(ellipsize(ctx, selectedNode.name, w - 190), x + 38, detailY + 20);
+    ctx.fillStyle = unlockedSelected ? "#9ff3d8" : (reqText.indexOf("Requer:") === 0 ? "#f1b2bf" : "#f3d478");
+    ctx.font = "800 11px system-ui, sans-serif";
+    ctx.fillText(ellipsize(ctx, unlockedSelected ? "Desbloqueado" : reqText, w - 190), x + 38, detailY + 38);
+    ctx.fillStyle = "#dbe9e1";
+    this.wrapText(ctx, selectedNode.text, x + 38, detailY + 56, w - 190, 13, 1);
+    this.drawButton(ctx, unlockedSelected ? "Ativo" : "Desbloquear", x + w - 146, detailY + 22, 104, 28, {
+      id: "skill-unlock-compact",
+      disabled: unlockedSelected,
+      onClick: function () { if (!unlockedSelected) game.unlockSelectedSkill(); },
+      area: { screen: "skills", action: "skillNode" }
+    });
+  };
+
   GameUI.prototype.drawReputation = function (ctx, x, y, w) {
     var game = this.game;
     var names = ["Humanos", "Demonios", "Dragoes", "Mortos-vivos"];
@@ -919,20 +1022,26 @@ ctx.fillText("v" + window.GameConfig.version + " - Menu concentra Conta e Salvar
     });
   };
 
-GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
-    var words = text.split(" ");
+GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+    var words = String(text || "").split(" ");
     var line = "";
+    var lines = 0;
     for (var i = 0; i < words.length; i += 1) {
       var test = line + words[i] + " ";
       if (ctx.measureText(test).width > maxWidth && i > 0) {
-        ctx.fillText(line, x, y);
+        lines += 1;
+        if (maxLines && lines >= maxLines) {
+          ctx.fillText(ellipsize(ctx, line, maxWidth), x, y);
+          return;
+        }
+        ctx.fillText(ellipsize(ctx, line, maxWidth), x, y);
         line = words[i] + " ";
         y += lineHeight;
       } else {
         line = test;
       }
     }
-    ctx.fillText(line, x, y);
+    if (!maxLines || lines < maxLines) ctx.fillText(ellipsize(ctx, line, maxWidth), x, y);
   };
 
 // Draw sync status indicator in HUD
@@ -1054,21 +1163,22 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillStyle = "#b9cbc0";
     ctx.fillText("CMD alterna regiao, CAP/ATK viaja, ESC/Voltar retorna.", x + 24, y + 68);
 
+    var regionRowH = compact ? 42 : 52;
     window.WorldRegions.forEach(function (reg, index) {
       var selected = index === game.selectedMenu;
       var unlocked = game.isRegionUnlocked ? game.isRegionUnlocked(reg) : Boolean(game.unlockedRegions[reg.id]);
       var rx = x + 24;
-      var ry = y + 92 + index * 52;
+      var ry = y + 92 + index * regionRowH;
       var hovered = this.addClickArea({
         screen: "worldMap",
         x: rx,
         y: ry,
         w: listW,
-        h: 44,
+        h: compact ? 36 : 44,
         action: "regionSelect",
         select: function (slot) { return function () { game.selectedMenu = slot; }; }(index)
       });
-      this.drawButtonBox(ctx, rx, ry, listW, 44, selected, hovered, reg.status === "future");
+      this.drawButtonBox(ctx, rx, ry, listW, compact ? 36 : 44, selected, hovered, reg.status === "future");
 
       ctx.fillStyle = reg.status === "future" ? "#8d9990" : unlocked ? "#edf5ea" : "#e36d6d";
       ctx.font = "900 15px system-ui, sans-serif";
@@ -1077,11 +1187,11 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
       
       ctx.font = "700 12px system-ui, sans-serif";
       ctx.fillStyle = selected || hovered ? "#9ff3d8" : "#b9cbc0";
-      ctx.fillText(statusLabel + " | Nvl " + reg.level + " | " + reg.type.toUpperCase(), rx + 12, ry + 36);
+      ctx.fillText(statusLabel + " | Nvl " + reg.level + " | " + reg.type.toUpperCase(), rx + 12, ry + (compact ? 31 : 36));
       
       if (selected || hovered) {
         ctx.fillStyle = "#9ff3d8";
-        ctx.fillRect(rx + 2, ry + 2, 4, 40);
+        ctx.fillRect(rx + 2, ry + 2, 4, compact ? 32 : 40);
       }
     }.bind(this));
     var selectedRegion = window.WorldRegions[game.selectedMenu] || window.WorldRegions[0];
@@ -1091,7 +1201,7 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
     this.drawSelectedRegionDetails(
       ctx,
       compact ? x + 24 : x + listW + 48,
-      compact ? y + 92 + window.WorldRegions.length * 52 + 8 : y + 238,
+      compact ? y + 92 + window.WorldRegions.length * regionRowH + 8 : y + 238,
       compact ? w - 48 : w - listW - 72,
       selectedRegion,
       game.isRegionUnlocked ? game.isRegionUnlocked(selectedRegion) : Boolean(game.unlockedRegions[selectedRegion.id])
@@ -1162,13 +1272,15 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
   };
 
   GameUI.prototype.drawSelectedRegionDetails = function (ctx, x, y, w, region, unlocked) {
-    this.drawPanel(ctx, x, y - 18, w, 178);
+    var compact = w < 430;
+    var panelH = compact ? 146 : 178;
+    this.drawPanel(ctx, x, y - 18, w, panelH);
     ctx.fillStyle = "#edf5ea";
     ctx.font = "900 18px system-ui, sans-serif";
     ctx.fillText(region.name, x + 14, y + 10);
     ctx.font = "700 13px system-ui, sans-serif";
     ctx.fillStyle = "#b9cbc0";
-    this.wrapText(ctx, region.desc, x + 14, y + 36, w - 28, 18);
+    this.wrapText(ctx, region.desc, x + 14, y + 36, w - 28, compact ? 15 : 18, compact ? 2 : 3);
     if (!unlocked && region.status !== "future") {
       ctx.fillStyle = "#e36d6d";
       ctx.font = "900 14px system-ui, sans-serif";
@@ -1184,14 +1296,14 @@ GameUI.prototype.wrapText = function (ctx, text, x, y, maxWidth, lineHeight) {
     }
     ctx.fillStyle = "#e7f0df";
     ctx.font = "900 14px system-ui, sans-serif";
-    ctx.fillText("Pontos de Interesse:", x + 14, y + 108);
+    ctx.fillText("Pontos de Interesse:", x + 14, y + (compact ? 102 : 108));
     (region.pointsOfInterest || []).forEach(function (poi, i) {
       if (i >= 3) return;
       ctx.fillStyle = "#edf5ea";
       ctx.font = "700 11px system-ui, sans-serif";
-      ctx.fillText("- " + poi.name + ": " + poi.desc, x + 18, y + 130 + i * 17);
+      ctx.fillText(ellipsize(ctx, "- " + poi.name + (compact ? "" : ": " + poi.desc), w - 130), x + 18, y + (compact ? 120 : 130) + i * (compact ? 13 : 17));
     });
-    this.drawButton(ctx, region.status === "future" ? "Futuro" : unlocked ? "Viajar" : "Bloqueado", x + w - 122, y + 100, 94, 30, {
+    this.drawButton(ctx, region.status === "future" ? "Futuro" : unlocked ? "Viajar" : "Bloqueado", x + w - 110, y + (compact ? 100 : 100), 82, 30, {
       id: "region-travel",
       disabled: region.status === "future" || !unlocked,
       onClick: function () { if (unlocked && region.status !== "future") this.game.confirmRegionTravel(); }.bind(this),

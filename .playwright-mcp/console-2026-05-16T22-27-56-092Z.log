@@ -1,0 +1,3 @@
+[    2125ms] [LOG] SaveManager initialized @ http://localhost:8000/src/saveManager.js:172
+[    2224ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8000/favicon.ico:0
+[  162517ms] [LOG] Save migrated from 0.2.8 to 0.3.2 @ http://localhost:8000/src/saveManager.js:407
