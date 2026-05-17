@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/loot/DungeonRewardChest3D.gd" id="1"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_chest"]
+size = Vector3(1.8, 1.0, 1.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_chest"]
+size = Vector3(1.8, 1.0, 1.2)
+
+[node name="DungeonRewardChest3D" type="Area3D"]
+script = ExtResource("1")
+monitoring = true
+collision_layer = 1
+collision_mask = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_chest")
+position = Vector3(0, 0.55, 0)
+modulate = Color(0.84, 0.70, 0.24, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_chest")
+position = Vector3(0, 0.55, 0)
+
+[node name="Label3D" type="Label3D" parent="."]
+position = Vector3(0, 1.4, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "Pressione E"
+font_size = 18

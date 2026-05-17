@@ -4,7 +4,8 @@
 [ext_resource type="PackedScene" path="res://scenes/camera/ThirdPersonCameraRig.tscn" id="2_camera"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/EnemyDummy3D.tscn" id="3_enemy"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PrototypeHUD.tscn" id="4_hud"]
-[ext_resource type="PackedScene" path="res://scenes/world/SpawnPoint3D.tscn" id="5_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/dungeons/DungeonEntrance3D.tscn" id="5_entrance"]
+[ext_resource type="PackedScene" path="res://scenes/world/SpawnPoint3D.tscn" id="6_spawn"]
 [ext_resource type="Material" path="res://assets/materials/arena_floor.tres" id="5_floor_material"]
 [ext_resource type="Script" path="res://scripts/world/ArenaManager3D.gd" id="6_arena"]
 
@@ -176,6 +177,9 @@ starting_wave = 1
 enemies_per_wave_base = 2
 enemies_per_wave_increment = 1
 max_active_enemies = 10
+
+[node name="DungeonEntrance3D" parent="." instance=ExtResource("5_entrance")]
+position = Vector3(0, 0, 8)
 
 [node name="Player3D" parent="." instance=ExtResource("1_player")]
 position = Vector3(0, 0, 0)

@@ -53,6 +53,22 @@ text = "Servos: 0/2"
 label_settings = SubResource("LabelSettings_small")
 text = "Comando: FOLLOW"
 
+[node name="DungeonLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+label_settings = SubResource("LabelSettings_small")
+text = "Dungeon: Inativa"
+
+[node name="RoomLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+label_settings = SubResource("LabelSettings_small")
+text = "Sala: -"
+
+[node name="EnemiesLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+label_settings = SubResource("LabelSettings_small")
+text = "Inimigos: -"
+
+[node name="ContextLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+label_settings = SubResource("LabelSettings_small")
+text = ""
+
 [node name="HintLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
 label_settings = SubResource("LabelSettings_small")
 text = "R reanima | 1 seguir | 2 atacar | 3 reunir"

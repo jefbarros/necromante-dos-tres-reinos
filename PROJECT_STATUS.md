@@ -2,7 +2,7 @@
 
 ## Versao Atual
 
-Godot G4.0 necromancia jogavel
+Godot G6 mini dungeon
 
 ## Estado Geral
 
@@ -16,6 +16,8 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 - G3.0 MVP jogavel completo em Godot
 - G3.0.1 responsividade Web minima concluida como complemento do MVP G3.0
 - G4.0 necromancia jogavel implementada em Godot
+- G5 primeira arena com loop de ondas e recompensas implementada em Godot
+- G6 mini dungeon prototipado em Godot na branch `godot/g6-mini-dungeon`
 - G1.2 Pages configurado
 - G1.2.1 smoke test manual pendente
 
@@ -91,6 +93,7 @@ G5 primeira arena implementada na branch `godot/g5-first-arena-loop`.
 | G3.0.1 | Responsividade Web minima complementar ao MVP G3.0 | Completo |
 | G4.0 | Necromancia jogavel minima Godot | Completo |
 | G5 | Primeira arena com ondas, XP e loot | Completo |
+| G6 | Mini dungeon prototipo | Completo |
 | v0.3.4 | HTML5 estavel | Congelado |
 
 ## Tags
@@ -105,10 +108,10 @@ G5 primeira arena implementada na branch `godot/g5-first-arena-loop`.
 
 ## Proximas Etapas
 
-1. G6 mini dungeon
-2. G7 entrada de dungeon com 3 salas
+1. G7 vertical slice
+2. Expandir a dungeon para um hub simples
 3. Melhorar smoke test Web por release
-4. Planejar persistencia simples somente apos estabilizar o loop jogavel
+4. Planejar persistencia expandida apos estabilizar o loop jogavel
 
 Ver `docs/godot/ROADMAP_G3.md` para detalhes.
 

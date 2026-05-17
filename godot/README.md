@@ -22,6 +22,22 @@ Esta etapa prova o loop minimo de necromancia jogavel:
 8. comandar servos com `1`, `2` e `3`;
 9. tomar dano e observar parte do dano ser transferida para servos ativos.
 
+## G6 - mini dungeon
+
+Esta fase adiciona a `Cripta de Veyrfall` como uma dungeon pequena e jogavel que prova o loop minimo:
+
+1. entrar na dungeon a partir de `PrototypeArena3D` usando `E`;
+2. limpar sala 1 com 2 inimigos;
+3. abrir a primeira porta/gate;
+4. limpar sala 2 com 3 inimigos;
+5. abrir a segunda porta/gate;
+6. derrotar o `EliteEnemy3D` na sala 3;
+7. colher a recompensa final em um baú;
+8. salvar progresso simples em `user://n3r_prototype_save.json`;
+9. voltar para a arena com `E`.
+
+O save simples é gravado em `user://n3r_prototype_save.json`.
+
 ## Controles atuais
 
 - W, A, S, D: movimento relativo a camera
@@ -33,6 +49,7 @@ Esta etapa prova o loop minimo de necromancia jogavel:
 - 1: servos seguem/protegem o jogador
 - 2: servos atacam inimigo proximo
 - 3: servos recuam e reunem no jogador
+- E: interagir com entradas, portas e recompensas
 - Esc: liberar ou capturar o mouse
 
 ## Implementado nesta etapa
@@ -46,6 +63,7 @@ Esta etapa prova o loop minimo de necromancia jogavel:
 - `EnemyDummy3D` tem ataque simples por proximidade contra player ou servo.
 - `PrototypeHUD.tscn` mostra HP, essencia, servos ativos/limite, comando atual e dica.
 - `PrototypeArena3D.tscn` mantem multiplos inimigos em area pequena para validar o fluxo.
+- `MiniDungeon_CryptOfVeyrfall.tscn` adiciona uma dungeon de 3 salas, gates de porta, elite, recompensa e retorno à arena.
 
 ## Fluxo de teste manual
 
@@ -59,8 +77,12 @@ Esta etapa prova o loop minimo de necromancia jogavel:
 8. Confirme `Essence spent: X`, `Skeleton raised` e a atualizacao do HUD.
 9. Use `1` para FOLLOW, `2` para ATTACK e `3` para RECALL.
 10. Tome dano com servo ativo e confirme `Damage transferred to summons: X`.
-11. Tome dano sem servo ativo e confirme `No summons available for damage transfer`.
-
+11. Tome dano sem servo ativo e confirme `No summons available for damage transfer`.9. Aproxime-se da entrada da dungeon no `PrototypeArena3D` e pressione `E`.
+10. Limpe sala 1, avance e confirme que o gate abre.
+11. Limpe sala 2, avance e confirme que o segundo gate abre.
+12. Derrote o elite na sala 3 e colete o baú final.
+13. Verifique que `user://n3r_prototype_save.json` foi criado.
+14. Use `E` no portal de saida para retornar para a arena.
 ## Fora do escopo
 
 - Roda tatica.
@@ -68,11 +90,12 @@ Esta etapa prova o loop minimo de necromancia jogavel:
 - Arvore de habilidade.
 - Evolucao, raridade e multiplas familias de servos.
 - Inventario, loot, XP e level up.
-- Dungeon, boss, mundo aberto, faccoes completas e save system.
+- Boss complexo e mundo aberto completo.
+- Inventario real, equipamentos finais e arvores de habilidade completas.
 - Reputacao, corrupcao moral e sistemas narrativos completos.
 - Pathfinding avancado, assets finais, efeitos finais e networking.
 
 ## Proximos passos sugeridos
 
 1. G5 primeira arena com spawn, loot simples, XP e level up.
-2. G6 mini dungeon.
+2. G7 vertical slice.

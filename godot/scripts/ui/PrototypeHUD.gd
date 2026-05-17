@@ -9,6 +9,10 @@ var _arena_manager: Node = null
 @onready var _summon_label: Label = $Panel/MarginContainer/VBoxContainer/SummonLabel
 @onready var _command_label: Label = $Panel/MarginContainer/VBoxContainer/CommandLabel
 @onready var _hint_label: Label = $Panel/MarginContainer/VBoxContainer/HintLabel
+@onready var _dungeon_label: Label = $Panel/MarginContainer/VBoxContainer/DungeonLabel
+@onready var _room_label: Label = $Panel/MarginContainer/VBoxContainer/RoomLabel
+@onready var _enemies_label: Label = $Panel/MarginContainer/VBoxContainer/EnemiesLabel
+@onready var _context_label: Label = $Panel/MarginContainer/VBoxContainer/ContextLabel
 
 
 func _ready() -> void:
@@ -83,7 +87,22 @@ func _update_labels() -> void:
 	else:
 		_health_label.text = "HP: -/-"
 
+	var dungeon_manager := get_tree().get_first_node_in_group("dungeon_manager")
+	var dungeon_text := "Dungeon: Inativa"
+	var room_text := "Sala: -"
+	var enemies_text := "Inimigos: -"
+	var context_text := ""
+	if dungeon_manager != null:
+		dungeon_text = "Dungeon: %s" % String(dungeon_manager.get("dungeon_name"))
+		room_text = "Sala: %s" % String(dungeon_manager.get("current_room_name"))
+		enemies_text = "Inimigos: %d" % int(dungeon_manager.get("enemies_alive"))
+		context_text = String(dungeon_manager.get("dungeon_hint"))
+
 	_summon_label.text = "Servos: %d/%d | %s" % [active_summons, limit, command_name]
 	_essence_label.text = "%s | %s" % [_essence_label.text, lv_text]
 	_command_label.text = arena_text
 	_health_label.text = "%s | %s" % [_health_label.text, loot_text]
+	_dungeon_label.text = dungeon_text
+	_room_label.text = room_text
+	_enemies_label.text = enemies_text
+	_context_label.text = context_text if context_text != "" else _hint_label.text
