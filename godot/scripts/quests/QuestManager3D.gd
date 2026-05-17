@@ -103,7 +103,7 @@ func get_save_data() -> Dictionary:
 
 func load_from_data(data: Dictionary) -> void:
 	if data.has("main_quest_state"):
-		var loaded := data["main_quest_state"]
+		var loaded: Variant = data["main_quest_state"]
 		if loaded is int and loaded >= 0 and loaded < QuestState.size():
 			current_state = loaded
 			print("Quest loaded: %s" % get_objective_text())

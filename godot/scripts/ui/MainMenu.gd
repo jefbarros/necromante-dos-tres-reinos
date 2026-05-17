@@ -1,12 +1,12 @@
 extends Control
 class_name MainMenu
 
-const HUB_SCENE := preload("res://scenes/hub/Hub_VeyrholdOutskirts.tscn")
+const HUB_SCENE_PATH := "res://scenes/hub/Hub_VeyrholdOutskirts.tscn"
 
-@onready var _new_game_button: Button = $VBoxContainer/MarginContainer/VBoxContainer/NewGameButton
-@onready var _continue_button: Button = $VBoxContainer/MarginContainer/VBoxContainer/ContinueButton
-@onready var _settings_button: Button = $VBoxContainer/MarginContainer/VBoxContainer/SettingsButton
-@onready var _quit_button: Button = $VBoxContainer/MarginContainer/VBoxContainer/QuitButton
+@onready var _new_game_button: Button = $VBoxContainer/NewGameButton
+@onready var _continue_button: Button = $VBoxContainer/ContinueButton
+@onready var _settings_button: Button = $VBoxContainer/SettingsButton
+@onready var _quit_button: Button = $VBoxContainer/QuitButton
 
 var _settings_menu: Control = null
 
@@ -42,7 +42,7 @@ func _on_continue_pressed() -> void:
 
 
 func _load_hub() -> void:
-	get_tree().change_scene_to_packed(HUB_SCENE)
+	get_tree().change_scene_to_file(HUB_SCENE_PATH)
 
 
 func _on_settings_pressed() -> void:
@@ -51,7 +51,7 @@ func _on_settings_pressed() -> void:
 
 func _open_settings_menu() -> void:
 	if _settings_menu == null:
-		var settings_scene := load("res://scenes/ui/SettingsMenu.tscn")
+		var settings_scene: PackedScene = load("res://scenes/ui/SettingsMenu.tscn") as PackedScene
 		if settings_scene == null:
 			print("SettingsMenu.tscn not found, skipping settings")
 			return

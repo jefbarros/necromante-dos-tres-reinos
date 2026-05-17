@@ -13,9 +13,9 @@ class_name OrderSoldier3D
 @export var attack_cooldown: float = 1.0
 @export var essence_reward: int = 8
 @export var xp_reward: int = 25
-@export var corpse_scene: PackedScene
+@export var corpse_scene: PackedScene = preload("res://scenes/necromancy/Corpse3D.tscn")
 @export var loot_drop_chance: float = 0.35
-@export var loot_scene: PackedScene
+@export var loot_scene: PackedScene = preload("res://scenes/loot/LootDrop3D.tscn")
 
 var _dead: bool = false
 var _attack_cooldown_timer: float = 0.0
@@ -119,8 +119,8 @@ func _drop_loot() -> void:
 func _spawn_corpse() -> void:
 	if _corpse_spawned or corpse_scene == null:
 		return
-	_corpsespawned = true
-	var corpse := corpse_scene.instantiate() as Node3D
+	_corpse_spawned = true
+	var corpse: Node3D = corpse_scene.instantiate() as Node3D
 	if corpse == null:
 		return
 	var spawn_parent := get_parent()

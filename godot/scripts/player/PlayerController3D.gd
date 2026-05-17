@@ -72,7 +72,7 @@ func _input(event: InputEvent) -> void:
 
 func _toggle_pause_menu() -> void:
 	# Check if pause menu already exists
-	var existing_pause := get_tree().get_first_node_in_group("pause_menu")
+	var existing_pause: Node = get_tree().get_first_node_in_group("pause_menu")
 	if existing_pause != null:
 		# Close existing pause menu
 		existing_pause.queue_free()
@@ -81,7 +81,7 @@ func _toggle_pause_menu() -> void:
 		return
 	
 	# Open pause menu
-	var pause_scene := load("res://scenes/ui/PauseMenu.tscn")
+	var pause_scene: PackedScene = load("res://scenes/ui/PauseMenu.tscn") as PackedScene
 	if pause_scene == null:
 		print("PauseMenu.tscn not found")
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -90,7 +90,13 @@ func _toggle_pause_menu() -> void:
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	
-	var pause_menu := pause_scene.instantiate()
+	var pause_menu: PauseMenu = pause_scene.instantiate() as PauseMenu
+	if pause_menu == null:
+		print("PauseMenu.tscn root is not PauseMenu")
+		get_tree().paused = false
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		return
+	
 	pause_menu.add_to_group("pause_menu")
 	get_tree().current_scene.add_child(pause_menu)
 	
@@ -101,7 +107,7 @@ func _toggle_pause_menu() -> void:
 
 
 func _close_pause_menu_if_open() -> void:
-	var existing_pause := get_tree().get_first_node_in_group("pause_menu")
+	var existing_pause: Node = get_tree().get_first_node_in_group("pause_menu")
 	if existing_pause != null:
 		existing_pause.queue_free()
 		get_tree().paused = false
@@ -151,7 +157,7 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("attack_primary"):
 		_start_basic_attack()
 
-if Input.is_action_just_pressed("raise_skeleton"):
+	if Input.is_action_just_pressed("raise_skeleton"):
 		if Input.is_key_pressed(KEY_SHIFT):
 			_try_raise_archer()
 		else:

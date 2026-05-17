@@ -1,6 +1,6 @@
 extends Area3D
 
-@export var target_scene: PackedScene
+@export var target_scene_path: String = ""
 @export var hint_text: String = "Pressione E para entrar"
 
 var _player_in_area: bool = false
@@ -16,9 +16,9 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if not _player_in_area:
 		return
-	if Input.is_action_just_pressed("interact") and target_scene != null:
+	if Input.is_action_just_pressed("interact") and not target_scene_path.is_empty():
 		print("Arena portal triggered")
-		get_tree().change_scene_to_file(target_scene.resource_path)
+		get_tree().change_scene_to_file(_normalized_scene_path())
 
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("player"):
@@ -31,3 +31,9 @@ func _on_body_exited(body: Node) -> void:
 		_player_in_area = false
 		if _hint_label != null:
 			_hint_label.text = hint_text
+
+
+func _normalized_scene_path() -> String:
+	if target_scene_path.begins_with("res://"):
+		return target_scene_path
+	return "res://" + target_scene_path

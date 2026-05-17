@@ -72,7 +72,7 @@ func _collect_game_state() -> Dictionary:
 	var state := {}
 	
 	# Get player data
-	var player := get_tree().get_first_node_in_group("player")
+	var player: Node = get_tree().get_first_node_in_group("player")
 	if player != null:
 		state["player_position"] = {
 			"x": player.position.x,
@@ -99,18 +99,18 @@ func _collect_game_state() -> Dictionary:
 		state["last_scene"] = current_scene.scene_file_path
 	
 	# Get quest state
-	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	var quest_mgr: Node = get_tree().get_first_node_in_group("quest_manager")
 	if quest_mgr != null:
 		state["quest_state"] = quest_mgr.get("current_state") if quest_mgr.has("current_state") else 0
 		state["quest_objective"] = quest_mgr.get("current_objective") if quest_mgr.has("current_objective") else ""
 	
 	# Get dungeon state
-	var dungeon_mgr := get_tree().get_first_node_in_group("dungeon_manager")
+	var dungeon_mgr: Node = get_tree().get_first_node_in_group("dungeon_manager")
 	if dungeon_mgr != null:
 		state["dungeon_cleared"] = dungeon_mgr.get("is_cleared") if dungeon_mgr.has("is_cleared") else false
 	
 	# Get boss state
-	var boss := get_tree().get_first_node_in_group("boss_ravan")
+	var boss: Node = get_tree().get_first_node_in_group("boss_ravan")
 	if boss != null:
 		state["boss_ravan_defeated"] = boss.get("is_defeated") if boss.has("is_defeated") else false
 	

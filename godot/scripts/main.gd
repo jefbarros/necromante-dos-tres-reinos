@@ -155,7 +155,7 @@ func _start_next_wave() -> void:
 		Vector2(25, 190),
 	]
 	for i in wave.size():
-		var enemy := enemy_scene.instantiate()
+		var enemy: Node2D = enemy_scene.instantiate() as Node2D
 		enemy.configure(wave[i], player)
 		enemies_root.add_child(enemy)
 		enemy.global_position = spawn_points[i % spawn_points.size()]
@@ -286,7 +286,7 @@ func try_raise_servant() -> void:
 		hud.show_feedback("Sem alma", Color(0.72, 0.78, 0.86, 1.0))
 		return
 
-	var servant := servant_scene.instantiate()
+	var servant: Node2D = servant_scene.instantiate() as Node2D
 	servants_root.add_child(servant)
 	servant.global_position = soul.global_position
 	servant.player = player

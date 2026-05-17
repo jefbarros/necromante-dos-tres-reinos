@@ -16,31 +16,31 @@ ambient_light_source = 2
 ambient_light_color = Color(0.42, 0.45, 0.48, 1)
 ambient_light_energy = 0.55
 
-[sub_sub_resource type="BoxMesh" id="BoxMesh_floor"]
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
 size = Vector3(24, 0.16, 24)
 
-[sub_sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(24, 0.16, 24)
 
-[sub_sub_resource type="BoxMesh" id="BoxMesh_wall_long"]
+[sub_resource type="BoxMesh" id="BoxMesh_wall_long"]
 size = Vector3(24, 1.8, 0.45)
 
-[sub_sub_resource type="BoxShape3D" id="BoxShape3D_wall_long"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_long"]
 size = Vector3(24, 1.8, 0.45)
 
-[sub_sub_resource type="BoxMesh" id="BoxMesh_wall_short"]
+[sub_resource type="BoxMesh" id="BoxMesh_wall_short"]
 size = Vector3(0.45, 1.8, 24)
 
-[sub_sub_resource type="BoxShape3D" id="BoxShape3D_wall_short"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_short"]
 size = Vector3(0.45, 1.8, 24)
 
-[sub_sub_resource type="BoxMesh" id="BoxMesh_obstacle"]
+[sub_resource type="BoxMesh" id="BoxMesh_obstacle"]
 size = Vector3(1.6, 1.0, 1.6)
 
-[sub_sub_resource type="BoxShape3D" id="BoxShape3D_obstacle"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_obstacle"]
 size = Vector3(1.6, 1.0, 1.6)
 
-[sub_sub_resource type="StandardMaterial3D" id="StandardMaterial3D_obstacle"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_obstacle"]
 albedo_color = Color(0.24, 0.22, 0.2, 1)
 roughness = 0.86
 
@@ -68,11 +68,11 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
-mesh = SubSubResource("BoxMesh_floor")
+mesh = SubResource("BoxMesh_floor")
 surface_material_override/0 = ExtResource("5_floor_material")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
-shape = SubSubResource("BoxShape3D_floor")
+shape = SubResource("BoxShape3D_floor")
 
 [node name="NorthWall" type="StaticBody3D" parent="."]
 position = Vector3(0, 0.9, -12.225)
@@ -80,11 +80,11 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="NorthWall"]
-mesh = SubSubResource("BoxMesh_wall_long")
-surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NorthWall"]
-shape = SubSubResource("BoxShape3D_wall_long")
+shape = SubResource("BoxShape3D_wall_long")
 
 [node name="SouthWall" type="StaticBody3D" parent="."]
 position = Vector3(0, 0.9, 12.225)
@@ -92,11 +92,11 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="SouthWall"]
-mesh = SubSubResource("BoxMesh_wall_long")
-surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SouthWall"]
-shape = SubSubResource("BoxShape3D_wall_long")
+shape = SubResource("BoxShape3D_wall_long")
 
 [node name="WestWall" type="StaticBody3D" parent="."]
 position = Vector3(-12.225, 0.9, 0)
@@ -104,11 +104,11 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="WestWall"]
-mesh = SubSubResource("BoxMesh_wall_short")
-surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+mesh = SubResource("BoxMesh_wall_short")
+surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="WestWall"]
-shape = SubSubResource("BoxShape3D_wall_short")
+shape = SubResource("BoxShape3D_wall_short")
 
 [node name="EastWall" type="StaticBody3D" parent="."]
 position = Vector3(12.225, 0.9, 0)
@@ -116,11 +116,11 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="EastWall"]
-mesh = SubSubResource("BoxMesh_wall_short")
-surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+mesh = SubResource("BoxMesh_wall_short")
+surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="EastWall"]
-shape = SubSubResource("BoxShape3D_wall_short")
+shape = SubResource("BoxShape3D_wall_short")
 
 [node name="Obstacles" type="Node3D" parent="."]
 
@@ -130,11 +130,11 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/ObstacleA"]
-mesh = SubSubResource("BoxMesh_obstacle")
-surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+mesh = SubResource("BoxMesh_obstacle")
+surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/ObstacleA"]
-shape = SubSubResource("BoxShape3D_obstacle")
+shape = SubResource("BoxShape3D_obstacle")
 
 [node name="ObstacleB" type="StaticBody3D" parent="Obstacles"]
 position = Vector3(2.8, 0.5, 2.4)
@@ -142,33 +142,33 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/ObstacleB"]
-mesh = SubSubResource("BoxMesh_obstacle")
-surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+mesh = SubResource("BoxMesh_obstacle")
+surface_material_override/0 = SubResource("StandardMaterial3D_obstacle")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/ObstacleB"]
-shape = SubSubResource("BoxShape3D_obstacle")
+shape = SubResource("BoxShape3D_obstacle")
 
 [node name="SpawnPoints" type="Node3D" parent="."]
 
 [node name="SpawnPoint1" type="Node3D" parent="SpawnPoints"]
 position = Vector3(-4, 0, -4)
 
-[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint1" instance=ExtResource("5_spawn")]
+[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint1" instance=ExtResource("6_spawn")]
 
 [node name="SpawnPoint2" type="Node3D" parent="SpawnPoints"]
 position = Vector3(4, 0, -4)
 
-[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint2" instance=ExtResource("5_spawn")]
+[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint2" instance=ExtResource("6_spawn")]
 
 [node name="SpawnPoint3" type="Node3D" parent="SpawnPoints"]
 position = Vector3(-4, 0, 4)
 
-[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint3" instance=ExtResource("5_spawn")]
+[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint3" instance=ExtResource("6_spawn")]
 
 [node name="SpawnPoint4" type="Node3D" parent="SpawnPoints"]
 position = Vector3(4, 0, 4)
 
-[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint4" instance=ExtResource("5_spawn")]
+[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint4" instance=ExtResource("6_spawn")]
 
 [node name="ArenaManager3D" type="Node3D" parent="."]
 script = ExtResource("6_arena")
