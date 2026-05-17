@@ -8,7 +8,7 @@ A partir desta transicao, **Godot** sera planejado como a futura base de produca
 
 ## Escopo desta etapa
 
-Esta etapa cobre apenas documentacao e planejamento.
+G0 cobriu apenas documentacao e planejamento. G1 entrega uma base Godot jogavel minima na branch `godot/g1-minimum-prototype`, sem remover nem alterar o prototipo HTML5/Canvas.
 
 Inclui:
 
@@ -17,14 +17,19 @@ Inclui:
 - Proposta de cenas Godot.
 - Proposta de modelo de dados.
 - Roadmap inicial por fases.
+- Subprojeto Godot em `godot/`.
+- Cena principal, player, inimigo e HUD placeholders.
+- Movimento basico por WASD/setas, camera, ataque simples por `1` ou clique, dano minimo e morte/desaparecimento do inimigo.
+- HUD com nome do prototipo, marcador `Godot G1`, vida do player, mana placeholder, controles e status de combate.
+- Checklist de regressao especifico em `docs/tests/REGRESSION_GODOT_G1.md`.
 
 Nao inclui:
 
-- Criacao de scripts Godot.
-- Criacao de cenas `.tscn`.
 - Conversao de assets.
 - Alteracao de gameplay HTML5.
 - Mudancas em arquivos JavaScript, HTML ou CSS.
+- Inventario, talentos, save, mapa-mundi, servos, assets finais ou builds Android/Windows.
+- Export Web obrigatorio; ele deve ser feito em fase separada caso os templates Godot estejam disponiveis.
 
 ## Estrategia
 
