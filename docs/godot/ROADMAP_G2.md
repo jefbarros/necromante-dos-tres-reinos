@@ -1,5 +1,7 @@
 # Roadmap Godot G2
 
+> G3.0 consolidou as entregas de jogabilidade minima em um MVP jogavel. Para o plano atual, ver `docs/godot/ROADMAP_G3.md`.
+
 ## Objetivo
 
 Evoluir o protótipo Godot de build mínimo para base jogável principal.
@@ -21,7 +23,7 @@ Evoluir o protótipo Godot de build mínimo para base jogável principal.
 
 ### G2.1 - Base de personagem e combate
 
-**Status**: Pendente
+**Status**: Consolidado em G3.0
 
 - [ ] Movimento refinado (aceleração, inércia, colisão)
 - [ ] Ataque básico melhorado (animação, hitbox)
@@ -31,7 +33,7 @@ Evoluir o protótipo Godot de build mínimo para base jogável principal.
 
 ### G2.2 - Inimigos e spawn
 
-**Status**: Pendente
+**Status**: Consolidado em G3.0
 
 - [ ] Spawn controlado (wave, timer)
 - [ ] IA simples (perseguir, atacar)
@@ -41,7 +43,7 @@ Evoluir o protótipo Godot de build mínimo para base jogável principal.
 
 ### G2.3 - Necromancia mínima
 
-**Status**: Pendente
+**Status**: Consolidado em G3.0
 
 - [ ] Captura/ressurreição básica (ao matar)
 - [ ] Servo simples seguindo jogador
@@ -51,7 +53,7 @@ Evoluir o protótipo Godot de build mínimo para base jogável principal.
 
 ### G2.4 - Progressão mínima
 
-**Status**: Pendente
+**Status**: Consolidado em G3.0
 
 - [ ] Sistema de XP
 - [ ] Level up
@@ -61,7 +63,7 @@ Evoluir o protótipo Godot de build mínimo para base jogável principal.
 
 ### G2.5 - Inventário mínimo
 
-**Status**: Pendente
+**Status**: Consolidado em G3.0
 
 - [ ] Drops de inimigos
 - [ ] Itens simples (poção, chave)

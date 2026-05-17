@@ -4,11 +4,11 @@ RPG de acao com necromancia. Evolui para uma estrutura de Mundo Aberto por Regio
 
 ## Plataformas
 
-### Godot (Plataforma Principal - G2+)
+### Godot (Plataforma Principal - G3+)
 
-**Status**: Em desenvolvimento
+**Status**: MVP jogavel G3.0
 
-Godot e a nova plataforma principal de producao a partir da fase G2.
+Godot e a plataforma principal de producao. A etapa G3.0 fecha um vertical slice jogavel com ondas, necromancia minima, servo, progressao, inventario simples e vitoria/derrota.
 
 - Build Web atual: `docs/play-godot/index.html`
 - URL publica esperada: https://jefbarros.github.io/necromante-dos-tres-reinos/play-godot/index.html
@@ -33,6 +33,7 @@ O prototipo HTML5/Canvas permanece como legado e laboratorio de referencia. Nao 
 | godot-g1 | Build Godot minimo |
 | godot-g1.1-web | Export Web validado |
 | godot-g1.2-pages | GitHub Pages configurado |
+| godot-g2.1-visual-baseline | Baseline visual e combate G2.1 |
 | v0.3.4 | Ultima versao HTML5/Canvas estabilidade |
 
 ---
@@ -40,16 +41,17 @@ O prototipo HTML5/Canvas permanece como legado e laboratorio de referencia. Nao 
 ## Roadmap
 
 - **G1.x**: Prototipo Godot (completo)
-- **G2.x**: Evolucao funcional em Godot (em progresso)
-- Ver `docs/godot/ROADMAP_G2.md` para fases detalhadas
+- **G2.x**: Evolucao funcional em Godot (baseline visual concluido)
+- **G3.x**: MVP jogavel e polimento pos-MVP
+- Ver `docs/godot/ROADMAP_G3.md` para o plano atual
 
 ---
 
 ## Smoke Test
 
-O smoke test manual G1.2.1 esta pendente de validacao no navegador.
+O smoke test manual G3.0 em GitHub Pages deve ser validado apos merge/publicacao.
 
-Ver `docs/play-godot/SMOKE_TEST_G1.2.1.md` para detalhes.
+Build esperado: https://jefbarros.github.io/necromante-dos-tres-reinos/play-godot/index.html
 
 ---
 
@@ -57,6 +59,8 @@ Ver `docs/play-godot/SMOKE_TEST_G1.2.1.md` para detalhes.
 
 - `docs/godot/MIGRATION_TO_GODOT.md` - Documentacao de migracao
 - `docs/godot/ROADMAP_G2.md` - Roadmap G2
+- `docs/godot/ROADMAP_G3.md` - Roadmap pos-MVP
+- `docs/godot/G3.0_MVP_COMPLETE.md` - Documentacao do MVP jogavel
 - `docs/godot/DEVELOPMENT_GUIDE.md` - Guia de desenvolvimento Godot
 - `docs/play-godot/README.md` - Build Web Godot
 - `docs/legacy-html5/README.md` - Legado HTML5
