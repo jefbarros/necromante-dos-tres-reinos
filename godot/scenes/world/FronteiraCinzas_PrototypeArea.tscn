@@ -1,0 +1,218 @@
+[gd_scene load_steps=17 format=3 uid="uid://frontier_area"]
+
+[ext_resource type="PackedScene" path="res://scenes/player/Player3D.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/camera/ThirdPersonCameraRig.tscn" id="2_camera"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PrototypeHUD.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/CorruptedWolf3D.tscn" id="5_wolf"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/OrderSoldier3D.tscn" id="6_soldier"]
+[ext_resource type="Script" path="res://scripts/world/AreaTransition3D.gd" id="7_transition"]
+[ext_resource type="PackedScene" path="res://scenes/hub/Hub_VeyrholdOutskirts.tscn" id="8_hub"]
+
+[sub_resource type="Environment" id="Environment_frontier"]
+background_mode = 1
+background_color = Color(0.08, 0.07, 0.06, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.35, 0.32, 0.28, 1)
+ambient_light_energy = 0.45
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(20, 0.2, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(20, 0.2, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_long"]
+size = Vector3(20, 2.0, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_long"]
+size = Vector3(20, 2.0, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_short"]
+size = Vector3(0.4, 2.0, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_short"]
+size = Vector3(0.4, 2.0, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ruin"]
+size = Vector3(1.5, 1.8, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Material_ruin"]
+albedo_color = Color(0.25, 0.22, 0.18, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_bone"]
+size = Vector3(0.15, 0.1, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="Material_bone"]
+albedo_color = Color(0.85, 0.82, 0.75, 1)
+roughness = 0.7
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_dead_tree"]
+top_radius = 0.15
+bottom_radius = 0.25
+height = 3.0
+
+[sub_resource type="StandardMaterial3D" id="Material_dead_tree"]
+albedo_color = Color(0.15, 0.12, 0.1, 1)
+roughness = 0.95
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_transition"]
+size = Vector3(3, 2, 0.5)
+
+[node name="FronteiraCinzas_PrototypeArea" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_frontier")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.9, -0.4, 0.1)
+light_energy = 1.5
+shadow_enabled = true
+
+[node name="TitleLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0.04, -8.5)
+modulate = Color(0.7, 0.6, 0.5, 1)
+text = "Fronteira de Cinzas"
+font_size = 32
+outline_size = 3
+
+[node name="Floor" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.1, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_floor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="NorthWall" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.0, -10.2)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NorthWall"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("Material_ruin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NorthWall"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="SouthWall" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.0, 10.2)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SouthWall"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("Material_ruin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SouthWall"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="WestWall" type="StaticBody3D" parent="."]
+position = Vector3(-10.2, 1.0, 0)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WestWall"]
+mesh = SubResource("BoxMesh_wall_short")
+surface_material_override/0 = SubResource("Material_ruin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WestWall"]
+shape = SubResource("BoxShape3D_wall_short")
+
+[node name="EastWall" type="StaticBody3D" parent="."]
+position = Vector3(10.2, 1.0, 0)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EastWall"]
+mesh = SubResource("BoxMesh_wall_short")
+surface_material_override/0 = SubResource("Material_ruin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EastWall"]
+shape = SubResource("BoxShape3D_wall_short")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Ruin1" type="StaticBody3D" parent="Props"]
+position = Vector3(-5, 0.9, -5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Props/Ruin1"]
+mesh = SubResource("BoxMesh_ruin")
+surface_material_override/0 = SubResource("Material_ruin")
+
+[node name="Ruin2" type="StaticBody3D" parent="Props"]
+position = Vector3(6, 0.85, -4)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Props/Ruin2"]
+mesh = SubResource("BoxMesh_ruin")
+surface_material_override/0 = SubResource("Material_ruin")
+
+[node name="DeadTree1" type="StaticBody3D" parent="Props"]
+position = Vector3(-7, 1.5, 4)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Props/DeadTree1"]
+mesh = SubResource("CylinderMesh_dead_tree")
+surface_material_override/0 = SubResource("Material_dead_tree")
+
+[node name="DeadTree2" type="StaticBody3D" parent="Props"]
+position = Vector3(8, 1.5, 5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Props/DeadTree2"]
+mesh = SubResource("CylinderMesh_dead_tree")
+surface_material_override/0 = SubResource("Material_dead_tree")
+
+[node name="BonePile1" type="StaticBody3D" parent="Props"]
+position = Vector3(-3, 0.15, 3)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Props/BonePile1"]
+mesh = SubResource("BoxMesh_bone")
+surface_material_override/0 = SubResource("Material_bone")
+
+[node name="BonePile2" type="StaticBody3D" parent="Props"]
+position = Vector3(4, 0.15, -2)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Props/BonePile2"]
+mesh = SubResource("BoxMesh_bone")
+surface_material_override/0 = SubResource("Material_bone")
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="CorruptedWolf1" parent="Enemies" instance=ExtResource("5_wolf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -2)
+
+[node name="CorruptedWolf2" parent="Enemies" instance=ExtResource("5_wolf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -3)
+
+[node name="OrderSoldier1" parent="Enemies" instance=ExtResource("6_soldier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 2)
+
+[node name="OrderSoldier2" parent="Enemies" instance=ExtResource("6_soldier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 3)
+
+[node name="Transitions" type="Node3D" parent="."]
+
+[node name="ReturnToHub" type="Area3D" parent="Transitions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 9)
+script = ExtResource("7_transition")
+target_scene = ExtResource("8_hub")
+transition_label = "E: Retornar aos Arredores de Veyrhold"
+area_name = "Hub"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Transitions/ReturnToHub"]
+shape = SubResource("BoxShape3D_transition")
+
+[node name="Label3D" type="Label3D" parent="Transitions/ReturnToHub"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.3)
+modulate = Color(0.8, 0.9, 0.7, 1)
+text = "E: Retornar ao Hub"
+font_size = 24
+outline_size = 4
+billboard = 1
+
+[node name="Player3D" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+
+[node name="ThirdPersonCameraRig" parent="." instance=ExtResource("2_camera")]
+target_path = NodePath("../Player3D")
+
+[node name="PrototypeHUD" parent="." instance=ExtResource("3_hud")]

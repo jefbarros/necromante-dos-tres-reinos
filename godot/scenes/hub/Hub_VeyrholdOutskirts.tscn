@@ -7,8 +7,10 @@
 [ext_resource type="PackedScene" path="res://scenes/dungeons/DungeonEntrance3D.tscn" id="5_entry"]
 [ext_resource type="PackedScene" path="res://scenes/dungeons/MiniDungeon_CryptOfVeyrfall.tscn" id="6_dungeon"]
 [ext_resource type="PackedScene" path="res://scenes/world/PrototypeArena3D.tscn" id="7_arena"]
-[ext_resource type="Script" path="res://scripts/quests/QuestManager3D.gd" id="8_quest"]
-[ext_resource type="Script" path="res://scripts/world/ArenaPortal3D.gd" id="9_arena_portal"]
+[ext_resource type="PackedScene" path="res://scenes/world/FronteiraCinzas_PrototypeArea.tscn" id="8_frontier"]
+[ext_resource type="Script" path="res://scripts/quests/QuestManager3D.gd" id="9_quest"]
+[ext_resource type="Script" path="res://scripts/world/ArenaPortal3D.gd" id="10_arena_portal"]
+[ext_resource type="Script" path="res://scripts/world/AreaTransition3D.gd" id="11_transition"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 size = Vector3(25, 0.2, 25)
@@ -155,7 +157,30 @@ target_path = NodePath("../Player3D")
 instance = ExtResource("3_hud")
 
 [node name="QuestManager3D" type="Node" parent="."]
-script = ExtResource("8_quest")
+script = ExtResource("9_quest")
+
+[node name="FronteiraPortal" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.25, 0)
+script = ExtResource("11_transition")
+target_scene = ExtResource("8_frontier")
+transition_label = "E: Viajar para Fronteira de Cinzas"
+area_name = "Fronteira"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FronteiraPortal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("BoxShape3D_portal")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FronteiraPortal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubSubResource("BoxMesh_wall_long")
+modulate = Color(0.3, 0.25, 0.2, 1)
+
+[node name="Label3D" type="Label3D" parent="FronteiraPortal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.3)
+modulate = Color(0.6, 0.7, 0.5, 1)
+text = "Fronteira de Cinzas
+(E)"
+font_size = 20
 
 [node name="NPC_MaraSurvivor" parent="."]
 instance = ExtResource("4_npc")
@@ -170,7 +195,7 @@ required_dungeon_cleared = false
 
 [node name="ArenaPortal" type="Area3D" parent="."]
 position = Vector3(8, 1.25, 0)
-script = ExtResource("9_arena_portal")
+script = ExtResource("10_arena_portal")
 target_scene = ExtResource("7_arena")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ArenaPortal"]
