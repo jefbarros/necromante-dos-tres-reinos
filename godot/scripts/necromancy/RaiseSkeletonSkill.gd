@@ -8,7 +8,7 @@ const RESULT_MISSING_SCENE := "missing_scene"
 const RESULT_NOT_ENOUGH_ESSENCE := "not_enough_essence"
 
 @export var summon_scene: PackedScene = preload("res://scenes/summons/SkeletonServant3D.tscn")
-@export var archer_summon_scene: PackedScene
+@export var archer_summon_scene: PackedScene = preload("res://scenes/summons/SkeletonArcherServant3D.tscn")
 @export var raise_radius: float = 4.0
 @export var max_active_summons: int = 2
 @export var summon_spawn_offset: Vector3 = Vector3(0.9, 0.0, 0.45)

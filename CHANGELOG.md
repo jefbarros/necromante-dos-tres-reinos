@@ -8,10 +8,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- G9 MVP PC Content Expansion branch: `godot/g9-mvp-pc-content-expansion`
 - G8 MVP PC Foundation branch: `godot/g8-mvp-pc-foundation`
 
 ### Changed
-- Updated PROJECT_STATUS.md with G8 status
+- Updated PROJECT_STATUS.md with G8 and G9 status
+
+## [0.9.0] - 2024-XX-XX
+
+### Godot G9 - MVP PC Content Expansion
+
+**Branch**: `godot/g9-mvp-pc-content-expansion`
+
+#### Added
+- **AreaTransition3D.gd/tscn** - Area transition system for hub ↔ external areas
+- **CorruptedWolf3D.gd** - Fast melee enemy (low HP, high speed, low damage)
+- **OrderSoldier3D.gd** - Human soldier, White Flame Order
+- **SkeletonArcherServant3D.gd** - Ranged servant, 20 essence cost
+- **QA_G9_MVP_PC_CONTENT_EXPANSION.md** - Manual QA checklist
+
+#### Changed
+- **RaiseSkeletonSkill.gd**: Added try_raise_archer() for Shift+R
+- **PlayerController3D.gd**: Added Shift+R for archer summon
+- **BossRavanPrototype3D.gd**: Phase 2 at 50% HP, 25% damage increase, Sacred Fury message
+
+#### New Controls
+- R: Reanimar esqueleto soldado (15 essencia)
+- Shift+R: Reanimar esqueleto arqueiro (20 essencia)
+- 1/2/3: FOLLOW/ATTACK/RECALL
+- E: Interagir/viajar
+
+#### Outside Scope
+- Full region/world streaming
+- Inventory/equipment
+- Multiple dungeons
 
 ## [0.8.0] - 2024-XX-XX
 
