@@ -1,0 +1,189 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/Player3D.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/camera/ThirdPersonCameraRig.tscn" id="2_camera"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PrototypeHUD.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/npcs/NPC_MaraSurvivor.tscn" id="4_npc"]
+[ext_resource type="PackedScene" path="res://scenes/dungeons/DungeonEntrance3D.tscn" id="5_entry"]
+[ext_resource type="PackedScene" path="res://scenes/dungeons/MiniDungeon_CryptOfVeyrfall.tscn" id="6_dungeon"]
+[ext_resource type="PackedScene" path="res://scenes/world/PrototypeArena3D.tscn" id="7_arena"]
+[ext_resource type="Script" path="res://scripts/quests/QuestManager3D.gd" id="8_quest"]
+[ext_resource type="Script" path="res://scripts/world/ArenaPortal3D.gd" id="9_arena_portal"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(25, 0.2, 25)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(25, 0.2, 25)
+
+[sub_sub_resource type="BoxMesh" id="BoxMesh_wall_long"]
+size = Vector3(25, 2.5, 0.4)
+
+[sub_sub_resource type="BoxShape3D" id="BoxShape3D_wall_long"]
+size = Vector3(25, 2.5, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_short"]
+size = Vector3(0.4, 2.5, 25)
+
+[sub_sub_resource type="BoxShape3D" id="BoxShape3D_wall_short"]
+size = Vector3(0.4, 2.5, 25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ruin"]
+size = Vector3(1.2, 2.0, 0.8)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_column"]
+top_radius = 0.3
+bottom_radius = 0.4
+height = 2.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_deco"]
+size = Vector3(0.6, 0.6, 0.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_portal"]
+size = Vector3(2.5, 2.5, 0.4)
+
+[node name="Hub_VeyrholdOutskirts" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.785, 0.524, 0)
+light_energy = 1.8
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.1, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_floor")
+modulate = Color(0.22, 0.25, 0.2, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="NorthWall" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.25, -12.7)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NorthWall"]
+mesh = SubSubResource("BoxMesh_wall_long")
+modulate = Color(0.35, 0.28, 0.22, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NorthWall"]
+shape = SubSubResource("BoxShape3D_wall_long")
+
+[node name="SouthWall" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.25, 12.7)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SouthWall"]
+mesh = SubSubResource("BoxMesh_wall_long")
+modulate = Color(0.35, 0.28, 0.22, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SouthWall"]
+shape = SubSubResource("BoxShape3D_wall_long")
+
+[node name="WestWall" type="StaticBody3D" parent="."]
+position = Vector3(-12.7, 1.25, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WestWall"]
+mesh = SubResource("BoxMesh_wall_short")
+modulate = Color(0.35, 0.28, 0.22, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WestWall"]
+shape = SubSubResource("BoxShape3D_wall_short")
+
+[node name="EastWall" type="StaticBody3D" parent="."]
+position = Vector3(12.7, 1.25, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EastWall"]
+mesh = SubResource("BoxMesh_wall_short")
+modulate = Color(0.35, 0.28, 0.22, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EastWall"]
+shape = SubSubResource("BoxShape3D_wall_short")
+
+[node name="Ruin1" type="StaticBody3D" parent="."]
+position = Vector3(-6, 1.0, -6)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ruin1"]
+mesh = SubResource("BoxMesh_ruin")
+modulate = Color(0.3, 0.25, 0.2, 1)
+
+[node name="Ruin2" type="StaticBody3D" parent="."]
+position = Vector3(7, 1.25, -5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ruin2"]
+mesh = SubResource("BoxMesh_ruin")
+modulate = Color(0.28, 0.23, 0.18, 1)
+
+[node name="Column1" type="StaticBody3D" parent="."]
+position = Vector3(-8, 1.25, 5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Column1"]
+mesh = SubResource("CylinderMesh_column")
+modulate = Color(0.4, 0.35, 0.3, 1)
+
+[node name="Column2" type="StaticBody3D" parent="."]
+position = Vector3(-8, 1.25, 8)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Column2"]
+mesh = SubResource("CylinderMesh_column")
+modulate = Color(0.4, 0.35, 0.3, 1)
+
+[node name="Deco1" type="StaticBody3D" parent="."]
+position = Vector3(6, 0.3, 6)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Deco1"]
+mesh = SubResource("BoxMesh_deco")
+modulate = Color(0.25, 0.22, 0.18, 1)
+
+[node name="Deco2" type="StaticBody3D" parent="."]
+position = Vector3(7, 0.3, 7)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Deco2"]
+mesh = SubResource("BoxMesh_deco")
+modulate = Color(0.25, 0.22, 0.18, 1)
+
+[node name="Player3D" parent="."]
+instance = ExtResource("1_player")
+position = Vector3(0, 0, 8)
+
+[node name="ThirdPersonCameraRig" parent="."]
+instance = ExtResource("2_camera")
+target_path = NodePath("../Player3D")
+
+[node name="PrototypeHUD" parent="."]
+instance = ExtResource("3_hud")
+
+[node name="QuestManager3D" type="Node" parent="."]
+script = ExtResource("8_quest")
+
+[node name="NPC_MaraSurvivor" parent="."]
+instance = ExtResource("4_npc")
+position = Vector3(-3, 0, 3)
+
+[node name="DungeonEntrance3D" parent="."]
+instance = ExtResource("5_entry")
+position = Vector3(0, 0, -8)
+target_scene = ExtResource("6_dungeon")
+hint_text = "Pressione E para entrar na Cripta"
+required_dungeon_cleared = false
+
+[node name="ArenaPortal" type="Area3D" parent="."]
+position = Vector3(8, 1.25, 0)
+script = ExtResource("9_arena_portal")
+target_scene = ExtResource("7_arena")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ArenaPortal"]
+shape = SubResource("BoxShape3D_portal")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ArenaPortal"]
+position = Vector3(0, 0, 0)
+mesh = SubSubResource("BoxMesh_wall_long")
+modulate = Color(0.45, 0.55, 0.7, 1)
+
+[node name="Label3D" type="Label3D" parent="ArenaPortal"]
+position = Vector3(0, 0.8, 0.3)
+text = "Arena de Teste
+(E)"
+modulate = Color(0.7, 0.85, 1, 1)
+font_size = 20

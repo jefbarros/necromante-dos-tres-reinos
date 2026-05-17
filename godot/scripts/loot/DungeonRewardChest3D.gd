@@ -40,6 +40,12 @@ func _collect_reward() -> void:
 		essence_component.call("add_essence", essence_reward)
 	_collected = true
 	print("Dungeon reward collected")
+
+	# Update quest
+	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	if quest_mgr != null and quest_mgr.has_method("advance_to"):
+		quest_mgr.call("advance_to", 6)  # COLLECT_REWARD
+
 	if has_node("MeshInstance3D"):
 		$MeshInstance3D.visible = false
 	if has_node("Label3D"):

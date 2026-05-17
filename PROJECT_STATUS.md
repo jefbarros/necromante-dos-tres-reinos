@@ -18,6 +18,7 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 - G4.0 necromancia jogavel implementada em Godot
 - G5 primeira arena com loop de ondas e recompensas implementada em Godot
 - G6 mini dungeon prototipado em Godot na branch `godot/g6-mini-dungeon`
+- G7 vertical slice prototype em desenvolvimento na branch `godot/g7-vertical-slice-prototype`
 - G1.2 Pages configurado
 - G1.2.1 smoke test manual pendente
 
@@ -94,6 +95,7 @@ G5 primeira arena implementada na branch `godot/g5-first-arena-loop`.
 | G4.0 | Necromancia jogavel minima Godot | Completo |
 | G5 | Primeira arena com ondas, XP e loot | Completo |
 | G6 | Mini dungeon prototipo | Completo |
+| G7 | Vertical slice prototype | Em Desenvolvimento |
 | v0.3.4 | HTML5 estavel | Congelado |
 
 ## Tags

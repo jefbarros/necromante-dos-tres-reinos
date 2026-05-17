@@ -95,7 +95,46 @@ O save simples é gravado em `user://n3r_prototype_save.json`.
 - Reputacao, corrupcao moral e sistemas narrativos completos.
 - Pathfinding avancado, assets finais, efeitos finais e networking.
 
+## G7 - Vertical Slice Prototype
+
+A Vertical Slice transforma os sistemas existentes em uma experiencia curta e jogavel:
+
+**Fluxo**:
+1. Abrir Hub_VeyrholdOutskirts.tscn
+2. Falar com Mara (NPC) - pressione E
+3. Entrar na Cripta de Veyrfall
+4. Limpar sala 1
+5. Limpar sala 2
+6. Derrotar Ravan, Lama da Chama Branca (Boss)
+7. Coletar recompensa
+8. Retornar ao hub
+
+**Cenas principais**:
+- res://scenes/hub/Hub_VeyrholdOutskirts.tscn (inicio)
+- res::scenes/npcs/NPC_MaraSurvivor.tscn
+- res://scenes/dungeons/MiniDungeon_CryptOfVeyrfall.tscn
+- res://scenes/enemies/BossRavanPrototype3D.tscn
+
+**Scripts adicionados**:
+- res://scripts/quests/QuestManager3D.gd
+- res://scripts/npcs/NPCInteractable3D.gd
+- res://scripts/enemies/BossRavanPrototype3D.gd
+
+**Save**: user://n3r_prototype_save.json
+
+**Fora do escopo**:
+- Mundo aberto completo
+- Inventario real
+- Arvore de habilidades
+- Faccoes e reputacao
+- Cutscenes complexas
+
 ## Proximos passos sugeridos
 
-1. G5 primeira arena com spawn, loot simples, XP e level up.
-2. G7 vertical slice.
+1. G8 MVP PC foundation
+2. Regiao pequena Fronteira de Cinzas
+3. Melhorias de combate
+4. 3 tipos de inimigo reais
+5. 3 servos jogaveis
+6. Save mais robusto
+7. Build Windows

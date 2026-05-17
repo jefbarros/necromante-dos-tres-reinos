@@ -1,14 +1,14 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/dungeons/DungeonManager3D.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/dungeons/DungeonEntrance3D.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/dungeons/DungeonGate3D.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/EnemyDummy3D.tscn" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/enemies/EliteEnemy3D.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/BossRavanPrototype3D.tscn" id="5_boss"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PrototypeHUD.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/player/Player3D.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/camera/ThirdPersonCameraRig.tscn" id="8"]
-[ext_resource type="PackedScene" path="res://scenes/world/PrototypeArena3D.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://scenes/hub/Hub_VeyrholdOutskirts.tscn" id="9_hub"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 size = Vector3(18, 0.16, 32)
@@ -132,17 +132,9 @@ position = Vector3(2.5, 0, 0)
 [node name="Room3" type="Node3D" parent="Rooms"]
 position = Vector3(0, 0, -5)
 
-[node name="EliteEnemy3D" parent="Room3"]
-instance = ExtResource("5")
+[node name="BossRavanPrototype3D" parent="Room3"]
+instance = ExtResource("5_boss")
 position = Vector3(0, 0, 0)
-
-[node name="EnemyDummy3D" parent="Room3"]
-instance = ExtResource("4")
-position = Vector3(-2.0, 0, -1.2)
-
-[node name="EnemyDummy3D" parent="Room3"]
-instance = ExtResource("4")
-position = Vector3(2.0, 0, -1.2)
 
 [node name="Gates" type="Node3D" parent="."]
 
@@ -160,7 +152,6 @@ position = Vector3(0, 0, -9.2)
 [node name="DungeonExit" parent="."]
 instance = ExtResource("2")
 position = Vector3(0, 0, -13)
-
-target_scene = ExtResource("9")
+target_scene = ExtResource("9_hub")
 required_dungeon_cleared = true
-exit_text = "Pressione E para retornar à arena"
+exit_text = "Pressione E para retornar ao hub"

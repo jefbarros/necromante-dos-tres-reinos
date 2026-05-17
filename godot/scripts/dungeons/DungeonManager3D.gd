@@ -72,6 +72,7 @@ func _get_room_state(room_index: int) -> String:
 func _clear_current_room() -> void:
 	print("Room %d cleared" % current_room)
 	emit_signal("room_cleared", current_room)
+	_update_quest_on_room_clear()
 	match current_room:
 		1:
 			_gates[0].call("open_gate")
@@ -84,7 +85,7 @@ func _clear_current_room() -> void:
 			_gates[1].call("open_gate")
 			current_room = 3
 			current_room_name = "Sala 3"
-			dungeon_hint = "Derrote o elite"
+			dungeon_hint = "Derrote Ravan, Lâmina da Chama Branca"
 			_emit_room_started(current_room)
 			_update_gate_states()
 		3:
@@ -121,9 +122,21 @@ func _spawn_reward() -> void:
 	reward.global_position = _reward_spawn.global_position
 	print("Dungeon reward spawned")
 
+
+func _update_quest_on_room_clear() -> void:
+	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	if quest_mgr == null or not quest_mgr.has_method("advance_if_current"):
+		return
+	match current_room:
+		1:
+			quest_mgr.call("advance_if_current", 2)  # CLEAR_ROOM_1
+		2:
+			quest_mgr.call("advance_if_current", 4)  # CLEAR_ROOM_2
+
 func _save_progress() -> void:
 	var save_manager = save_manager_script.new()
 	var player := get_tree().get_first_node_in_group("player")
+	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
 	var scene_path := ""
 	if get_tree().current_scene != null and get_tree().current_scene.has_method("get_filename"):
 		scene_path = String(get_tree().current_scene.call("get_filename"))
@@ -131,7 +144,10 @@ func _save_progress() -> void:
 		"player_level": 0,
 		"player_xp": 0,
 		"current_essence": 0,
-		"dungeon_crypt_veyrfall_cleared": true,
+		"main_quest_state": 0,
+		"vertical_slice_completed": false,
+		"boss_ravan_defeated": false,
+		"crypt_veyrfall_cleared": true,
 		"last_scene": scene_path
 	}
 	if player != null:
@@ -144,5 +160,9 @@ func _save_progress() -> void:
 			data["current_essence"] = int(essence.call("get_current_essence"))
 		elif essence != null and essence.has("current_essence"):
 			data["current_essence"] = int(essence.get("current_essence"))
+	if quest_mgr != null and quest_mgr.has("current_state"):
+		data["main_quest_state"] = int(quest_mgr.get("current_state"))
+		data["vertical_slice_completed"] = bool(quest_mgr.get("current_state") == 8)
+		data["boss_ravan_defeated"] = bool(quest_mgr.get("current_state") >= 5)
 	if save_manager != null and save_manager.has_method("save_game"):
 		save_manager.call("save_game", data)

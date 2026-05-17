@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/npcs/NPCInteractable3D.gd" id="1_script"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_npc"]
+radius = 0.35
+height = 1.5
+
+[sub_sub_resource type="CapsuleMesh" id="CapsuleMesh_npc"]
+radius = 0.35
+height = 1.5
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_area"]
+size = Vector3(2.0, 1.5, 2.0)
+
+[node name="NPC_MaraSurvivor" type="CharacterBody3D"]
+script = ExtResource("1_script")
+npc_name = "Mara, Sobrevivente de Veyrfall"
+interaction_hint = "E: falar"
+dialogue_text = "Você também ouviu os mortos? A cripta acordou depois do massacre. Se conseguir atravessá-la, talvez descubra por que os cadáveres obedecem a você."
+quest_manager_path = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.75, 0)
+shape = SubResource("CapsuleShape3D_npc")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.75, 0)
+mesh = SubSubResource("CapsuleMesh_npc")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+position = Vector3(0, 0.75, 0)
+shape = SubResource("BoxShape3D_area")
+
+[node name="InteractLabel" type="Label3D" parent="."]
+position = Vector3(0, 2.0, 0)
+pixel_size = 0.005
+text = "E: falar"
+modulate = Color(1, 1, 0.8, 1)

@@ -13,10 +13,16 @@ var _arena_manager: Node = null
 @onready var _room_label: Label = $Panel/MarginContainer/VBoxContainer/RoomLabel
 @onready var _enemies_label: Label = $Panel/MarginContainer/VBoxContainer/EnemiesLabel
 @onready var _context_label: Label = $Panel/MarginContainer/VBoxContainer/ContextLabel
+@onready var _quest_label: Label = $Panel/MarginContainer/VBoxContainer/QuestLabel
+@onready var _objective_label: Label = $Panel/MarginContainer/VBoxContainer/ObjectiveLabel
 
 
 func _ready() -> void:
-	_hint_label.text = "Enter Iniciar | R reanima | 1/2/3 comandos | F5 Reinicia"
+	_hint_label.text = "E | R | 1/2/3 | F5"
+	if _quest_label != null:
+		_quest_label.text = "Quest: Nenhuma"
+	if _objective_label != null:
+		_objective_label.text = "Objetivo: -"
 	_arena_manager = get_tree().get_first_node_in_group("arena_manager")
 	_update_labels()
 
@@ -98,11 +104,26 @@ func _update_labels() -> void:
 		enemies_text = "Inimigos: %d" % int(dungeon_manager.get("enemies_alive"))
 		context_text = String(dungeon_manager.get("dungeon_hint"))
 
-	_summon_label.text = "Servos: %d/%d | %s" % [active_summons, limit, command_name]
+_summon_label.text = "Servos: %d/%d | %s" % [active_summons, limit, command_name]
 	_essence_label.text = "%s | %s" % [_essence_label.text, lv_text]
 	_command_label.text = arena_text
 	_health_label.text = "%s | %s" % [_health_label.text, loot_text]
 	_dungeon_label.text = dungeon_text
 	_room_label.text = room_text
 	_enemies_label.text = enemies_text
-	_context_label.text = context_text if context_text != "" else _hint_label.text
+_context_label.text = context_text if context_text != "" else _hint_label.text
+
+	# Quest display
+	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	if quest_mgr != null:
+		var quest_text := "Quest: O Despertar na Cripta"
+		var objective_text := "Objetivo: " + String(quest_mgr.call("get_objective_text"))
+		if _quest_label != null:
+			_quest_label.text = quest_text
+		if _objective_label != null:
+			_objective_label.text = objective_text
+	else:
+		if _quest_label != null:
+			_quest_label.text = "Quest: Nenhuma"
+		if _objective_label != null:
+			_objective_label.text = "Objetivo: -"
