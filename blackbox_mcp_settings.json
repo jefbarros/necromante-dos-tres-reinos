@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "github.com/modelcontextprotocol/servers/tree/main/src/git": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "d:/02_Trabalho/Games/Necromante dos Três Reinos"
+      ]
+    }
+  }
+}

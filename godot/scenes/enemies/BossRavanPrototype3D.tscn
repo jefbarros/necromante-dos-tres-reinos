@@ -1,0 +1,59 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/BossRavanPrototype3D.gd" id="1_script"]
+[ext_resource type="Material" path="res://assets/materials/enemy_dummy.tres" id="2_material"]
+[ext_resource type="Script" path="res://scripts/combat/HealthComponent.gd" id="3_health"]
+[ext_resource type="Script" path="res://scripts/combat/Hurtbox3D.gd" id="4_hurtbox"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_boss"]
+radius = 0.45
+height = 1.8
+
+[sub_sub_resource type="CapsuleMesh" id="CapsuleMesh_boss"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_weak"]
+size = Vector3(0.15, 0.15, 0.15)
+
+[sub_resource type="BoxMesh" id="BoxMesh_weak"]
+size = Vector3(0.15, 0.15, 0.15)
+
+[node name="BossRavanPrototype3D" type="CharacterBody3D" groups=["enemy", "boss"]]
+script = ExtResource("1_script")
+collision_layer = 2
+collision_mask = 1
+max_health = 300.0
+essence_reward = 50
+attack_damage = 25.0
+xp_reward = 250
+loot_drop_chance = 1.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_boss")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.9, 0)
+mesh = SubSubResource("CapsuleMesh_boss")
+surface_material_override/0 = ExtResource("2_material")
+
+[node name="WeakPointMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.6, -0.4)
+mesh = SubResource("BoxMesh_weak")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("3_health")
+max_health = 300.0
+
+[node name="Hurtbox3D" type="Area3D" parent="."]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_hurtbox")
+health_component_path = NodePath("../HealthComponent")
+target_path = NodePath("..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox3D"]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_boss")

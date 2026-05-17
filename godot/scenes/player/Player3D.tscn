@@ -1,0 +1,105 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/PlayerController3D.gd" id="1_controller"]
+[ext_resource type="Material" path="res://assets/materials/player_placeholder.tres" id="2_material"]
+[ext_resource type="Script" path="res://scripts/combat/Hitbox3D.gd" id="3_hitbox"]
+[ext_resource type="Script" path="res://scripts/necromancy/RaiseSkeletonSkill.gd" id="4_raise_skill"]
+[ext_resource type="Script" path="res://scripts/combat/HealthComponent.gd" id="5_health"]
+[ext_resource type="Script" path="res://scripts/necromancy/EssenceComponent.gd" id="6_essence"]
+[ext_resource type="Script" path="res://scripts/necromancy/DamageTransferComponent.gd" id="7_transfer"]
+[ext_resource type="Script" path="res://scripts/summons/SummonCommandComponent.gd" id="8_command"]
+[ext_resource type="Script" path="res://scripts/progression/ExperienceComponent.gd" id="9_xp"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="SphereMesh" id="SphereMesh_focus"]
+radius = 0.16
+height = 0.32
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_staff"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 1.65
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_attack"]
+size = Vector3(1.25, 1.2, 1.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_attack"]
+size = Vector3(1.25, 1.2, 1.25)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_attack"]
+transparency = 1
+albedo_color = Color(0.38, 0.92, 0.76, 0.22)
+
+[node name="Player3D" type="CharacterBody3D" groups=["player"]]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_controller")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_body")
+surface_material_override/0 = ExtResource("2_material")
+
+[node name="FaceGlow" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.38, -0.31)
+mesh = SubResource("SphereMesh_focus")
+
+[node name="Staff" type="MeshInstance3D" parent="."]
+position = Vector3(0.43, 0.78, -0.08)
+rotation = Vector3(0.22, 0.0, 0.0)
+mesh = SubResource("CylinderMesh_staff")
+
+[node name="BasicAttackHitbox" type="Area3D" parent="."]
+visible = false
+position = Vector3(0, 0.95, -0.625)
+collision_layer = 0
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("3_hitbox")
+damage = 18.0
+source_path = NodePath("..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BasicAttackHitbox"]
+shape = SubResource("BoxShape3D_attack")
+
+[node name="AttackPreview" type="MeshInstance3D" parent="BasicAttackHitbox"]
+mesh = SubResource("BoxMesh_attack")
+surface_material_override/0 = SubResource("StandardMaterial3D_attack")
+
+[node name="RaiseSkeletonSkill" type="Node" parent="."]
+script = ExtResource("4_raise_skill")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("5_health")
+max_health = 100.0
+
+[node name="EssenceComponent" type="Node" parent="."]
+script = ExtResource("6_essence")
+max_essence = 100
+starting_essence = 20
+
+[node name="DamageTransferComponent" type="Node" parent="."]
+script = ExtResource("7_transfer")
+transfer_percent = 0.2
+
+[node name="SummonCommandComponent" type="Node" parent="."]
+script = ExtResource("8_command")
+
+[node name="ExperienceComponent" type="Node" parent="."]
+script = ExtResource("9_xp")
+starting_level = 1
+current_xp = 0
+xp_to_next_level = 100
+xp_growth = 1.25

@@ -1,0 +1,194 @@
+[gd_scene load_steps=21 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/Player3D.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/camera/ThirdPersonCameraRig.tscn" id="2_camera"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/EnemyDummy3D.tscn" id="3_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PrototypeHUD.tscn" id="4_hud"]
+[ext_resource type="PackedScene" path="res://scenes/dungeons/DungeonEntrance3D.tscn" id="5_entrance"]
+[ext_resource type="PackedScene" path="res://scenes/world/SpawnPoint3D.tscn" id="6_spawn"]
+[ext_resource type="Material" path="res://assets/materials/arena_floor.tres" id="5_floor_material"]
+[ext_resource type="Script" path="res://scripts/world/ArenaManager3D.gd" id="6_arena"]
+
+[sub_resource type="Environment" id="Environment_arena"]
+background_mode = 1
+background_color = Color(0.045, 0.049, 0.055, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.42, 0.45, 0.48, 1)
+ambient_light_energy = 0.55
+
+[sub_sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(24, 0.16, 24)
+
+[sub_sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(24, 0.16, 24)
+
+[sub_sub_resource type="BoxMesh" id="BoxMesh_wall_long"]
+size = Vector3(24, 1.8, 0.45)
+
+[sub_sub_resource type="BoxShape3D" id="BoxShape3D_wall_long"]
+size = Vector3(24, 1.8, 0.45)
+
+[sub_sub_resource type="BoxMesh" id="BoxMesh_wall_short"]
+size = Vector3(0.45, 1.8, 24)
+
+[sub_sub_resource type="BoxShape3D" id="BoxShape3D_wall_short"]
+size = Vector3(0.45, 1.8, 24)
+
+[sub_sub_resource type="BoxMesh" id="BoxMesh_obstacle"]
+size = Vector3(1.6, 1.0, 1.6)
+
+[sub_sub_resource type="BoxShape3D" id="BoxShape3D_obstacle"]
+size = Vector3(1.6, 1.0, 1.6)
+
+[sub_sub_resource type="StandardMaterial3D" id="StandardMaterial3D_obstacle"]
+albedo_color = Color(0.24, 0.22, 0.2, 1)
+roughness = 0.86
+
+[node name="PrototypeArena3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_arena")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.9, -0.65, 0.0)
+light_energy = 1.8
+shadow_enabled = true
+
+[node name="PrototypeLabel" type="Label3D" parent="."]
+position = Vector3(0, 0.04, -8.2)
+rotation = Vector3(-1.5708, 0, 0)
+modulate = Color(0.58, 0.78, 0.72, 1)
+text = "Prototype Arena 3D - G5 First Arena Loop"
+font_size = 36
+outline_size = 4
+
+[node name="Floor" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.08, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubSubResource("BoxMesh_floor")
+surface_material_override/0 = ExtResource("5_floor_material")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubSubResource("BoxShape3D_floor")
+
+[node name="NorthWall" type="StaticBody3D" parent="."]
+position = Vector3(0, 0.9, -12.225)
+collision_layer = 1
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NorthWall"]
+mesh = SubSubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NorthWall"]
+shape = SubSubResource("BoxShape3D_wall_long")
+
+[node name="SouthWall" type="StaticBody3D" parent="."]
+position = Vector3(0, 0.9, 12.225)
+collision_layer = 1
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SouthWall"]
+mesh = SubSubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SouthWall"]
+shape = SubSubResource("BoxShape3D_wall_long")
+
+[node name="WestWall" type="StaticBody3D" parent="."]
+position = Vector3(-12.225, 0.9, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WestWall"]
+mesh = SubSubResource("BoxMesh_wall_short")
+surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WestWall"]
+shape = SubSubResource("BoxShape3D_wall_short")
+
+[node name="EastWall" type="StaticBody3D" parent="."]
+position = Vector3(12.225, 0.9, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EastWall"]
+mesh = SubSubResource("BoxMesh_wall_short")
+surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EastWall"]
+shape = SubSubResource("BoxShape3D_wall_short")
+
+[node name="Obstacles" type="Node3D" parent="."]
+
+[node name="ObstacleA" type="StaticBody3D" parent="Obstacles"]
+position = Vector3(-3.2, 0.5, -2.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/ObstacleA"]
+mesh = SubSubResource("BoxMesh_obstacle")
+surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/ObstacleA"]
+shape = SubSubResource("BoxShape3D_obstacle")
+
+[node name="ObstacleB" type="StaticBody3D" parent="Obstacles"]
+position = Vector3(2.8, 0.5, 2.4)
+collision_layer = 1
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Obstacles/ObstacleB"]
+mesh = SubSubResource("BoxMesh_obstacle")
+surface_material_override/0 = SubSubResource("StandardMaterial3D_obstacle")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Obstacles/ObstacleB"]
+shape = SubSubResource("BoxShape3D_obstacle")
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="SpawnPoint1" type="Node3D" parent="SpawnPoints"]
+position = Vector3(-4, 0, -4)
+
+[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint1" instance=ExtResource("5_spawn")]
+
+[node name="SpawnPoint2" type="Node3D" parent="SpawnPoints"]
+position = Vector3(4, 0, -4)
+
+[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint2" instance=ExtResource("5_spawn")]
+
+[node name="SpawnPoint3" type="Node3D" parent="SpawnPoints"]
+position = Vector3(-4, 0, 4)
+
+[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint3" instance=ExtResource("5_spawn")]
+
+[node name="SpawnPoint4" type="Node3D" parent="SpawnPoints"]
+position = Vector3(4, 0, 4)
+
+[node name="SpawnPoint3D" parent="SpawnPoints/SpawnPoint4" instance=ExtResource("5_spawn")]
+
+[node name="ArenaManager3D" type="Node3D" parent="."]
+script = ExtResource("6_arena")
+enemy_scene = ExtResource("3_enemy")
+starting_wave = 1
+enemies_per_wave_base = 2
+enemies_per_wave_increment = 1
+max_active_enemies = 10
+
+[node name="DungeonEntrance3D" parent="." instance=ExtResource("5_entrance")]
+position = Vector3(0, 0, 8)
+
+[node name="Player3D" parent="." instance=ExtResource("1_player")]
+position = Vector3(0, 0, 0)
+
+[node name="ThirdPersonCameraRig" parent="." instance=ExtResource("2_camera")]
+target_path = NodePath("../Player3D")
+
+[node name="EnemyDummy3D" parent="." instance=ExtResource("3_enemy")]
+position = Vector3(0, 0, -2.8)
+visible = false
+
+[node name="PrototypeHUD" parent="." instance=ExtResource("4_hud")]

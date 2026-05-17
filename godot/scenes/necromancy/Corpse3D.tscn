@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/necromancy/Corpse3D.gd" id="1_corpse"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_corpse"]
+size = Vector3(1.05, 0.22, 0.7)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_corpse"]
+albedo_color = Color(0.09, 0.085, 0.08, 1)
+roughness = 0.95
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_raise_area"]
+radius = 2.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_corpse"]
+size = Vector3(1.05, 0.22, 0.7)
+
+[node name="Corpse3D" type="Node3D" groups=["corpse"]]
+script = ExtResource("1_corpse")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.11, 0)
+rotation = Vector3(0.0, 0.35, 0.0)
+mesh = SubResource("BoxMesh_corpse")
+surface_material_override/0 = SubResource("StandardMaterial3D_corpse")
+
+[node name="RaiseArea3D" type="Area3D" parent="."]
+collision_layer = 16
+collision_mask = 1
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RaiseArea3D"]
+shape = SubResource("SphereShape3D_raise_area")
+
+[node name="BodyCollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.11, 0)
+shape = SubResource("BoxShape3D_corpse")
