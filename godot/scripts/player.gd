@@ -19,6 +19,9 @@ var _attack_timer: float = 0.0
 
 @onready var attack_area: Area2D = $AttackArea
 @onready var attack_shape: CollisionShape2D = $AttackArea/CollisionShape2D
+@onready var attack_feedback: Polygon2D = $AttackFeedback
+
+var _attack_feedback_tween: Tween
 
 
 func _ready() -> void:
@@ -57,6 +60,7 @@ func try_attack() -> void:
 
 	_attack_timer = attack_cooldown
 	attack_area.position = last_direction * attack_range
+	_show_attack_feedback()
 
 	var query := PhysicsShapeQueryParameters2D.new()
 	query.shape = attack_shape.shape
@@ -74,10 +78,25 @@ func try_attack() -> void:
 
 	attack_performed.emit(attack_damage, hit_count)
 	if hit_count > 0:
-		status_changed.emit("Ataque acertou %d alvo(s)." % hit_count)
+		status_changed.emit("Ataque acertou: %d dano." % attack_damage)
 	else:
-		status_changed.emit("Ataque sem alvo no alcance.")
+		status_changed.emit("Ataque errou: inimigo fora do alcance.")
 
 
 func _read_movement_input() -> Vector2:
 	return Input.get_vector("move_left", "move_right", "move_up", "move_down")
+
+
+func _show_attack_feedback() -> void:
+	if _attack_feedback_tween != null:
+		_attack_feedback_tween.kill()
+
+	attack_feedback.rotation = last_direction.angle()
+	attack_feedback.visible = true
+	attack_feedback.modulate.a = 1.0
+	_attack_feedback_tween = create_tween()
+	_attack_feedback_tween.tween_property(attack_feedback, "modulate:a", 0.0, 0.18)
+	_attack_feedback_tween.finished.connect(func() -> void:
+		attack_feedback.visible = false
+		attack_feedback.modulate.a = 1.0
+	)

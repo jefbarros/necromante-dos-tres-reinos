@@ -14,9 +14,38 @@ size = Vector2(24, 640)
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
 
+[node name="Backdrop" type="Polygon2D" parent="."]
+color = Color(0.025, 0.027, 0.034, 1)
+polygon = PackedVector2Array(-720, -420, 720, -420, 720, 420, -720, 420)
+
 [node name="Floor" type="Polygon2D" parent="."]
-color = Color(0.12, 0.14, 0.13, 1)
+color = Color(0.09, 0.075, 0.082, 1)
 polygon = PackedVector2Array(-480, -320, 480, -320, 480, 320, -480, 320)
+
+[node name="ArenaRingOuter" type="Polygon2D" parent="."]
+color = Color(0.21, 0.18, 0.13, 1)
+polygon = PackedVector2Array(-420, -260, 420, -260, 420, 260, -420, 260)
+
+[node name="ArenaRingInner" type="Polygon2D" parent="."]
+color = Color(0.075, 0.064, 0.07, 1)
+polygon = PackedVector2Array(-386, -226, 386, -226, 386, 226, -386, 226)
+
+[node name="BloodMark" type="Polygon2D" parent="."]
+position = Vector2(156, 26)
+rotation = 0.34
+color = Color(0.32, 0.035, 0.055, 0.72)
+polygon = PackedVector2Array(-54, -12, -18, -28, 42, -10, 60, 16, 4, 30, -46, 18)
+
+[node name="RuneA" type="Polygon2D" parent="."]
+position = Vector2(-265, -170)
+color = Color(0.23, 0.53, 0.46, 0.28)
+polygon = PackedVector2Array(0, -24, 21, 12, -21, 12)
+
+[node name="RuneB" type="Polygon2D" parent="."]
+position = Vector2(290, 160)
+rotation = 0.785398
+color = Color(0.55, 0.34, 0.18, 0.26)
+polygon = PackedVector2Array(-24, -24, 24, -24, 24, 24, -24, 24)
 
 [node name="NorthWall" type="StaticBody2D" parent="."]
 position = Vector2(0, -332)
