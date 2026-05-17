@@ -1,0 +1,52 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/summons/SkeletonServant3D.gd" id="1_servant"]
+[ext_resource type="Material" path="res://assets/materials/skeleton_servant.tres" id="2_material"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_servant"]
+radius = 0.3
+height = 1.55
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_servant"]
+radius = 0.3
+height = 1.55
+
+[sub_resource type="SphereMesh" id="SphereMesh_skull"]
+radius = 0.23
+height = 0.46
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_bone"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.72
+
+[node name="SkeletonServant3D" type="CharacterBody3D" groups=["summon"]]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_servant")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.775, 0)
+shape = SubResource("CapsuleShape3D_servant")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.72, 0)
+mesh = SubResource("CapsuleMesh_servant")
+surface_material_override/0 = ExtResource("2_material")
+
+[node name="Skull" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.52, 0)
+mesh = SubResource("SphereMesh_skull")
+surface_material_override/0 = ExtResource("2_material")
+
+[node name="LeftArm" type="MeshInstance3D" parent="."]
+position = Vector3(-0.38, 0.94, 0)
+rotation = Vector3(0, 0, 0.65)
+mesh = SubResource("CylinderMesh_bone")
+surface_material_override/0 = ExtResource("2_material")
+
+[node name="RightArm" type="MeshInstance3D" parent="."]
+position = Vector3(0.38, 0.94, 0)
+rotation = Vector3(0, 0, -0.65)
+mesh = SubResource("CylinderMesh_bone")
+surface_material_override/0 = ExtResource("2_material")

@@ -18,6 +18,10 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 - G1.2 Pages configurado
 - G1.2.1 smoke test manual pendente
 
+## Godot 3D Foundation / G2
+
+G2 3D foundation concluido em branch dedicada: cena `godot/scenes/world/PrototypeArena3D.tscn` com player 3D, camera orbital, arena de teste, inimigo dummy e servo esqueleto dummy seguindo o jogador. Esta entrega nao substitui o prototipo HTML5/Canvas nem a cena Godot 2D atual.
+
 ## Plataforma Principal
 
 **Godot 4.x**
