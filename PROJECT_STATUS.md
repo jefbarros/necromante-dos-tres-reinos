@@ -22,6 +22,15 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 
 G2 3D foundation concluido em branch dedicada: cena `godot/scenes/world/PrototypeArena3D.tscn` com player 3D, camera orbital, arena de teste, inimigo dummy e servo esqueleto dummy seguindo o jogador. Esta entrega nao substitui o prototipo HTML5/Canvas nem a cena Godot 2D atual.
 
+## Godot G2 Basic Combat
+
+G2 combate basico concluido na branch `godot/g2-basic-combat`.
+
+- Ciclo minimo validado em prototipo: mover, mirar/posicionar, atacar, causar dano e matar `EnemyDummy3D`.
+- Arquivos principais: `godot/scripts/combat/HealthComponent.gd`, `godot/scripts/combat/Hitbox3D.gd`, `godot/scripts/combat/Hurtbox3D.gd`, `godot/scenes/player/Player3D.tscn`, `godot/scripts/player/PlayerController3D.gd`, `godot/scenes/enemies/EnemyDummy3D.tscn`, `godot/scripts/enemies/EnemyDummy3D.gd` e `godot/scenes/world/PrototypeArena3D.tscn`.
+- Validacao manual esperada: abrir `godot/` no Godot 4.6.x, executar `res://scenes/world/PrototypeArena3D.tscn`, testar WASD, camera com mouse, Shift, Espaco, clique esquerdo, dano/morte do dummy e servo seguindo o player.
+- Fora do escopo: primeira invocacao real, reanimacao, essencia da morte, comando de servos, loot, XP, dungeon, boss, inventario, skill tree, UI complexa e save system.
+
 ## Plataforma Principal
 
 **Godot 4.x**

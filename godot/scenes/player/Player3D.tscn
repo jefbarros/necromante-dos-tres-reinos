@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/PlayerController3D.gd" id="1_controller"]
 [ext_resource type="Material" path="res://assets/materials/player_placeholder.tres" id="2_material"]
+[ext_resource type="Script" path="res://scripts/combat/Hitbox3D.gd" id="3_hitbox"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.35
@@ -19,6 +20,16 @@ height = 0.32
 top_radius = 0.035
 bottom_radius = 0.035
 height = 1.65
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_attack"]
+size = Vector3(1.25, 1.2, 1.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_attack"]
+size = Vector3(1.25, 1.2, 1.25)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_attack"]
+transparency = 1
+albedo_color = Color(0.38, 0.92, 0.76, 0.22)
 
 [node name="Player3D" type="CharacterBody3D" groups=["player"]]
 collision_layer = 1
@@ -42,3 +53,21 @@ mesh = SubResource("SphereMesh_focus")
 position = Vector3(0.43, 0.78, -0.08)
 rotation = Vector3(0.22, 0.0, 0.0)
 mesh = SubResource("CylinderMesh_staff")
+
+[node name="BasicAttackHitbox" type="Area3D" parent="."]
+visible = false
+position = Vector3(0, 0.95, -0.625)
+collision_layer = 0
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("3_hitbox")
+damage = 18.0
+source_path = NodePath("..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BasicAttackHitbox"]
+shape = SubResource("BoxShape3D_attack")
+
+[node name="AttackPreview" type="MeshInstance3D" parent="BasicAttackHitbox"]
+mesh = SubResource("BoxMesh_attack")
+surface_material_override/0 = SubResource("StandardMaterial3D_attack")
