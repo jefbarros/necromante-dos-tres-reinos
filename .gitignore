@@ -8,3 +8,4 @@ godot/*.tmp
 
 # Local/experimental Godot addons outside subproject
 /addons/
+godot/addons/
