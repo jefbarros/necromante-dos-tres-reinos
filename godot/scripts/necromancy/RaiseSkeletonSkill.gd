@@ -8,10 +8,12 @@ const RESULT_MISSING_SCENE := "missing_scene"
 const RESULT_NOT_ENOUGH_ESSENCE := "not_enough_essence"
 
 @export var summon_scene: PackedScene = preload("res://scenes/summons/SkeletonServant3D.tscn")
+@export var archer_summon_scene: PackedScene
 @export var raise_radius: float = 4.0
 @export var max_active_summons: int = 2
 @export var summon_spawn_offset: Vector3 = Vector3(0.9, 0.0, 0.45)
 @export var skeleton_essence_cost: int = 15
+@export var archer_essence_cost: int = 20
 
 var active_summons: Array[Node3D] = []
 
@@ -99,3 +101,48 @@ func cleanup_invalid_summons() -> void:
 		var summon := active_summons[index]
 		if summon == null or not is_instance_valid(summon) or not summon.is_inside_tree():
 			active_summons.remove_at(index)
+
+
+func try_raise_archer() -> String:
+	cleanup_invalid_summons()
+	if archer_summon_scene == null:
+		return RESULT_MISSING_SCENE
+	if active_summons.size() >= max_active_summons:
+		return RESULT_LIMIT_REACHED
+
+	var corpse := find_nearest_corpse()
+	if corpse == null:
+		return RESULT_NO_CORPSE
+
+	var player := get_parent() as Node3D
+	var essence_component := player.get_node_or_null("EssenceComponent") if player != null else null
+	if essence_component == null or not essence_component.has_method("spend_essence"):
+		return RESULT_NOT_ENOUGH_ESSENCE
+
+	var summon := archer_summon_scene.instantiate() as Node3D
+	if summon == null:
+		return RESULT_MISSING_SCENE
+
+	if not bool(essence_component.call("spend_essence", archer_essence_cost)):
+		return RESULT_NOT_ENOUGH_ESSENCE
+
+	var spawn_parent := player.get_parent() if player != null and player.get_parent() != null else get_tree().current_scene
+	if spawn_parent == null:
+		spawn_parent = get_tree().root
+
+	spawn_parent.add_child(summon)
+	var raise_position := corpse.global_position
+	if corpse.has_method("get_raise_position"):
+		raise_position = corpse.call("get_raise_position")
+	summon.global_position = raise_position + summon_spawn_offset
+	if player != null:
+		summon.set("owner_node", player)
+		summon.set("owner_path", summon.get_path_to(player))
+		var command_component := player.get_node_or_null("SummonCommandComponent")
+		if command_component != null and command_component.has_method("apply_current_mode_to"):
+			command_component.call("apply_current_mode_to", summon)
+
+	active_summons.append(summon)
+	if corpse.has_method("consume"):
+		corpse.call("consume")
+	return RESULT_RAISED

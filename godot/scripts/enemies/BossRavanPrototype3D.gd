@@ -64,7 +64,8 @@ func _physics_process(delta: float) -> void:
 	var current_health_pct := float(health_component.get("current_health")) / float(health_component.get("max_health"))
 	if not _phase_2 and current_health_pct < 0.5:
 		_phase_2 = true
-		print("Ravan enters phase 2")
+		print("Ravan enters phase 2 - Sacred Fury")
+		_announce_phase_2()
 
 	var attack_target := _find_attack_target()
 	if attack_target != null:
@@ -199,7 +200,14 @@ func _announce_defeat() -> void:
 	# Notify quest manager
 	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
 	if quest_mgr != null and quest_mgr.has_method("advance_to"):
-		quest_mgr.call("advance_to", 5)  # DEFEAT_RAVAN state
+		quest_mgr.call("advance_to", 5)
+
+
+func _announce_phase_2() -> void:
+	# Notify player of phase 2
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud != null and hud.has_method("show_message"):
+		hud.call("show_message", "Ravan enters Sacred Fury!")
 
 
 func _flash_damage() -> void:

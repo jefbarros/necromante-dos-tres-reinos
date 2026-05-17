@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://cjx8mwtq9yq0w"]
+
+[ext_resource type="Script" path="res://scripts/world/AreaTransition3D.gd" id="1_area_transition"]
+
+[node name="AreaTransition3D" type="Area3D"]
+script = ExtResource("1_area_transition")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D")
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+text = "E: Viajar"
+font_size = 32
+outline_size = 8
+modulate = Color(1, 1, 1, 1)
+billboard = 1
+[sub_resource:1]
+type = "BoxShape3D"
+size = Vector3(2, 2, 2)

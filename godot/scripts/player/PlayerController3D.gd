@@ -151,8 +151,11 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("attack_primary"):
 		_start_basic_attack()
 
-	if Input.is_action_just_pressed("raise_skeleton"):
-		_try_raise_skeleton()
+if Input.is_action_just_pressed("raise_skeleton"):
+		if Input.is_key_pressed(KEY_SHIFT):
+			_try_raise_archer()
+		else:
+			_try_raise_skeleton()
 
 	if Input.is_action_just_pressed("summon_follow"):
 		_set_summon_command(SummonBrain.CommandMode.FOLLOW)
@@ -222,6 +225,26 @@ func _try_raise_skeleton() -> void:
 			print("Summon limit reached")
 		"not_enough_essence":
 			print("Not enough essence to raise skeleton")
+		_:
+			print("No corpse nearby")
+
+
+func _try_raise_archer() -> void:
+	if _raise_skeleton_skill == null:
+		print("Raise skeleton skill not found")
+		return
+	if not _raise_skeleton_skill.has_method("try_raise_archer"):
+		print("Archer summon not available")
+		return
+
+	var result := String(_raise_skeleton_skill.call("try_raise_archer"))
+	match result:
+		"raised":
+			print("Skeleton Archer raised")
+		"limit_reached":
+			print("Summon limit reached")
+		"not_enough_essence":
+			print("Not enough essence (need 20) to raise archer")
 		_:
 			print("No corpse nearby")
 
