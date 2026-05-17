@@ -15,16 +15,8 @@ signal requested_quit_to_desktop
 @onready var _menu_button: Button = $VBoxContainer/MarginContainer/VBoxContainer/MenuButton
 @onready var _quit_button: Button = $VBoxContainer/MarginContainer/VBoxContainer/QuitButton
 
-var _save_manager: Node = null
-
 
 func _ready() -> void:
-	# Find save manager in the scene
-	_save_manager = get_tree().get_first_node_in_group("save_manager")
-	if _save_manager == null:
-		# Try to find it by class name
-		_save_manager = get_tree().get_first_node_in_group("save_manager")
-	
 	_continue_button.pressed.connect(_on_continue_pressed)
 	_save_button.pressed.connect(_on_save_pressed)
 	_load_button.pressed.connect(_on_load_pressed)
@@ -44,27 +36,23 @@ func _on_continue_pressed() -> void:
 
 
 func _on_save_pressed() -> void:
-	if _save_manager != null and _save_manager.has_method("save_game"):
-		# Collect current game state
-		var game_state := _collect_game_state()
-		var result := _save_manager.call("save_game", game_state)
-		if result:
-			print("Game saved successfully")
-		else:
-			print("Failed to save game")
+	# Collect current game state
+	var game_state := _collect_game_state()
+	var result := SimpleSaveManager.save_game(game_state)
+	if result:
+		print("Game saved successfully")
 	else:
-		print("Save manager not found")
+		print("Failed to save game")
 
 
 func _on_load_pressed() -> void:
-	# Load the game
-	if _save_manager != null and _save_manager.has_method("load_game"):
-		var save_data := _save_manager.call("load_game")
-		if save_data.size() > 0:
-			_apply_game_state(save_data)
-			print("Game loaded successfully")
-		else:
-			print("No save data found to load")
+	# Load the game using singleton
+	var save_data := SimpleSaveManager.load_game()
+	if save_data.size() > 0:
+		_apply_game_state(save_data)
+		print("Game loaded successfully")
+	else:
+		print("No save data found to load")
 	
 	emit_signal("requested_load")
 	queue_free()

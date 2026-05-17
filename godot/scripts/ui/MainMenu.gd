@@ -2,7 +2,6 @@ extends Control
 class_name MainMenu
 
 const HUB_SCENE := preload("res://scenes/hub/Hub_VeyrholdOutskirts.tscn")
-const SAVE_MANAGER_PATH := "user://n3r_prototype_save.json"
 
 @onready var _new_game_button: Button = $VBoxContainer/MarginContainer/VBoxContainer/NewGameButton
 @onready var _continue_button: Button = $VBoxContainer/MarginContainer/VBoxContainer/ContinueButton
@@ -22,7 +21,7 @@ func _ready() -> void:
 
 
 func _update_continue_button_state() -> void:
-	var has_save := FileAccess.file_exists(SAVE_MANAGER_PATH)
+	var has_save := SimpleSaveManager.has_save()
 	_continue_button.disabled = not has_save
 	if has_save:
 		_continue_button.text = "Continuar"
@@ -32,8 +31,7 @@ func _update_continue_button_state() -> void:
 
 func _on_new_game_pressed() -> void:
 	# Clear existing save for fresh start
-	if FileAccess.file_exists(SAVE_MANAGER_PATH):
-		FileAccess.remove(SAVE_MANAGER_PATH)
+	SimpleSaveManager.clear_save()
 	
 	_load_hub()
 

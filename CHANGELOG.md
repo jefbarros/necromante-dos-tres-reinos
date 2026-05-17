@@ -8,11 +8,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- G10 MVP PC Playtest Build & Polish branch: `godot/g10-playtest-build-polish`
 - G9 MVP PC Content Expansion branch: `godot/g9-mvp-pc-content-expansion`
 - G8 MVP PC Foundation branch: `godot/g8-mvp-pc-foundation`
 
 ### Changed
-- Updated PROJECT_STATUS.md with G8 and G9 status
+- Updated PROJECT_STATUS.md with G9 and G10 status
+
+### Fixed
+- **SimpleSaveManager.gd**: Removed `class_name` to fix autoload conflict
+- **MainMenu.gd**: Updated to use `SimpleSaveManager` singleton directly
+- **PauseMenu.gd**: Updated to use `SimpleSaveManager` singleton directly
+
+## [0.10.0] - 2024-XX-XX
+
+### Godot G10 - MVP PC Playtest Build & Polish
+
+**Branch**: `godot/g10-playtest-build-polish`
+
+#### Added
+- **FronteiraCinzas_PrototypeArea.tscn** - Nova area externa para playtest
+- **CorruptedWolf3D** e **OrderSoldier3D** posicionados na Fronteira de Cinzas
+- **AreaTransition3D** conectando Hub <-> Fronteira de Cinzas
+- **QA_G10_PLAYTEST_BUILD_POLISH.md** - Checklist de QA para playtest
+
+#### Changed
+- **Hub_VeyrholdOutskirts.tscn**: Added FronteiraPortal para viaje
+- FronteiraCinzas tem retorno ao hub
+- Controles documentados no README
+
+#### New Controls (G10)
+- E: Viajar entre areas (hub <-> Fronteira)
+- R: Reanimar esqueleto soldado (15 essencia)
+- Shift+R: Reanimar esqueleto arqueiro (20 essencia)
+
+#### Balanceamento
+- Player HP: 100, Attack: 18
+- CorruptedWolf: 30 HP, 12 dano, 5 essencia
+- OrderSoldier: 50 HP, 15 dano, 8 essencia
+- SkeletonServant: 35 HP, 10 dano
+- SkeletonArcher: 25 HP, 8 dano, 8m range
+- Boss Ravan: 300 HP, 25->31 dano (fase 2 at 50% HP)
+
+#### Outside Scope
+- Build Windows (gerar se possivel)
+- World streaming
+- Full inventory
+- Multiplayer
 
 ## [0.9.0] - 2024-XX-XX
 
