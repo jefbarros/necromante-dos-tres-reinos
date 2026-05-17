@@ -8,16 +8,19 @@ A fundacao 3D jogavel fica em:
 
 Para testar, abra o projeto em `godot/` com Godot 4.6.x, abra essa cena e execute com **Run Current Scene**.
 
-## G3 - primeira invocacao real
+## G4 - necromancia jogavel
 
-Esta etapa prova a fantasia central em forma minima:
+Esta etapa prova o loop minimo de necromancia jogavel:
 
 1. matar um `EnemyDummy3D`;
-2. gerar um `Corpse3D` simples no local da morte;
-3. aproximar o player do cadaver;
-4. pressionar `R`;
-5. consumir o cadaver e criar um `SkeletonServant3D`;
-6. observar o servo seguir o player e atacar outros inimigos proximos.
+2. ganhar Essencia da Morte;
+3. gerar um `Corpse3D` no local da morte;
+4. aproximar o player do cadaver;
+5. pressionar `R`;
+6. gastar essencia;
+7. criar um `SkeletonServant3D`;
+8. comandar servos com `1`, `2` e `3`;
+9. tomar dano e observar parte do dano ser transferida para servos ativos.
 
 ## Controles atuais
 
@@ -27,17 +30,22 @@ Esta etapa prova a fantasia central em forma minima:
 - Espaco: esquiva/roll placeholder
 - Clique esquerdo: ataque basico frontal
 - R: reanimar esqueleto a partir de cadaver proximo
+- 1: servos seguem/protegem o jogador
+- 2: servos atacam inimigo proximo
+- 3: servos recuam e reunem no jogador
 - Esc: liberar ou capturar o mouse
 
 ## Implementado nesta etapa
 
-- `Corpse3D.tscn` com grupo `corpse`, visual placeholder e consumo unico.
-- `RaiseSkeletonSkill.gd` como habilidade simples no `Player3D`.
-- Limite inicial de 2 servos ativos.
-- `SkeletonServant3D` com `HealthComponent`, estados minimos, follow, chase, attack e morte.
-- Ataque basico do servo contra inimigos no grupo `enemy`.
-- HUD minimo em `PrototypeHUD.tscn` com `Servos: X/Y` e dica de reanimacao.
-- `PrototypeArena3D.tscn` com multiplos `EnemyDummy3D` para validar matar, reanimar e atacar outro alvo.
+- `EssenceComponent.gd` no `Player3D`, com essencia inicial, limite, ganho e gasto.
+- `EnemyDummy3D` concede essencia uma unica vez ao morrer por player ou servo.
+- `RaiseSkeletonSkill.gd` cobra essencia antes de consumir cadaver.
+- `SummonCommandComponent.gd` centraliza os comandos FOLLOW, ATTACK e RECALL.
+- `SkeletonServant3D` respeita modos de comando com ranges diferentes.
+- `DamageTransferComponent.gd` redireciona 20% do dano do player para servos ativos.
+- `EnemyDummy3D` tem ataque simples por proximidade contra player ou servo.
+- `PrototypeHUD.tscn` mostra HP, essencia, servos ativos/limite, comando atual e dica.
+- `PrototypeArena3D.tscn` mantem multiplos inimigos em area pequena para validar o fluxo.
 
 ## Fluxo de teste manual
 
@@ -45,25 +53,26 @@ Esta etapa prova a fantasia central em forma minima:
 2. Execute com **Run Current Scene**.
 3. Teste WASD, mouse, Shift, Espaco e clique esquerdo.
 4. Mate um `EnemyDummy3D` com o ataque basico.
-5. Confirme no console `EnemyDummy died` e `Corpse spawned`.
+5. Confirme no console `EnemyDummy died`, `Essence gained: X` e `Corpse spawned`.
 6. Aproxime-se do cadaver.
 7. Pressione `R`.
-8. Confirme `Skeleton raised` e a atualizacao do HUD.
-9. Observe o servo seguir o player.
-10. Aproxime o servo de outro `EnemyDummy3D` e confirme o log `Skeleton attacked EnemyDummy for X damage`.
+8. Confirme `Essence spent: X`, `Skeleton raised` e a atualizacao do HUD.
+9. Use `1` para FOLLOW, `2` para ATTACK e `3` para RECALL.
+10. Tome dano com servo ativo e confirme `Damage transferred to summons: X`.
+11. Tome dano sem servo ativo e confirme `No summons available for damage transfer`.
 
 ## Fora do escopo
 
-- Essencia da morte completa e custo de essencia.
-- Comando manual de servos, roda tatica e modos seguir/atacar/recuar.
-- Dano transferido ao servo.
-- Evolucao, raridade, inventario, loot e XP.
-- Dungeon, boss, mundo aberto, faccoes completas, save system e UI complexa.
-- Assets finais, efeitos finais e networking.
+- Roda tatica.
+- UI final/bonita.
+- Arvore de habilidade.
+- Evolucao, raridade e multiplas familias de servos.
+- Inventario, loot, XP e level up.
+- Dungeon, boss, mundo aberto, faccoes completas e save system.
+- Reputacao, corrupcao moral e sistemas narrativos completos.
+- Pathfinding avancado, assets finais, efeitos finais e networking.
 
 ## Proximos passos sugeridos
 
-1. G4 necromancia jogavel.
-2. Essencia da morte.
-3. Comandos seguir/atacar/recuar.
-4. Dano transferido.
+1. G5 primeira arena com spawn, loot simples, XP e level up.
+2. G6 mini dungeon.

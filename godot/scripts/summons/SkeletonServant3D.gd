@@ -1,5 +1,7 @@
 extends CharacterBody3D
 
+const SummonBrain := preload("res://scripts/summons/SummonBrain3D.gd")
+
 enum State {
 	FOLLOW_OWNER,
 	CHASE_TARGET,
@@ -12,6 +14,8 @@ enum State {
 @export var acceleration: float = 12.0
 @export var gravity: float = 24.0
 @export var aggro_range: float = 6.0
+@export var protect_range: float = 3.0
+@export var attack_command_aggro_range: float = 9.0
 @export var attack_range: float = 1.35
 @export var attack_damage: float = 10.0
 @export var attack_cooldown: float = 0.9
@@ -20,6 +24,7 @@ enum State {
 
 var owner_node: Node3D
 var state: int = State.FOLLOW_OWNER
+var command_mode: int = SummonBrain.CommandMode.FOLLOW
 var _target: Node3D
 var _attack_cooldown_timer: float = 0.0
 
@@ -83,12 +88,22 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 
-func receive_damage(amount: float) -> void:
+func receive_damage(amount: float, source: Node = null) -> void:
 	if state == State.DEAD:
 		return
 
 	if _health_component.has_method("take_damage"):
-		_health_component.call("take_damage", amount, self)
+		_health_component.call("take_damage", amount, source)
+
+
+func set_command_mode(mode: int) -> void:
+	command_mode = mode
+	if command_mode == SummonBrain.CommandMode.RECALL:
+		_target = null
+
+
+func is_dead() -> bool:
+	return state == State.DEAD
 
 
 func _resolve_owner() -> void:
@@ -101,7 +116,12 @@ func _resolve_owner() -> void:
 
 
 func _update_target() -> void:
-	if _is_valid_enemy(_target) and _flat_distance_to(_target.global_position) <= aggro_range:
+	if command_mode == SummonBrain.CommandMode.RECALL:
+		_target = null
+		return
+
+	var current_aggro_range := _get_current_aggro_range()
+	if _is_valid_enemy(_target) and _flat_distance_to(_target.global_position) <= current_aggro_range:
 		return
 
 	_target = _find_nearest_enemy()
@@ -109,7 +129,7 @@ func _update_target() -> void:
 
 func _find_nearest_enemy() -> Node3D:
 	var nearest: Node3D = null
-	var nearest_distance := aggro_range
+	var nearest_distance := _get_current_aggro_range()
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		var enemy_node := enemy as Node3D
 		if not _is_valid_enemy(enemy_node):
@@ -121,6 +141,16 @@ func _find_nearest_enemy() -> Node3D:
 			nearest_distance = distance
 
 	return nearest
+
+
+func _get_current_aggro_range() -> float:
+	match command_mode:
+		SummonBrain.CommandMode.ATTACK:
+			return attack_command_aggro_range
+		SummonBrain.CommandMode.RECALL:
+			return 0.0
+		_:
+			return protect_range
 
 
 func _is_valid_enemy(enemy: Node3D) -> bool:
@@ -154,7 +184,7 @@ func _attack_target() -> void:
 
 	_attack_cooldown_timer = attack_cooldown
 	if _target.has_method("receive_damage"):
-		_target.call("receive_damage", attack_damage)
+		_target.call("receive_damage", attack_damage, self)
 	else:
 		var health_component := _target.get_node_or_null("HealthComponent")
 		if health_component != null and health_component.has_method("take_damage"):

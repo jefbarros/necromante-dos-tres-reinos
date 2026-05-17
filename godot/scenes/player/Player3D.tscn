@@ -1,9 +1,13 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/PlayerController3D.gd" id="1_controller"]
 [ext_resource type="Material" path="res://assets/materials/player_placeholder.tres" id="2_material"]
 [ext_resource type="Script" path="res://scripts/combat/Hitbox3D.gd" id="3_hitbox"]
 [ext_resource type="Script" path="res://scripts/necromancy/RaiseSkeletonSkill.gd" id="4_raise_skill"]
+[ext_resource type="Script" path="res://scripts/combat/HealthComponent.gd" id="5_health"]
+[ext_resource type="Script" path="res://scripts/necromancy/EssenceComponent.gd" id="6_essence"]
+[ext_resource type="Script" path="res://scripts/necromancy/DamageTransferComponent.gd" id="7_transfer"]
+[ext_resource type="Script" path="res://scripts/summons/SummonCommandComponent.gd" id="8_command"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.35
@@ -75,3 +79,19 @@ surface_material_override/0 = SubResource("StandardMaterial3D_attack")
 
 [node name="RaiseSkeletonSkill" type="Node" parent="."]
 script = ExtResource("4_raise_skill")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("5_health")
+max_health = 100.0
+
+[node name="EssenceComponent" type="Node" parent="."]
+script = ExtResource("6_essence")
+max_essence = 100
+starting_essence = 20
+
+[node name="DamageTransferComponent" type="Node" parent="."]
+script = ExtResource("7_transfer")
+transfer_percent = 0.2
+
+[node name="SummonCommandComponent" type="Node" parent="."]
+script = ExtResource("8_command")

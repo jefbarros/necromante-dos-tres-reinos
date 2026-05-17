@@ -2,7 +2,7 @@
 
 ## Versao Atual
 
-Godot G3.0 MVP jogavel
+Godot G4.0 necromancia jogavel
 
 ## Estado Geral
 
@@ -15,6 +15,7 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 - G2.1 baseline visual e jogavel minimo concluido
 - G3.0 MVP jogavel completo em Godot
 - G3.0.1 responsividade Web minima concluida como complemento do MVP G3.0
+- G4.0 necromancia jogavel implementada em Godot
 - G1.2 Pages configurado
 - G1.2.1 smoke test manual pendente
 
@@ -39,6 +40,16 @@ G3 primeira invocacao real implementada na branch `godot/g3-first-real-summon`.
 - Arquivos principais: `godot/scripts/necromancy/Corpse3D.gd`, `godot/scripts/necromancy/RaiseSkeletonSkill.gd`, `godot/scenes/necromancy/Corpse3D.tscn`, `godot/scripts/summons/SkeletonServant3D.gd`, `godot/scenes/summons/SkeletonServant3D.tscn`, `godot/scenes/ui/PrototypeHUD.tscn`, `godot/scripts/ui/PrototypeHUD.gd` e `godot/scenes/world/PrototypeArena3D.tscn`.
 - Validacao manual esperada: abrir `godot/` no Godot 4.6.x, executar `res://scenes/world/PrototypeArena3D.tscn`, testar movimento/camera/sprint/dodge/ataque, matar um dummy, reanimar um esqueleto com `R` e observar o servo atacar outro dummy.
 - Fora do escopo: essencia da morte, custo, comando manual, roda tatica, dano transferido, evolucao de servos, raridade, inventario, loot, XP, dungeon, boss, save e UI complexa.
+
+## Godot G4 Playable Necromancy
+
+G4 necromancia jogavel implementada na branch `godot/g4-playable-necromancy`.
+
+- Ciclo minimo: matar `EnemyDummy3D`, ganhar Essencia da Morte, gerar `Corpse3D`, pressionar `R` perto do cadaver, gastar essencia, criar `SkeletonServant3D`, comandar servos e transferir parte do dano do player para servos ativos.
+- Arquivos principais: `godot/scripts/necromancy/EssenceComponent.gd`, `godot/scripts/necromancy/DamageTransferComponent.gd`, `godot/scripts/summons/SummonCommandComponent.gd`, `godot/scripts/necromancy/RaiseSkeletonSkill.gd`, `godot/scripts/player/PlayerController3D.gd`, `godot/scripts/enemies/EnemyDummy3D.gd`, `godot/scripts/summons/SkeletonServant3D.gd`, `godot/scripts/ui/PrototypeHUD.gd`, `godot/scenes/player/Player3D.tscn`, `godot/scenes/ui/PrototypeHUD.tscn`, `godot/scenes/world/PrototypeArena3D.tscn` e `godot/project.godot`.
+- Validacao manual esperada: abrir `godot/` no Godot 4.6.x, executar `res://scenes/world/PrototypeArena3D.tscn`, testar movimento/camera/sprint/dodge/ataque, matar um dummy, confirmar essencia e cadaver, reanimar com `R`, usar `1` FOLLOW, `2` ATTACK e `3` RECALL, tomar dano com servo ativo e confirmar transferencia, tomar dano sem servo ativo e confirmar dano total no player.
+- Validacao tecnica: cenas G4 principais carregadas em Godot 4.6.2 headless e `git diff --check` deve passar antes do commit.
+- Fora do escopo: roda tatica, UI final, skill tree, evolucao/raridade de servos, inventario, loot, XP/level up, dungeon, boss, save system, mundo aberto, reputacao, corrupcao moral, faccoes completas, pathfinding avancado e multiplas familias de servos.
 
 ## Plataforma Principal
 
@@ -67,6 +78,7 @@ G3 primeira invocacao real implementada na branch `godot/g3-first-real-summon`.
 | G2.1 | Baseline visual e jogavel minimo Godot | Completo |
 | G3.0 | MVP jogavel completo Godot | Completo |
 | G3.0.1 | Responsividade Web minima complementar ao MVP G3.0 | Completo |
+| G4.0 | Necromancia jogavel minima Godot | Completo |
 | v0.3.4 | HTML5 estavel | Congelado |
 
 ## Tags
@@ -81,8 +93,8 @@ G3 primeira invocacao real implementada na branch `godot/g3-first-real-summon`.
 
 ## Proximas Etapas
 
-1. Validar G3.0.1 no GitHub Pages apos merge
-2. G3.1 polimento final e bugs
+1. G5 primeira arena com spawn, loot simples, XP e level up
+2. G6 mini dungeon
 3. Melhorar smoke test Web por release
 4. Planejar persistencia simples somente apos estabilizar o loop jogavel
 
