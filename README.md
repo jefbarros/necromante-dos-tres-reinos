@@ -1,6 +1,21 @@
 # Necromante dos Tres Reinos
 
-Prototipo jogavel v0.3.3 em HTML5, JavaScript e Canvas. O jogo evolui para uma estrutura de Mundo Aberto por Regioes, com lore e identidade propria baseada nos Tres Reinos: Humanos, Demonios e Dragoes.
+Prototipo jogavel v0.3.4 em HTML5, JavaScript e Canvas. O jogo evolui para uma estrutura de Mundo Aberto por Regioes, com lore e identidade propria baseada nos Tres Reinos: Humanos, Demonios e Dragoes.
+
+## v0.3.4 - Polimento visual, mobile e regressao dos sistemas centrais
+
+A v0.3.4 estabiliza a revisao de UX/UI da v0.3.3, com foco em leitura, responsividade e regressao dos sistemas centrais. Nao adiciona mapas maiores, novas regioes reais, novas racas completas, 3D, builds nativos ou faccoes inteligentes.
+
+Mudancas principais:
+- Responsividade melhorada em Equipe, Inventario, Talentos e Mapa para desktop estreito e mobile.
+- Textos de botoes, cards e paineis passam a truncar ou limitar linhas para evitar estouro visual.
+- Barra rapida fica horizontal tambem no modo compacto, reduzindo conflito com controles mobile.
+- Equipe compacta empilha ativos e reserva, preservando scroll, filtros, ordenacao e acoes.
+- Talentos compactos mostram abas por caminho e nodes do caminho selecionado.
+- Inventario e Mapa recebem limites de linhas e paineis mais defensivos em telas pequenas.
+- Comparacao de equipamentos usa estado "Diferente" para itens de mesmo poder com foco distinto.
+- Fusao de servos passa a respeitar a reserva filtrada/ordenada selecionada.
+- Saves v0.3.2/v0.3.3 continuam aceitos pela migracao e novos saves usam schema 0.3.4.
 
 ## v0.3.3 - UX/UI Overhaul: mouse, menus ricos, equipamentos e mapa
 
