@@ -64,10 +64,10 @@ func try_attack() -> void:
 	query.collision_mask = 2
 	query.exclude = [get_rid()]
 
-	var hits := get_world_2d().direct_space_state.intersect_shape(query, 16)
-	var hit_count := 0
+	var hits: Array[Dictionary] = get_world_2d().direct_space_state.intersect_shape(query, 16)
+	var hit_count: int = 0
 	for hit in hits:
-		var target := hit.get("collider")
+		var target: Object = hit.get("collider") as Object
 		if target != null and target.has_method("take_damage"):
 			target.take_damage(attack_damage)
 			hit_count += 1

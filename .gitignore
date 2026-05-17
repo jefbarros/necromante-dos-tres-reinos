@@ -5,3 +5,7 @@ godot/.import/
 godot/export_presets.cfg.bak
 godot/*.tmp
 /android/
+
+# Local/experimental Godot addons outside subproject
+/addons/
+godot/addons/
