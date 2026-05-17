@@ -167,7 +167,7 @@ func _spawn_corpse() -> void:
 		return
 
 	_corpse_spawned = true
-	var corpse := corpse_scene.instantiate() as Node3D
+	var corpse: Node3D = corpse_scene.instantiate() as Node3D
 	if corpse == null:
 		return
 

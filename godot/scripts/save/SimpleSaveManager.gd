@@ -111,7 +111,7 @@ func _create_save_data(additional_data: Dictionary = {}) -> Dictionary:
 		"crypt_veyrfall_cleared": false
 	}
 
-	var player := get_tree().get_first_node_in_group("player")
+	var player: Node = get_tree().get_first_node_in_group("player")
 	if player != null:
 		var essence := player.get_node_or_null("EssenceComponent")
 		if essence != null:
@@ -139,7 +139,7 @@ func _create_save_data(additional_data: Dictionary = {}) -> Dictionary:
 		if loot_collected_count != null:
 			data["total_loot_collected"] = loot_collected_count
 
-	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	var quest_mgr: Node = get_tree().get_first_node_in_group("quest_manager")
 	if quest_mgr != null:
 		var current_state = quest_mgr.get("current_state")
 		if current_state != null:

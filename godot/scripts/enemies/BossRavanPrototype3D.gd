@@ -29,7 +29,7 @@ var _attack_cooldown_timer: float = 0.0
 var _phase_2: bool = false
 var _alive_material: Material
 
-var health_component: Node = $HealthComponent
+@onready var health_component: Node = $HealthComponent
 @onready var _body: MeshInstance3D = $Body
 @onready var _collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var _hurtbox: Area3D = $Hurtbox3D
@@ -185,7 +185,7 @@ func _spawn_corpse() -> void:
 		return
 
 	_corpse_spawned = true
-	var corpse := corpse_scene.instantiate() as Node3D
+	var corpse: Node3D = corpse_scene.instantiate() as Node3D
 	if corpse == null:
 		return
 
@@ -198,14 +198,14 @@ func _spawn_corpse() -> void:
 
 func _announce_defeat() -> void:
 	# Notify quest manager
-	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	var quest_mgr: Node = get_tree().get_first_node_in_group("quest_manager")
 	if quest_mgr != null and quest_mgr.has_method("advance_to"):
 		quest_mgr.call("advance_to", 5)
 
 
 func _announce_phase_2() -> void:
 	# Notify player of phase 2
-	var hud := get_tree().get_first_node_in_group("hud")
+	var hud: Node = get_tree().get_first_node_in_group("hud")
 	if hud != null and hud.has_method("show_message"):
 		hud.call("show_message", "Ravan enters Sacred Fury!")
 

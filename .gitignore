@@ -1,38 +1,34 @@
-# Godot 4+ specific ignores
+# Godot cache
 .godot/
 godot/.godot/
 godot/.import/
 godot/export_presets.cfg.bak
 godot/*.tmp
-/android/
-
-# Local/experimental Godot addons outside subproject
-/addons/
 godot/addons/
 
-# Exports and builds locally generated
-/export_presets.cfg
+# Local exports/builds
+/exports/
 /builds/
 *.exe
 *.zip
 *.apk
 *.aab
+
+# Web export generated locally
 *.pck
 *.wasm
-*.js
-*.html
-*.png
-*.jpg
 
-# Exception for public Godot Web build (GitHub Pages)
+# Keep GitHub Pages Godot Web build
 !docs/play-godot/*.pck
 !docs/play-godot/*.wasm
 !docs/play-godot/*.js
 !docs/play-godot/*.html
 !docs/play-godot/*.png
-!docs/play-godot/*.jpg
+!docs/play-godot/*.audio.worklet.js
+!docs/play-godot/*.worker.js
 
-# Package managers
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

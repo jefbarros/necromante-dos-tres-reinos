@@ -2,7 +2,7 @@ extends Node3D
 
 signal room_started(room_index)
 signal room_cleared(room_index)
-signal dungeon_cleared()
+signal dungeon_completed()
 
 @export var dungeon_name: String = "Cripta de Veyrfall"
 @export var reward_chest_scene: PackedScene = preload("res://scenes/loot/DungeonRewardChest3D.tscn")
@@ -10,20 +10,24 @@ signal dungeon_cleared()
 
 var current_room: int = 0
 var enemies_alive: int = 0
-var dungeon_cleared: bool = false
+var is_dungeon_cleared: bool = false
 var dungeon_hint: String = ""
 var current_room_name: String = "Nenhuma"
 
-onready var _room_nodes: Array[Node3D] = [get_node("Rooms/Room1"), get_node("Rooms/Room2"), get_node("Rooms/Room3")]
-onready var _gates: Array[Node] = [get_node("Gates/Gate1"), get_node("Gates/Gate2")]
-onready var _reward_spawn: Node3D = get_node("RewardSpawn")
+@onready var _room_nodes: Array[Node3D] = [
+	get_node("../Rooms/Room1"),
+	get_node("../Rooms/Room2"),
+	get_node("../Rooms/Room3"),
+]
+@onready var _gates: Array[Node] = [get_node("../Gates/Gate1"), get_node("../Gates/Gate2")]
+@onready var _reward_spawn: Node3D = get_node("../RewardSpawn")
 
 func _ready() -> void:
 	add_to_group("dungeon_manager")
 	_start_dungeon()
 
 func _process(_delta: float) -> void:
-	if dungeon_cleared:
+	if is_dungeon_cleared:
 		return
 	_update_room_status()
 
@@ -89,11 +93,11 @@ func _clear_current_room() -> void:
 			_emit_room_started(current_room)
 			_update_gate_states()
 		3:
-			dungeon_cleared = true
+			is_dungeon_cleared = true
 			current_room_name = "Concluída"
 			dungeon_hint = "Dungeon concluída"
 			print("Dungeon cleared")
-			emit_signal("dungeon_cleared")
+			emit_signal("dungeon_completed")
 			_spawn_reward()
 			_save_progress()
 
@@ -124,7 +128,7 @@ func _spawn_reward() -> void:
 
 
 func _update_quest_on_room_clear() -> void:
-	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	var quest_mgr: Node = get_tree().get_first_node_in_group("quest_manager")
 	if quest_mgr == null or not quest_mgr.has_method("advance_if_current"):
 		return
 	match current_room:
@@ -135,8 +139,8 @@ func _update_quest_on_room_clear() -> void:
 
 func _save_progress() -> void:
 	var save_manager = save_manager_script.new()
-	var player := get_tree().get_first_node_in_group("player")
-	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	var player: Node = get_tree().get_first_node_in_group("player")
+	var quest_mgr: Node = get_tree().get_first_node_in_group("quest_manager")
 	var scene_path := ""
 	if get_tree().current_scene != null and get_tree().current_scene.has_method("get_filename"):
 		scene_path = String(get_tree().current_scene.call("get_filename"))

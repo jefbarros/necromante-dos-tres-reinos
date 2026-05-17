@@ -29,7 +29,7 @@ func _on_body_exited(body: Node) -> void:
 func _collect_reward() -> void:
 	if _collected:
 		return
-	var player := get_tree().get_first_node_in_group("player")
+	var player: Node = get_tree().get_first_node_in_group("player")
 	if player == null:
 		return
 	var xp_component := player.get_node_or_null("ExperienceComponent")
@@ -42,7 +42,7 @@ func _collect_reward() -> void:
 	print("Dungeon reward collected")
 
 	# Update quest
-	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	var quest_mgr: Node = get_tree().get_first_node_in_group("quest_manager")
 	if quest_mgr != null and quest_mgr.has_method("advance_to"):
 		quest_mgr.call("advance_to", 6)  # COLLECT_REWARD
 

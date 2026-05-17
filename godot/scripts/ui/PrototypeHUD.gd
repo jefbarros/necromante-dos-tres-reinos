@@ -32,13 +32,13 @@ func _process(_delta: float) -> void:
 
 
 func _update_labels() -> void:
-	var player := get_tree().get_first_node_in_group("player")
-	var limit := max_summons
-	var active_summons := get_tree().get_nodes_in_group("summon").size()
-	var command_name := "FOLLOW"
-	var lv_text = "LV: 1 (0/100)"
-	var arena_text = "Arena: PRONTO | Onda: 0"
-	var loot_text = "Loot: 0 (Nenhum)"
+	var player: Node = get_tree().get_first_node_in_group("player")
+	var limit: int = max_summons
+	var active_summons: int = get_tree().get_nodes_in_group("summon").size()
+	var command_name: String = "FOLLOW"
+	var lv_text: String = "LV: 1 (0/100)"
+	var arena_text: String = "Arena: PRONTO | Onda: 0"
+	var loot_text: String = "Loot: 0 (Nenhum)"
 
 	if player != null:
 		var health := player.get_node_or_null("HealthComponent")
@@ -65,10 +65,12 @@ func _update_labels() -> void:
 		
 		var loot_count: int = 0
 		var loot_name: String = "Nenhum"
-		if player.has("loot_collected_count"):
-			loot_count = int(player.get("loot_collected_count"))
-		if player.has("last_loot_name"):
-			loot_name = String(player.get("last_loot_name"))
+		var loot_collected_value: Variant = player.get("loot_collected_count")
+		if loot_collected_value != null:
+			loot_count = int(loot_collected_value)
+		var last_loot_value: Variant = player.get("last_loot_name")
+		if last_loot_value != null:
+			loot_name = String(last_loot_value)
 		loot_text = "Loot: %d (%s)" % [loot_count, loot_name]
 
 		var skill := player.get_node_or_null("RaiseSkeletonSkill")
@@ -93,7 +95,7 @@ func _update_labels() -> void:
 	else:
 		_health_label.text = "HP: -/-"
 
-	var dungeon_manager := get_tree().get_first_node_in_group("dungeon_manager")
+	var dungeon_manager: Node = get_tree().get_first_node_in_group("dungeon_manager")
 	var dungeon_text := "Dungeon: Inativa"
 	var room_text := "Sala: -"
 	var enemies_text := "Inimigos: -"
@@ -104,17 +106,17 @@ func _update_labels() -> void:
 		enemies_text = "Inimigos: %d" % int(dungeon_manager.get("enemies_alive"))
 		context_text = String(dungeon_manager.get("dungeon_hint"))
 
-_summon_label.text = "Servos: %d/%d | %s" % [active_summons, limit, command_name]
+	_summon_label.text = "Servos: %d/%d | %s" % [active_summons, limit, command_name]
 	_essence_label.text = "%s | %s" % [_essence_label.text, lv_text]
 	_command_label.text = arena_text
 	_health_label.text = "%s | %s" % [_health_label.text, loot_text]
 	_dungeon_label.text = dungeon_text
 	_room_label.text = room_text
 	_enemies_label.text = enemies_text
-_context_label.text = context_text if context_text != "" else _hint_label.text
+	_context_label.text = context_text if context_text != "" else _hint_label.text
 
 	# Quest display
-	var quest_mgr := get_tree().get_first_node_in_group("quest_manager")
+	var quest_mgr: Node = get_tree().get_first_node_in_group("quest_manager")
 	if quest_mgr != null:
 		var quest_text := "Quest: O Despertar na Cripta"
 		var objective_text := "Objetivo: " + String(quest_mgr.call("get_objective_text"))

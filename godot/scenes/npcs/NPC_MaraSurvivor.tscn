@@ -6,7 +6,7 @@
 radius = 0.35
 height = 1.5
 
-[sub_sub_resource type="CapsuleMesh" id="CapsuleMesh_npc"]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_npc"]
 radius = 0.35
 height = 1.5
 
@@ -26,7 +26,7 @@ shape = SubResource("CapsuleShape3D_npc")
 
 [node name="Body" type="MeshInstance3D" parent="."]
 position = Vector3(0, 0.75, 0)
-mesh = SubSubResource("CapsuleMesh_npc")
+mesh = SubResource("CapsuleMesh_npc")
 
 [node name="Area3D" type="Area3D" parent="."]
 

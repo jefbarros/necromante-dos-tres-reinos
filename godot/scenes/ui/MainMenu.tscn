@@ -69,7 +69,9 @@ text = "Configuracoes"
 [node name="QuitButton" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
-text = "Sair"</[node name="VersionLabel" type="Label" parent="."]
+text = "Sair"
+
+[node name="VersionLabel" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0

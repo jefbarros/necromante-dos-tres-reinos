@@ -39,7 +39,7 @@ func try_raise_skeleton() -> String:
 	if scene_to_spawn == null:
 		return RESULT_MISSING_SCENE
 
-	var summon := scene_to_spawn.instantiate() as Node3D
+	var summon: Node3D = scene_to_spawn.instantiate() as Node3D
 	if summon == null:
 		return RESULT_MISSING_SCENE
 
@@ -119,7 +119,7 @@ func try_raise_archer() -> String:
 	if essence_component == null or not essence_component.has_method("spend_essence"):
 		return RESULT_NOT_ENOUGH_ESSENCE
 
-	var summon := archer_summon_scene.instantiate() as Node3D
+	var summon: Node3D = archer_summon_scene.instantiate() as Node3D
 	if summon == null:
 		return RESULT_MISSING_SCENE
 

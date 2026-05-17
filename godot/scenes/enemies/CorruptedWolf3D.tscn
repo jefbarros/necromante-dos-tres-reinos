@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/CorruptedWolf3D.gd" id="1_script"]
+[ext_resource type="Material" path="res://assets/materials/enemy_dummy.tres" id="2_material"]
+[ext_resource type="Script" path="res://scripts/combat/HealthComponent.gd" id="3_health"]
+[ext_resource type="Script" path="res://scripts/combat/Hurtbox3D.gd" id="4_hurtbox"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wolf"]
+radius = 0.3
+height = 0.9
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_wolf"]
+radius = 0.3
+height = 0.9
+
+[node name="CorruptedWolf3D" type="CharacterBody3D" groups=["enemy"]]
+script = ExtResource("1_script")
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.45, 0)
+shape = SubResource("CapsuleShape3D_wolf")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.45, 0)
+scale = Vector3(1.2, 0.7, 1.6)
+mesh = SubResource("CapsuleMesh_wolf")
+surface_material_override/0 = ExtResource("2_material")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("3_health")
+max_health = 30.0
+
+[node name="Hurtbox3D" type="Area3D" parent="."]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_hurtbox")
+health_component_path = NodePath("../HealthComponent")
+target_path = NodePath("..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox3D"]
+position = Vector3(0, 0.45, 0)
+shape = SubResource("CapsuleShape3D_wolf")

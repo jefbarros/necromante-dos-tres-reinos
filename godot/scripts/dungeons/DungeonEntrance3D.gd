@@ -1,6 +1,6 @@
 extends Node3D
 
-@export var target_scene: PackedScene
+@export var target_scene_path: String = ""
 @export var hint_text: String = "Pressione E para entrar"
 @export var exit_text: String = "Pressione E para retornar"
 @export var required_dungeon_cleared: bool = false
@@ -21,9 +21,9 @@ func _process(_delta: float) -> void:
 	if not _player_in_area:
 		return
 	if Input.is_action_just_pressed("interact") and _can_enter():
-		if target_scene != null:
+		if not target_scene_path.is_empty():
 			print("Dungeon entrance triggered: loading scene")
-			get_tree().change_scene_to_file(target_scene.resource_path)
+			get_tree().change_scene_to_file(_normalized_scene_path())
 
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("player"):
@@ -47,7 +47,7 @@ func _current_hint() -> String:
 func _can_enter() -> bool:
 	if required_dungeon_cleared:
 		var manager := _get_dungeon_manager()
-		return manager != null and manager.dungeon_cleared
+		return manager != null and bool(manager.get("is_dungeon_cleared"))
 	return true
 
 func _get_dungeon_manager() -> Node:
@@ -59,4 +59,10 @@ func _is_dungeon_cleared() -> bool:
 	var manager := _get_dungeon_manager()
 	if manager == null:
 		return false
-	return bool(manager.get("dungeon_cleared"))
+	return bool(manager.get("is_dungeon_cleared"))
+
+
+func _normalized_scene_path() -> String:
+	if target_scene_path.begins_with("res://"):
+		return target_scene_path
+	return "res://" + target_scene_path

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://frontier_area"]
+[gd_scene load_steps=21 format=3 uid="uid://frontier_area"]
 
 [ext_resource type="PackedScene" path="res://scenes/player/Player3D.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://scenes/camera/ThirdPersonCameraRig.tscn" id="2_camera"]
@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" path="res://scenes/enemies/CorruptedWolf3D.tscn" id="5_wolf"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/OrderSoldier3D.tscn" id="6_soldier"]
 [ext_resource type="Script" path="res://scripts/world/AreaTransition3D.gd" id="7_transition"]
-[ext_resource type="PackedScene" path="res://scenes/hub/Hub_VeyrholdOutskirts.tscn" id="8_hub"]
 
 [sub_resource type="Environment" id="Environment_frontier"]
 background_mode = 1
@@ -194,7 +193,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 3)
 [node name="ReturnToHub" type="Area3D" parent="Transitions"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 9)
 script = ExtResource("7_transition")
-target_scene = ExtResource("8_hub")
+target_scene_path = "scenes/hub/Hub_VeyrholdOutskirts.tscn"
 transition_label = "E: Retornar aos Arredores de Veyrhold"
 area_name = "Hub"
 

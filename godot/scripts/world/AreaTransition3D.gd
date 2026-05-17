@@ -4,7 +4,7 @@ class_name AreaTransition3D
 ## AreaTransition3D
 ## Handles player travel between areas
 
-@export var target_scene: PackedScene
+@export var target_scene_path: String = ""
 @export var target_spawn_point: String = ""
 @export var transition_label: String = "E: Viajar"
 @export var area_name: String = "Area"
@@ -53,16 +53,21 @@ func _hide_label() -> void:
 
 
 func _transition_to_area() -> void:
-	if target_scene == null:
-		print("AreaTransition: No target scene set")
+	if target_scene_path.is_empty():
+		print("AreaTransition: No target_scene_path set")
 		return
 
 	print("AreaTransition: Transitioning to ", area_name)
 	
-	var scene_manager = get_tree().get_first_node_in_group("scene_manager")
-	if scene_manager != null and scene_manager.has_method("transition_to"):
-		scene_manager.call("transition_to", target_scene, target_spawn_point)
+	var scene_manager: Node = get_tree().get_first_node_in_group("scene_manager")
+	if scene_manager != null and scene_manager.has_method("transition_to_file"):
+		scene_manager.call("transition_to_file", target_scene_path, target_spawn_point)
 		return
 
-	# Fallback: direct scene change
-	get_tree().change_scene_to_packed(target_scene)
+	get_tree().change_scene_to_file(_normalized_scene_path())
+
+
+func _normalized_scene_path() -> String:
+	if target_scene_path.begins_with("res://"):
+		return target_scene_path
+	return "res://" + target_scene_path
