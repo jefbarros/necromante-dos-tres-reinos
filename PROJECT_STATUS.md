@@ -2,7 +2,7 @@
 
 ## Versao Atual
 
-Godot G8 MVP PC Foundation
+Godot G10 MVP PC Playtest Build & Polish
 
 ## Estado Geral
 
@@ -20,9 +20,15 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 - G6 mini dungeon prototipado em Godot na branch `godot/g6-mini-dungeon`
 - G7 vertical slice prototype concluido na branch `godot/g7-vertical-slice-prototype`
 - G8 MVP PC Foundation concluido na branch `godot/g8-mvp-pc-foundation`
-- G9 MVP PC Content Expansion em desenvolvimento na branch `godot/g9-mvp-pc-content-expansion`
+- G9 MVP PC Content Expansion concluido na branch `godot/g9-mvp-pc-content-expansion`
+- G10 MVP PC Playtest Build & Poland em desenvolvimento na branch `godot/g10-playtest-build-polish`
+- FronteiraCinzas_PrototypeArea.tscn criada
+- CorruptedWolf3D e OrderSoldier3D posicionados
+- AreaTransition3D conectando hub <-> Fronteira
+- SkeletonArcherServant3D funcional
 - G1.2 Pages configurado
 - G1.2.1 smoke test manual pendente
+- SimpleSaveManager autoload conflict corrigido (removido class_name)
 
 ## Godot 3D Foundation / G2
 
@@ -99,7 +105,8 @@ G5 primeira arena implementada na branch `godot/g5-first-arena-loop`.
 | G6 | Mini dungeon prototipo | Completo |
 | G7 | Vertical slice prototype | Completo |
 | G8 | MVP PC Foundation | Completo |
-| G9 | MVP PC Content Expansion | Em Desenvolvimento |
+| G9 | MVP PC Content Expansion | Completo |
+| G10 | MVP PC Playtest Build & Polish | Em Desenvolvimento |
 | v0.3.4 | HTML5 estavel | Congelado |
 
 ## Tags
