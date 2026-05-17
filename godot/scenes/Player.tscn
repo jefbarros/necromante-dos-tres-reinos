@@ -49,6 +49,11 @@ visible = false
 color = Color(0.42, 0.95, 0.82, 0.58)
 polygon = PackedVector2Array(31, -26, 70, -8, 70, 8, 31, 26, 44, 0)
 
+[node name="HitFlash" type="Polygon2D" parent="."]
+visible = false
+color = Color(1, 0.22, 0.18, 0.5)
+polygon = PackedVector2Array(0, -34, 28, -8, 18, 29, -18, 29, -28, -8)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_player")
 

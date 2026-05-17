@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://ntdr_servant_g3"]
+
+[ext_resource type="Script" path="res://scripts/servant.gd" id="1_servant"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_servant"]
+size = Vector2(22, 22)
+
+[node name="Servant" type="CharacterBody2D" groups=["servants"]]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_servant")
+
+[node name="Shadow" type="Polygon2D" parent="."]
+position = Vector2(0, 14)
+color = Color(0, 0, 0, 0.34)
+polygon = PackedVector2Array(-18, -4, 18, -4, 20, 3, 0, 8, -20, 3)
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.08, 0.32, 0.28, 1)
+polygon = PackedVector2Array(0, -20, 15, 12, 0, 22, -15, 12)
+
+[node name="Core" type="Polygon2D" parent="."]
+color = Color(0.35, 1, 0.78, 0.88)
+polygon = PackedVector2Array(0, -9, 8, 0, 0, 9, -8, 0)
+
+[node name="Slash" type="Polygon2D" parent="."]
+visible = false
+color = Color(0.42, 0.95, 0.82, 0.55)
+polygon = PackedVector2Array(20, -18, 52, -6, 52, 6, 20, 18, 31, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_servant")
