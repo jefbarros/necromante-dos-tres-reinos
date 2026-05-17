@@ -57,6 +57,9 @@ func _ready() -> void:
 	player.died.connect(_on_player_died)
 	hud.start_requested.connect(start_run)
 	hud.restart_requested.connect(start_run)
+	hud.attack_requested.connect(player.try_attack)
+	hud.capture_requested.connect(try_raise_servant)
+	hud.potion_requested.connect(use_health_potion)
 	_reset_world()
 	hud.show_start()
 

@@ -2,7 +2,12 @@ extends CanvasLayer
 
 signal start_requested
 signal restart_requested
+signal attack_requested
+signal capture_requested
+signal potion_requested
 
+@onready var root: Control = $Root
+@onready var panel: ColorRect = $Root/Panel
 @onready var health_label: Label = $Root/Panel/HealthLabel
 @onready var mana_label: Label = $Root/Panel/ManaLabel
 @onready var level_label: Label = $Root/Panel/LevelLabel
@@ -19,32 +24,45 @@ signal restart_requested
 @onready var overlay_body: Label = $Root/Overlay/BodyLabel
 @onready var inventory_panel: ColorRect = $Root/InventoryPanel
 @onready var inventory_panel_label: Label = $Root/InventoryPanel/InventoryPanelLabel
+@onready var touch_panel: Control = $Root/TouchPanel
+@onready var attack_button: Button = $Root/TouchPanel/AttackButton
+@onready var capture_button: Button = $Root/TouchPanel/CaptureButton
+@onready var potion_button: Button = $Root/TouchPanel/PotionButton
 
 var _feedback_tween: Tween
+var _compact_layout := false
 
 
 func _ready() -> void:
-	controls_label.text = "Enter: iniciar/reiniciar | WASD/setas: mover | 1/clique: ataque | C: erguer servo | I: inventario | Q: pocao"
+	controls_label.text = "Enter/clique: iniciar/reiniciar | WASD/setas: mover | 1/clique: ataque | C: servo | I: inventario | Q: pocao"
 	status_label.text = "G3.0 pronto."
+	attack_button.pressed.connect(attack_requested.emit)
+	capture_button.pressed.connect(capture_requested.emit)
+	potion_button.pressed.connect(potion_requested.emit)
+	get_viewport().size_changed.connect(_apply_responsive_layout)
 	set_inventory_visible(false)
+	_apply_responsive_layout()
 
 
 func show_start() -> void:
 	overlay.visible = true
 	overlay_title.text = "Necromante dos Tres Reinos"
-	overlay_body.text = "MVP Godot G3.0\n\nSobreviva as ondas e erga seu primeiro servo.\n\nEnter para iniciar."
+	overlay_body.text = "MVP Godot G3.0\n\nSobreviva as ondas e erga seu primeiro servo.\n\nEnter ou clique para iniciar."
+	_apply_responsive_layout()
 
 
 func show_victory() -> void:
 	overlay.visible = true
 	overlay_title.text = "MVP G3.0 concluido"
-	overlay_body.text = "O necromante ergueu sua primeira tropa.\n\nEnter para reiniciar."
+	overlay_body.text = "O necromante ergueu sua primeira tropa.\n\nEnter ou clique para reiniciar."
+	_apply_responsive_layout()
 
 
 func show_game_over() -> void:
 	overlay.visible = true
 	overlay_title.text = "Derrota"
-	overlay_body.text = "O necromante foi vencido antes de consolidar sua tropa.\n\nEnter para reiniciar."
+	overlay_body.text = "O necromante foi vencido antes de consolidar sua tropa.\n\nEnter ou clique para reiniciar."
+	_apply_responsive_layout()
 
 
 func hide_overlay() -> void:
@@ -117,8 +135,72 @@ func show_feedback(text: String, color: Color) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ENTER:
-		if overlay.visible:
-			if overlay_title.text == "Necromante dos Tres Reinos":
-				start_requested.emit()
-			else:
-				restart_requested.emit()
+		_emit_overlay_action()
+	elif overlay.visible and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_emit_overlay_action()
+	elif overlay.visible and event is InputEventScreenTouch and event.pressed:
+		_emit_overlay_action()
+
+
+func _emit_overlay_action() -> void:
+	if not overlay.visible:
+		return
+	if overlay_title.text == "Necromante dos Tres Reinos":
+		start_requested.emit()
+	else:
+		restart_requested.emit()
+
+
+func _apply_responsive_layout() -> void:
+	var size := get_viewport().get_visible_rect().size
+	var window_size := Vector2(DisplayServer.window_get_size())
+	var reference_size := window_size if window_size.x > 0.0 and window_size.y > 0.0 else size
+	var compact := reference_size.x < 980.0 or reference_size.y < 560.0
+	var portrait := reference_size.y > reference_size.x
+	_compact_layout = compact or portrait
+
+	var ui_scale := 1.0
+	if portrait:
+		ui_scale = 0.9
+
+	panel.scale = Vector2.ONE * ui_scale
+	panel.position = Vector2(12, 10)
+	panel.size = Vector2(392, 240)
+
+	inventory_panel.scale = Vector2.ONE * ui_scale
+	inventory_panel.size = Vector2(346, 170)
+	inventory_panel.position = Vector2(
+		max(12.0, size.x - inventory_panel.size.x * ui_scale - 12.0),
+		82.0 if not portrait else 258.0
+	)
+
+	controls_label.position = Vector2(16, max(8.0, size.y - 84.0))
+	controls_label.size = Vector2(max(260.0, size.x - 32.0), 28)
+	controls_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status_label.position = Vector2(16, max(34.0, size.y - 48.0))
+	status_label.size = Vector2(max(260.0, size.x - 32.0), 28)
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+	feedback_label.position = Vector2(max(16.0, size.x * 0.36), 96)
+	feedback_label.size = Vector2(min(420.0, max(220.0, size.x * 0.42)), 36)
+
+	overlay.size = Vector2(min(760.0, max(300.0, size.x - 48.0)), min(430.0, max(250.0, size.y - 72.0)))
+	overlay.position = (size - overlay.size) * 0.5
+	overlay_title.position = Vector2(42, 32)
+	overlay_title.size = Vector2(max(220.0, overlay.size.x - 84.0), 54)
+	overlay_body.position = Vector2(42, 104)
+	overlay_body.size = Vector2(max(220.0, overlay.size.x - 84.0), max(120.0, overlay.size.y - 136.0))
+
+	touch_panel.visible = _compact_layout
+	touch_panel.scale = Vector2.ONE
+	touch_panel.position = Vector2(
+		max(12.0, size.x - 406.0),
+		max(96.0, size.y - 168.0)
+	)
+
+	if portrait:
+		controls_label.text = "Mobile Web experimental: use horizontal. Touch minimo: ataque, servo e pocao."
+	elif _compact_layout:
+		controls_label.text = "Mobile/notebook: Enter/clique iniciar | WASD/setas | 1 ataque | C servo | Q pocao"
+	else:
+		controls_label.text = "Enter/clique: iniciar/reiniciar | WASD/setas: mover | 1/clique: ataque | C: servo | I: inventario | Q: pocao"

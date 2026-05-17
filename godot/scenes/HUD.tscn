@@ -113,6 +113,38 @@ offset_right = 328.0
 offset_bottom = 154.0
 text = "Inventario"
 
+[node name="TouchPanel" type="Control" parent="Root"]
+visible = false
+layout_mode = 0
+offset_left = 874.0
+offset_top = 542.0
+offset_right = 1268.0
+offset_bottom = 626.0
+
+[node name="AttackButton" type="Button" parent="Root/TouchPanel"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 118.0
+offset_bottom = 72.0
+text = "Ataque"
+
+[node name="CaptureButton" type="Button" parent="Root/TouchPanel"]
+layout_mode = 0
+offset_left = 132.0
+offset_top = 0.0
+offset_right = 250.0
+offset_bottom = 72.0
+text = "Servo"
+
+[node name="PotionButton" type="Button" parent="Root/TouchPanel"]
+layout_mode = 0
+offset_left = 264.0
+offset_top = 0.0
+offset_right = 382.0
+offset_bottom = 72.0
+text = "Pocao"
+
 [node name="ControlsLabel" type="Label" parent="Root"]
 layout_mode = 0
 offset_left = 16.0

@@ -14,6 +14,7 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 - G1.1 export Web validado
 - G2.1 baseline visual e jogavel minimo concluido
 - G3.0 MVP jogavel completo em Godot
+- G3.0.1 responsividade Web minima como complemento do MVP
 - G1.2 Pages configurado
 - G1.2.1 smoke test manual pendente
 
@@ -43,6 +44,7 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 | G1.2 Pages | GitHub Pages | Completo |
 | G2.1 | Baseline visual e jogavel minimo Godot | Completo |
 | G3.0 | MVP jogavel completo Godot | Completo |
+| G3.0.1 | Responsividade Web minima do MVP | Completo |
 | v0.3.4 | HTML5 estavel | Congelado |
 
 ## Tags
@@ -57,8 +59,8 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 
 ## Proximas Etapas
 
-1. Validar G3.0 no navegador e no GitHub Pages
-2. Polir feedback visual e balanceamento do MVP
+1. Validar G3.0.1 no GitHub Pages apos merge
+2. G3.1 polimento final e bugs
 3. Melhorar smoke test Web por release
 4. Planejar persistencia simples somente apos estabilizar o loop jogavel
 
@@ -95,6 +97,7 @@ git ls-files | findstr /i "export_presets.cfg"
 - Smoke test manual G1.2.1 precisa ser validado no navegador
 - Validar build Web em https://jefbarros.github.io/necromante-dos-tres-reinos/play-godot/index.html
 - Validar G3.0 publicado no GitHub Pages apos merge
+- Validar G3.0.1 responsivo no GitHub Pages apos merge
 
 ## Documentacao
 
@@ -104,5 +107,6 @@ git ls-files | findstr /i "export_presets.cfg"
 - `docs/godot/DEVELOPMENT_GUIDE.md`
 - `docs/godot/G2.1_VISUAL_GAMEPLAY_BASELINE.md`
 - `docs/godot/G3.0_MVP_COMPLETE.md`
+- `docs/godot/G3.0.1_RESPONSIVE_WEB.md`
 - `docs/play-godot/README.md`
 - `docs/legacy-html5/README.md`
