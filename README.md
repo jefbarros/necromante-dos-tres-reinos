@@ -75,7 +75,7 @@ Ver `docs/play-godot/SMOKE_TEST_G1.2.1.md` para detalhes.
 ## Regras de Desenvolvimento
 
 - Novas features devem ser implementadas primeiro em Godot.
-- **Não altar `src/*.js` em tarefas Godot** - O legado permanece intocado.
+- **Não alterar `src/*.js` em tarefas Godot** - O legado permanece intocado.
 - Cada marco deve ter validacao e documentacao.
 - Evitar reescrever a arquitetura toda de uma vez.
 
