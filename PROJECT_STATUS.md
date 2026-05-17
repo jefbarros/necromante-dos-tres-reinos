@@ -6,33 +6,31 @@ Godot G10 MVP PC Playtest Build & Polish
 
 ## Estado Geral
 
-Migração oficial para Godot como plataforma principal de producao em andamento.
+Projeto principal em Godot 4.x como plataforma de producao.
 
-- **Plataforma Principal**: Godot (G3+)
-- **Plataforma Legada**: HTML5/Canvas v0.3.4 (congelado)
+- **Plataforma Principal**: Godot G10
 - Godot G1 mínimo validado
 - G1.1 export Web validado
-- G2.1 baseline visual e jogavel minimo concluido
-- G3.0 MVP jogavel completo em Godot
-- G3.0.1 responsividade Web minima concluida como complemento do MVP G3.0
-- G4.0 necromancia jogavel implementada em Godot
+- G1.2 Pages configurado
+- G2.1 baseline visual e jogável mínimo concluído
+- G3.0 MVP jogável completo em Godot
+- G3.0.1 responsividade Web mínima concluída como complemento do MVP G3.0
+- G4.0 necromancia jogável implementada em Godot
 - G5 primeira arena com loop de ondas e recompensas implementada em Godot
-- G6 mini dungeon prototipado em Godot na branch `godot/g6-mini-dungeon`
-- G7 vertical slice prototype concluido na branch `godot/g7-vertical-slice-prototype`
-- G8 MVP PC Foundation concluido na branch `godot/g8-mvp-pc-foundation`
-- G9 MVP PC Content Expansion concluido na branch `godot/g9-mvp-pc-content-expansion`
-- G10 MVP PC Playtest Build & Poland em desenvolvimento na branch `godot/g10-playtest-build-polish`
+- G6 mini dungeon prototipado em Godot
+- G7 vertical slice prototype concluido
+- G8 MVP PC Foundation concluido
+- G9 MVP PC Content Expansion concluido
+- G10 MVP PC Playtest Build & Polish em desenvolvimento
 - FronteiraCinzas_PrototypeArea.tscn criada
 - CorruptedWolf3D e OrderSoldier3D posicionados
 - AreaTransition3D conectando hub <-> Fronteira
 - SkeletonArcherServant3D funcional
-- G1.2 Pages configurado
-- G1.2.1 smoke test manual pendente
 - SimpleSaveManager autoload conflict corrigido (removido class_name)
 
 ## Godot 3D Foundation / G2
 
-G2 3D foundation concluido em branch dedicada: cena `godot/scenes/world/PrototypeArena3D.tscn` com player 3D, camera orbital, arena de teste, inimigo dummy e servo esqueleto dummy seguindo o jogador. Esta entrega nao substitui o prototipo HTML5/Canvas nem a cena Godot 2D atual.
+G2 3D foundation concluido em branch dedicada: cena `godot/scenes/world/PrototypeArena3D.tscn` com player 3D, camera orbital, arena de teste, inimigo dummy e servo esqueleto dummy seguindo o jogador.
 
 ## Godot G2 Basic Combat
 
@@ -79,16 +77,7 @@ G5 primeira arena implementada na branch `godot/g5-first-arena-loop`.
 
 - Cenas e scripts em `godot/`
 - Build Web em `docs/play-godot/`
-- Roadmap G3 prioriza polimento pos-MVP
-
-## Plataforma Legada
-
-**HTML5/Canvas v0.3.4**
-
-- Prototipo congelado em v0.3.4
-- Nao recebera novas features
-- Mantido como referencia/laboratorio
-- Codigo fonte permanece intocado em tarefas Godot
+- Roadmap prioritiza expansao de conteudo e polimento
 
 ## Marcos Concluidos
 
@@ -107,7 +96,6 @@ G5 primeira arena implementada na branch `godot/g5-first-arena-loop`.
 | G8 | MVP PC Foundation | Completo |
 | G9 | MVP PC Content Expansion | Completo |
 | G10 | MVP PC Playtest Build & Polish | Em Desenvolvimento |
-| v0.3.4 | HTML5 estavel | Congelado |
 
 ## Tags
 
@@ -117,37 +105,28 @@ G5 primeira arena implementada na branch `godot/g5-first-arena-loop`.
 | godot-g1.1-web | Export Web validado |
 | godot-g1.2-pages | GitHub Pages configurado |
 | godot-g2.1-visual-baseline | Baseline visual e combate G2.1 |
-| v0.3.4 | HTML5 estavel |
 
 ## Proximas Etapas
 
-1. G7 vertical slice
-2. Expandir a dungeon para um hub simples
-3. Melhorar smoke test Web por release
-4. Planejar persistencia expandida apos estabilizar o loop jogavel
+1. G10 playtest build polish
+2. Smoke test e validacao
+3. Expandir dungeons e conteudo
+4. Planejar persistencia apos estabilizar o loop jogavel
 
 Ver `docs/godot/ROADMAP_G3.md` para detalhes.
 
 ## Regras de Desenvolvimento
 
-- Novas features devem ser implementadas primeiro em Godot.
-- **Não alterar `src/*.js` em tarefas Godot**, exceto correções emergenciais documentadas.
-- Não reimplementar tudo de uma vez - evoluir por marcos.
-- Cada marco deve ter validação e documentação.
+- Novas features devem ser implementadas em Godot.
+- Cada marco deve ter validacao e documentacao.
 - Arquivos exportados de `docs/play-godot/` não devem ser alterados desnecessariamente.
 - O único preset Godot válido continua sendo `godot/export_presets.cfg`.
 
 ## Validacoes
 
 ```bash
-# Validar JS legado
-npm.cmd run check
-
-# Verificar src intacto
-git diff --name-only -- src
-
-# Verificar whitespace
-git diff --check
+# Verificar cenas Godot
+git ls-files | findstr /i ".tscn .gd"
 
 # Verificar preset
 git ls-files | findstr /i "export_presets.cfg"
@@ -156,10 +135,9 @@ git ls-files | findstr /i "export_presets.cfg"
 
 ## Pendencias
 
-- Smoke test manual G1.2.1 precisa ser validado no navegador
+- Smoke test manual G10 precisa ser validado no navegador
 - Validar build Web em https://jefbarros.github.io/necromante-dos-tres-reinos/play-godot/index.html
-- Validar G3.0 publicado no GitHub Pages apos merge
-- Validar G3.0.1 responsivo no GitHub Pages apos merge
+- Validar G10 publicado no GitHub Pages apos merge
 
 ## Documentacao
 
@@ -171,4 +149,3 @@ git ls-files | findstr /i "export_presets.cfg"
 - `docs/godot/G3.0_MVP_COMPLETE.md`
 - `docs/godot/G3.0.1_RESPONSIVE_WEB.md`
 - `docs/play-godot/README.md`
-- `docs/legacy-html5/README.md`

@@ -9,3 +9,30 @@ godot/*.tmp
 # Local/experimental Godot addons outside subproject
 /addons/
 godot/addons/
+
+# Exports and builds locally generated
+/export_presets.cfg
+/builds/
+*.exe
+*.zip
+*.apk
+*.aab
+*.pck
+*.wasm
+*.js
+*.html
+*.png
+*.jpg
+
+# Exception for public Godot Web build (GitHub Pages)
+!docs/play-godot/*.pck
+!docs/play-godot/*.wasm
+!docs/play-godot/*.js
+!docs/play-godot/*.html
+!docs/play-godot/*.png
+!docs/play-godot/*.jpg
+
+# Package managers
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
