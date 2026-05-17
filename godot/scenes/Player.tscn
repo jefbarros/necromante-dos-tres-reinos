@@ -13,9 +13,41 @@ collision_layer = 1
 collision_mask = 1
 script = ExtResource("1_player")
 
-[node name="Body" type="Polygon2D" parent="."]
-color = Color(0.35, 0.8, 0.95, 1)
-polygon = PackedVector2Array(-14, -14, 14, -14, 14, 14, -14, 14)
+[node name="Shadow" type="Polygon2D" parent="."]
+position = Vector2(0, 17)
+color = Color(0, 0, 0, 0.38)
+polygon = PackedVector2Array(-22, -5, 22, -5, 26, 4, 0, 10, -26, 4)
+
+[node name="Cloak" type="Polygon2D" parent="."]
+color = Color(0.075, 0.13, 0.18, 1)
+polygon = PackedVector2Array(0, -24, 20, 17, 8, 26, -8, 26, -20, 17)
+
+[node name="Trim" type="Polygon2D" parent="."]
+color = Color(0.23, 0.73, 0.66, 1)
+polygon = PackedVector2Array(0, -21, 8, 19, 0, 25, -8, 19)
+
+[node name="Hood" type="Polygon2D" parent="."]
+color = Color(0.04, 0.07, 0.1, 1)
+polygon = PackedVector2Array(0, -30, 18, -12, 9, 1, -9, 1, -18, -12)
+
+[node name="FaceGlow" type="Polygon2D" parent="."]
+color = Color(0.48, 0.98, 0.88, 0.9)
+polygon = PackedVector2Array(-5, -15, 5, -15, 4, -7, -4, -7)
+
+[node name="Staff" type="Line2D" parent="."]
+points = PackedVector2Array(17, -22, 25, 25)
+width = 4.0
+default_color = Color(0.42, 0.32, 0.2, 1)
+
+[node name="StaffOrb" type="Polygon2D" parent="."]
+position = Vector2(16, -25)
+color = Color(0.24, 0.92, 0.78, 1)
+polygon = PackedVector2Array(0, -6, 6, 0, 0, 6, -6, 0)
+
+[node name="AttackFeedback" type="Polygon2D" parent="."]
+visible = false
+color = Color(0.42, 0.95, 0.82, 0.58)
+polygon = PackedVector2Array(31, -26, 70, -8, 70, 8, 31, 26, 44, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_player")

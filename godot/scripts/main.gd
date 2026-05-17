@@ -22,7 +22,11 @@ func _ready() -> void:
 
 func _on_player_attack_performed(damage: int, hits: int) -> void:
 	if hits > 0:
-		hud.set_status("Ataque basico: %d dano." % damage)
+		hud.set_status("Ataque acertou: %d dano." % damage)
+		hud.show_feedback("-%d" % damage, Color(1.0, 0.78, 0.35, 1.0))
+	else:
+		hud.set_status("Ataque errou: inimigo fora do alcance.")
+		hud.show_feedback("Errou", Color(0.72, 0.78, 0.86, 1.0))
 
 
 func _on_enemy_defeated() -> void:
