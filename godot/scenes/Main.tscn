@@ -13,6 +13,9 @@ size = Vector2(24, 640)
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
 
+[node name="Camera2D" type="Camera2D" parent="."]
+enabled = true
+
 [node name="Backdrop" type="Polygon2D" parent="."]
 color = Color(0.025, 0.027, 0.034, 1)
 polygon = PackedVector2Array(-720, -420, 720, -420, 720, 420, -720, 420)

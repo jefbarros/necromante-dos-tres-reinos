@@ -14,7 +14,7 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 - G1.1 export Web validado
 - G2.1 baseline visual e jogavel minimo concluido
 - G3.0 MVP jogavel completo em Godot
-- G3.0.1 responsividade Web minima como complemento do MVP
+- G3.0.1 responsividade Web minima concluida como complemento do MVP G3.0
 - G1.2 Pages configurado
 - G1.2.1 smoke test manual pendente
 
@@ -44,7 +44,7 @@ Migração oficial para Godot como plataforma principal de producao em andamento
 | G1.2 Pages | GitHub Pages | Completo |
 | G2.1 | Baseline visual e jogavel minimo Godot | Completo |
 | G3.0 | MVP jogavel completo Godot | Completo |
-| G3.0.1 | Responsividade Web minima do MVP | Completo |
+| G3.0.1 | Responsividade Web minima complementar ao MVP G3.0 | Completo |
 | v0.3.4 | HTML5 estavel | Congelado |
 
 ## Tags

@@ -40,6 +40,7 @@ var waves := [
 ]
 
 @onready var player: CharacterBody2D = $Player
+@onready var camera_2d: Camera2D = $Camera2D
 @onready var hud: CanvasLayer = $HUD
 @onready var enemies_root: Node2D = $Enemies
 @onready var souls_root: Node2D = $Souls
@@ -50,6 +51,7 @@ var waves := [
 
 
 func _ready() -> void:
+	get_viewport().size_changed.connect(_apply_responsive_camera)
 	player.health_changed.connect(hud.set_health)
 	player.mana_changed.connect(hud.set_mana)
 	player.status_changed.connect(hud.set_status)
@@ -60,6 +62,7 @@ func _ready() -> void:
 	hud.attack_requested.connect(player.try_attack)
 	hud.capture_requested.connect(try_raise_servant)
 	hud.potion_requested.connect(use_health_potion)
+	_apply_responsive_camera()
 	_reset_world()
 	hud.show_start()
 
@@ -82,6 +85,18 @@ func _process(_delta: float) -> void:
 		return
 
 	_collect_nearby_drops()
+
+
+func _apply_responsive_camera() -> void:
+	var viewport_size := get_viewport().get_visible_rect().size
+	var viewport_scale: float = min(viewport_size.x / 1280.0, viewport_size.y / 720.0)
+	var portrait := viewport_size.y > viewport_size.x
+	var zoom_factor: float = clamp(viewport_scale, 0.58, 1.0)
+	if portrait:
+		zoom_factor = clamp(viewport_scale, 0.52, 0.72)
+
+	camera_2d.position = Vector2.ZERO
+	camera_2d.zoom = Vector2.ONE * zoom_factor
 
 
 func start_run() -> void:

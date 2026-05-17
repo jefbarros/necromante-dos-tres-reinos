@@ -98,7 +98,7 @@ func set_objective(text: String) -> void:
 
 
 func set_inventory(items: Dictionary) -> void:
-	inventory_label.text = "Pocoes: %d | Essencias: %d | Fragmentos: %d" % [
+	inventory_label.text = "Pocoes: %d | Ess: %d | Frag: %d" % [
 		items.get("pocao", 0),
 		items.get("essencia", 0),
 		items.get("fragmento", 0),
@@ -161,41 +161,74 @@ func _apply_responsive_layout() -> void:
 
 	var ui_scale := 1.0
 	if portrait:
-		ui_scale = 0.9
+		ui_scale = 0.68
+	elif compact:
+		ui_scale = 0.76
 
 	panel.scale = Vector2.ONE * ui_scale
-	panel.position = Vector2(12, 10)
+	panel.position = Vector2(8, 8)
 	panel.size = Vector2(392, 240)
 
 	inventory_panel.scale = Vector2.ONE * ui_scale
 	inventory_panel.size = Vector2(346, 170)
 	inventory_panel.position = Vector2(
 		max(12.0, size.x - inventory_panel.size.x * ui_scale - 12.0),
-		82.0 if not portrait else 258.0
+		72.0 if not portrait else 184.0
 	)
 
-	controls_label.position = Vector2(16, max(8.0, size.y - 84.0))
-	controls_label.size = Vector2(max(260.0, size.x - 32.0), 28)
+	var bottom_margin := 74.0 if not _compact_layout else 44.0
+	controls_label.position = Vector2(8, max(8.0, size.y - bottom_margin))
+	controls_label.size = Vector2(max(240.0, size.x - 16.0), 24)
 	controls_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	status_label.position = Vector2(16, max(34.0, size.y - 48.0))
-	status_label.size = Vector2(max(260.0, size.x - 32.0), 28)
+	status_label.position = Vector2(8, max(30.0, size.y - 28.0))
+	status_label.size = Vector2(max(240.0, size.x - 16.0), 24)
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	feedback_label.position = Vector2(max(16.0, size.x * 0.36), 96)
 	feedback_label.size = Vector2(min(420.0, max(220.0, size.x * 0.42)), 36)
 
-	overlay.size = Vector2(min(760.0, max(300.0, size.x - 48.0)), min(430.0, max(250.0, size.y - 72.0)))
+	var panel_right := panel.position.x + panel.size.x * ui_scale
+	var overlay_margin := Vector2(48, 72)
+	if portrait:
+		overlay_margin = Vector2(32, 300)
+	elif _compact_layout:
+		overlay_margin = Vector2(panel_right + 32.0, 96)
+	overlay.size = Vector2(
+		min(760.0, max(280.0, size.x - overlay_margin.x)),
+		min(430.0, max(176.0, size.y - overlay_margin.y))
+	)
 	overlay.position = (size - overlay.size) * 0.5
-	overlay_title.position = Vector2(42, 32)
-	overlay_title.size = Vector2(max(220.0, overlay.size.x - 84.0), 54)
-	overlay_body.position = Vector2(42, 104)
-	overlay_body.size = Vector2(max(220.0, overlay.size.x - 84.0), max(120.0, overlay.size.y - 136.0))
+	if not portrait:
+		overlay.position.x = clamp(
+			max(overlay.position.x, panel_right + 24.0),
+			12.0,
+			max(12.0, size.x - overlay.size.x - 12.0)
+		)
+	var overlay_padding := 42.0 if not _compact_layout else 24.0
+	var title_size := 32
+	var body_size := 18
+	if portrait:
+		title_size = 13
+		body_size = 9
+	elif _compact_layout:
+		title_size = 20
+		body_size = 12
+	overlay_title.add_theme_font_size_override("font_size", title_size)
+	overlay_body.add_theme_font_size_override("font_size", body_size)
+	overlay_title.position = Vector2(overlay_padding, overlay_padding * 0.76)
+	overlay_title.size = Vector2(max(190.0, overlay.size.x - overlay_padding * 2.0), 42)
+	overlay_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	overlay_body.position = Vector2(overlay_padding, overlay_padding + 62.0)
+	overlay_body.size = Vector2(
+		max(190.0, overlay.size.x - overlay_padding * 2.0),
+		max(92.0, overlay.size.y - overlay_padding - 74.0)
+	)
 
 	touch_panel.visible = _compact_layout
-	touch_panel.scale = Vector2.ONE
+	touch_panel.scale = Vector2.ONE * (0.86 if portrait else 0.92)
 	touch_panel.position = Vector2(
-		max(12.0, size.x - 406.0),
-		max(96.0, size.y - 168.0)
+		max(8.0, size.x - 370.0),
+		max(82.0, size.y - 92.0)
 	)
 
 	if portrait:
