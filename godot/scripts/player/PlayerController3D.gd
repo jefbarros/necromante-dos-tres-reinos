@@ -148,10 +148,10 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("dodge") and _dodge_cooldown_timer <= 0.0:
 		_start_dodge(move_direction)
 
-	if Input.is_action_just_pressed("attack_primary"):
+if Input.is_action_just_pressed("attack_primary"):
 		_start_basic_attack()
 
-if Input.is_action_just_pressed("raise_skeleton"):
+	if Input.is_action_just_pressed("raise_skeleton"):
 		if Input.is_key_pressed(KEY_SHIFT):
 			_try_raise_archer()
 		else:
