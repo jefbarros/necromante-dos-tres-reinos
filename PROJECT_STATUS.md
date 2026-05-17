@@ -51,6 +51,17 @@ G4 necromancia jogavel implementada na branch `godot/g4-playable-necromancy`.
 - Validacao tecnica: cenas G4 principais carregadas em Godot 4.6.2 headless e `git diff --check` deve passar antes do commit.
 - Fora do escopo: roda tatica, UI final, skill tree, evolucao/raridade de servos, inventario, loot, XP/level up, dungeon, boss, save system, mundo aberto, reputacao, corrupcao moral, faccoes completas, pathfinding avancado e multiplas familias de servos.
 
+## Godot G5 First Arena Loop
+
+G5 primeira arena implementada na branch `godot/g5-first-arena-loop`.
+
+- Ciclo minimo:Enter inicia onda, matar inimigos, ganhar essencia/XP/loot, reanimar cadaveres, comandar servos, concluir onda, iniciar proxima onda.
+-Arquivos principais: `godot/scripts/world/ArenaManager3D.gd`, `godot/scripts/world/SpawnPoint3D.gd`, `godot/scripts/progression/ExperienceComponent.gd`, `godot/scripts/loot/LootDrop3D.gd`, `godot/scenes/world/SpawnPoint3D.tscn`, `godot/scenes/loot/LootDrop3D.tscn`, `godot/scenes/player/Player3D.tscn`, `godot/scenes/world/PrototypeArena3D.tscn`, `godot/scripts/enemies/EnemyDummy3D.gd`, `godot/scripts/player/PlayerController3D.gd`, `godot/scripts/ui/PrototypeHUD.gd`.
+- Validacao manual esperada: abrir `godot/` no Godot 4.6.x, executar `res://scenes/world/PrototypeArena3D.tscn`, testar Enter para iniciar onda, matar inimigos, confirmar essencia/XP/loot, reanimar com `R`, usar `1` FOLLOW, `2` ATTACK e `3` RECALL, concluir onda, Enter para proxima onda, F5 para reiniciar.
+- Validacao tecnica: cenas G5 principais carregadas em Godot 4.6.2 headless e `git diff --check` deve passar antes do commit.
+- Controles: WASD mover, Mouse camera, Shift sprint, Espaco dodge, Clique esquerdo ataque, R reanimar, 1 FOLLOW, 2 ATTACK, 3 RECALL, Enter inicia onda, F5 reinicia, Esc captura mouse.
+- Fora do escopo: dungeon, boss, save system, inventario completo, equipamentos reais, raridade avancada, arvore de habilidades, loja, quests, mundo aberto, faccoes, reputacao, corrupcao moral.
+
 ## Plataforma Principal
 
 **Godot 4.x**
@@ -70,7 +81,7 @@ G4 necromancia jogavel implementada na branch `godot/g4-playable-necromancy`.
 
 ## Marcos Concluidos
 
-| Marco | Descricao | Status |
+| Marco | Descricao | Status|
 |-------|----------|--------|
 | G1 | Build Godot minimo | Completo |
 | G1.1 Web | Export Web | Completo |
@@ -79,6 +90,7 @@ G4 necromancia jogavel implementada na branch `godot/g4-playable-necromancy`.
 | G3.0 | MVP jogavel completo Godot | Completo |
 | G3.0.1 | Responsividade Web minima complementar ao MVP G3.0 | Completo |
 | G4.0 | Necromancia jogavel minima Godot | Completo |
+| G5 | Primeira arena com ondas, XP e loot | Completo |
 | v0.3.4 | HTML5 estavel | Congelado |
 
 ## Tags
@@ -93,8 +105,8 @@ G4 necromancia jogavel implementada na branch `godot/g4-playable-necromancy`.
 
 ## Proximas Etapas
 
-1. G5 primeira arena com spawn, loot simples, XP e level up
-2. G6 mini dungeon
+1. G6 mini dungeon
+2. G7 entrada de dungeon com 3 salas
 3. Melhorar smoke test Web por release
 4. Planejar persistencia simples somente apos estabilizar o loop jogavel
 
