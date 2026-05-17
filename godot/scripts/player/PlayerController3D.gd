@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 const SummonBrain := preload("res://scripts/summons/SummonBrain3D.gd")
+const LootDropScene := preload("res://scenes/loot/LootDrop3D.tscn")
 
 @export var move_speed: float = 5.0
 @export var sprint_speed: float = 8.0
@@ -24,12 +25,17 @@ var _dodge_cooldown_timer: float = 0.0
 var _attack_timer: float = 0.0
 var _attack_cooldown_timer: float = 0.0
 var _dead: bool = false
+var loot_collected_count: int = 0
+var last_loot_name: String = ""
 
 @onready var _attack_hitbox: Node3D = get_node_or_null("BasicAttackHitbox") as Node3D
 @onready var _raise_skeleton_skill: Node = get_node_or_null("RaiseSkeletonSkill")
 @onready var _health_component: Node = get_node_or_null("HealthComponent")
 @onready var _damage_transfer_component: Node = get_node_or_null("DamageTransferComponent")
 @onready var _summon_command_component: Node = get_node_or_null("SummonCommandComponent")
+@onready var _experience_component: Node = get_node_or_null("ExperienceComponent")
+
+signal loot_collected(loot_name, total_count)
 
 
 func _ready() -> void:
@@ -69,6 +75,9 @@ func _physics_process(delta: float) -> void:
 	_dodge_cooldown_timer = maxf(_dodge_cooldown_timer - delta, 0.0)
 	_attack_cooldown_timer = maxf(_attack_cooldown_timer - delta, 0.0)
 	_update_attack_timer(delta)
+
+	if Input.is_action_just_pressed("arena_restart"):
+		get_tree().reload_current_scene()
 
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -180,6 +189,12 @@ func receive_damage(amount: float, source: Node = null) -> void:
 		_health_component.call("take_damage", final_damage, source)
 
 
+func collect_loot(loot_name: String, amount: int) -> void:
+	loot_collected_count += amount
+	last_loot_name = loot_name
+	emit_signal("loot_collected", loot_name, loot_collected_count)
+
+
 func _on_damaged(amount: float, source: Node) -> void:
 	print("Player health: %.1f/%.1f" % [
 		_health_component.get("current_health"),
@@ -220,10 +235,13 @@ func _ensure_input_actions() -> void:
 	_add_key_action("move_right", KEY_D)
 	_add_key_action("sprint", KEY_SHIFT)
 	_add_key_action("dodge", KEY_SPACE)
+	_add_key_action("interact", KEY_E)
 	_add_key_action("raise_skeleton", KEY_R)
 	_add_key_action("summon_follow", KEY_1)
 	_add_key_action("summon_attack", KEY_2)
 	_add_key_action("summon_recall", KEY_3)
+	_add_key_action("arena_start", KEY_ENTER)
+	_add_key_action("arena_restart", KEY_F5)
 	_add_mouse_button_action("attack_primary", MOUSE_BUTTON_LEFT)
 
 

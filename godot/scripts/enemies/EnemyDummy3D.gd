@@ -11,6 +11,10 @@ extends CharacterBody3D
 @export var attack_damage: float = 8.0
 @export var attack_cooldown: float = 1.25
 
+@export var xp_reward: int = 25
+@export var loot_drop_chance: float = 0.5
+@export var loot_scene: PackedScene = preload("res://scenes/loot/LootDrop3D.tscn")
+
 var _spawn_position: Vector3
 var _time: float = 0.0
 var _dead: bool = false
@@ -117,7 +121,10 @@ func _die(source: Node = null) -> void:
 	_body.set_surface_override_material(0, corpse_material)
 
 	print("EnemyDummy died")
-	_grant_essence(source if source != null else _last_damage_source)
+	var reward_source = source if source != null else _last_damage_source
+	_grant_essence(reward_source)
+	_grant_xp(reward_source)
+	_drop_loot()
 	_spawn_corpse()
 	hide()
 
@@ -134,6 +141,25 @@ func _grant_essence(source: Node) -> void:
 	if essence_component != null and essence_component.has_method("add_essence"):
 		_essence_granted = true
 		essence_component.call("add_essence", essence_reward)
+
+func _grant_xp(source: Node) -> void:
+	var player := _find_reward_player(source)
+	if player == null: return
+	
+	var xp_component := player.get_node_or_null("ExperienceComponent")
+	if xp_component and xp_component.has_method("add_xp"):
+		xp_component.call("add_xp", xp_reward)
+
+func _drop_loot() -> void:
+	if loot_scene == null or randf() > loot_drop_chance:
+		print("No loot dropped")
+		return
+
+	var loot = loot_scene.instantiate() as Node3D
+	if loot:
+		get_parent().add_child(loot)
+		loot.global_position = global_position
+		print("Loot dropped")
 
 
 func _spawn_corpse() -> void:

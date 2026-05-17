@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/PlayerController3D.gd" id="1_controller"]
 [ext_resource type="Material" path="res://assets/materials/player_placeholder.tres" id="2_material"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/necromancy/EssenceComponent.gd" id="6_essence"]
 [ext_resource type="Script" path="res://scripts/necromancy/DamageTransferComponent.gd" id="7_transfer"]
 [ext_resource type="Script" path="res://scripts/summons/SummonCommandComponent.gd" id="8_command"]
+[ext_resource type="Script" path="res://scripts/progression/ExperienceComponent.gd" id="9_xp"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.35
@@ -95,3 +96,10 @@ transfer_percent = 0.2
 
 [node name="SummonCommandComponent" type="Node" parent="."]
 script = ExtResource("8_command")
+
+[node name="ExperienceComponent" type="Node" parent="."]
+script = ExtResource("9_xp")
+starting_level = 1
+current_xp = 0
+xp_to_next_level = 100
+xp_growth = 1.25
